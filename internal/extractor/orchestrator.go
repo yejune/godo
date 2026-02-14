@@ -134,6 +134,26 @@ func (o *ExtractorOrchestrator) Extract(srcDir string) (*template.Registry, *mod
 		return nil, nil, err
 	}
 
+	// Check for CLAUDE.md at project root (parent of srcDir).
+	// In real moai-adk, CLAUDE.md lives at the project root, not inside .claude/.
+	if merged.ClaudeMD == "" {
+		projectRoot := filepath.Dir(srcDir)
+		claudePath := filepath.Join(projectRoot, "CLAUDE.md")
+		if info, statErr := os.Stat(claudePath); statErr == nil && !info.IsDir() {
+			doc, parseErr := parser.ParseDocument(claudePath)
+			if parseErr != nil {
+				return nil, nil, fmt.Errorf("parse project-root CLAUDE.md: %w", parseErr)
+			}
+			doc.Path = "CLAUDE.md" // canonical relative path
+
+			_, manifest, extErr := o.route(fileTypeClaudeMD, doc)
+			if extErr != nil {
+				return nil, nil, fmt.Errorf("extract project-root CLAUDE.md: %w", extErr)
+			}
+			mergeManifest(merged, manifest)
+		}
+	}
+
 	return registry, merged, nil
 }
 
@@ -214,7 +234,7 @@ func classifyFile(relPath string) fileType {
 		if strings.HasSuffix(normalized, ".md") {
 			return fileTypeRule
 		}
-	case "styles":
+	case "styles", "output-styles":
 		if strings.HasSuffix(normalized, ".md") {
 			return fileTypeStyle
 		}

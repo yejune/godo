@@ -4,7 +4,7 @@ import (
 	"github.com/do-focus/convert/internal/model"
 )
 
-// StyleExtractor handles style definition files (.claude/styles/*.md).
+// StyleExtractor handles style definition files (.claude/output-styles/*.md or .claude/styles/*.md).
 // ALL styles are persona-specific -- each persona defines its own
 // communication style. There is no core style content.
 type StyleExtractor struct{}

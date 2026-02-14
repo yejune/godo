@@ -121,8 +121,10 @@ func TestOrchestrator_MixedFileTypes(t *testing.T) {
 		"skills/do-foundation-claude.md": "---\nname: do-foundation-claude\ndescription: Foundation skill\n---\n\n## Foundation\n\nCore foundation content.\n",
 		// Persona skill
 		"skills/moai-workflow-ddd.md": "---\nname: moai-workflow-ddd\ndescription: DDD workflow skill\n---\n\n## DDD\n\nDDD skill content.\n",
-		// Style file (always persona)
+		// Style file (always persona) — legacy styles/ path
 		"styles/pair.md": "---\nname: pair\ndescription: Pair programming style\n---\n\n## Style\n\nFriendly pair programmer.\n",
+		// Style file via output-styles/ path (real moai-adk structure)
+		"output-styles/moai/sprint.md": "---\nname: sprint\ndescription: Sprint style\n---\n\n## Style\n\nMinimal output.\n",
 		// Rule file (core)
 		"rules/dev-testing.md": "# Testing Rules\n\nTest everything.\n",
 		// Persona rule (spec-workflow.md is in WholeFileRules)
@@ -158,9 +160,9 @@ func TestOrchestrator_MixedFileTypes(t *testing.T) {
 		t.Errorf("manifest Skills count = %d, want 1 (moai-workflow-ddd)", len(manifest.Skills))
 	}
 
-	// Style (all persona)
-	if len(manifest.Styles) != 1 {
-		t.Errorf("manifest Styles count = %d, want 1", len(manifest.Styles))
+	// Style (all persona) — includes both styles/ and output-styles/
+	if len(manifest.Styles) != 2 {
+		t.Errorf("manifest Styles count = %d, want 2", len(manifest.Styles))
 	}
 
 	// Persona rule (spec-workflow.md is in WholeFileRules)
@@ -247,6 +249,72 @@ func TestOrchestrator_SkipsNonRelevantFiles(t *testing.T) {
 	}
 }
 
+
+func TestOrchestrator_ClaudeMDAtProjectRoot(t *testing.T) {
+	orch := newTestOrchestrator(t)
+
+	// Simulate project root with .claude/ subdirectory.
+	// CLAUDE.md is at project root, not inside .claude/.
+	projectRoot := t.TempDir()
+	claudeDir := filepath.Join(projectRoot, ".claude")
+	if err := os.MkdirAll(filepath.Join(claudeDir, "agents"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	// Write CLAUDE.md at project root (parent of .claude/)
+	claudeMD := "# Do Execution Directive\n\nMain persona directive.\n"
+	if err := os.WriteFile(filepath.Join(projectRoot, "CLAUDE.md"), []byte(claudeMD), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Write an agent inside .claude/
+	agentContent := "---\nname: expert-generic\ndescription: test\n---\n\n## Overview\n\nContent.\n"
+	if err := os.WriteFile(filepath.Join(claudeDir, "agents", "expert-generic.md"), []byte(agentContent), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Extract from .claude/ — CLAUDE.md should be found at project root
+	_, manifest, err := orch.Extract(claudeDir)
+	if err != nil {
+		t.Fatalf("Extract() error: %v", err)
+	}
+
+	if manifest.ClaudeMD != "CLAUDE.md" {
+		t.Errorf("manifest ClaudeMD = %q, want %q", manifest.ClaudeMD, "CLAUDE.md")
+	}
+}
+
+func TestOrchestrator_ClaudeMDInsideSrcDirTakesPrecedence(t *testing.T) {
+	orch := newTestOrchestrator(t)
+
+	// If CLAUDE.md exists both inside srcDir and at project root,
+	// the one inside srcDir wins (found during Walk).
+	projectRoot := t.TempDir()
+	claudeDir := filepath.Join(projectRoot, ".claude")
+	if err := os.MkdirAll(claudeDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	// CLAUDE.md inside .claude/
+	if err := os.WriteFile(filepath.Join(claudeDir, "CLAUDE.md"), []byte("# Inside"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	// CLAUDE.md at project root
+	if err := os.WriteFile(filepath.Join(projectRoot, "CLAUDE.md"), []byte("# Root"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	_, manifest, err := orch.Extract(claudeDir)
+	if err != nil {
+		t.Fatalf("Extract() error: %v", err)
+	}
+
+	// The one inside srcDir should win
+	if manifest.ClaudeMD != "CLAUDE.md" {
+		t.Errorf("manifest ClaudeMD = %q, want %q", manifest.ClaudeMD, "CLAUDE.md")
+	}
+}
+
 func TestClassifyFile(t *testing.T) {
 	tests := []struct {
 		path string
@@ -261,6 +329,8 @@ func TestClassifyFile(t *testing.T) {
 		{"rules/dev-testing.md", fileTypeRule},
 		{"rules/do/workflow/spec-workflow.md", fileTypeRule},
 		{"styles/pair.md", fileTypeStyle},
+		{"output-styles/pair.md", fileTypeStyle},
+		{"output-styles/moai/sprint.md", fileTypeStyle},
 		{"commands/help.md", fileTypeCommand},
 		{"commands/subdir/deploy.md", fileTypeCommand},
 		{"hooks/pre-tool.sh", fileTypeHook},
