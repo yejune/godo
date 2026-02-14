@@ -30,37 +30,6 @@ func setupSourceDir(t *testing.T, files map[string]string) string {
 	return dir
 }
 
-// rekeyAgentPatches transforms AgentPatches keys from extractor format (agent
-// name, e.g. "expert-backend") to assembler format (relative file path, e.g.
-// "agents/expert-backend.md"). The extractor keys by frontmatter name; the
-// assembler expects file paths relative to the core directory.
-func rekeyAgentPatches(manifest *model.PersonaManifest, sourceFiles map[string]string) {
-	if len(manifest.AgentPatches) == 0 {
-		return
-	}
-
-	// Build name-to-path mapping from source agent files.
-	nameToPath := make(map[string]string)
-	for relPath := range sourceFiles {
-		if strings.HasPrefix(relPath, "agents/") && strings.HasSuffix(relPath, ".md") {
-			base := filepath.Base(relPath)
-			name := strings.TrimSuffix(base, ".md")
-			nameToPath[name] = relPath
-		}
-	}
-
-	rekeyed := make(map[string]*model.AgentPatch, len(manifest.AgentPatches))
-	for key, patch := range manifest.AgentPatches {
-		if path, ok := nameToPath[key]; ok {
-			rekeyed[path] = patch
-		} else {
-			// Key is already a path or unknown; keep as-is.
-			rekeyed[key] = patch
-		}
-	}
-	manifest.AgentPatches = rekeyed
-}
-
 // buildCoreAndPersonaDirs takes the extraction results and source directory,
 // then builds separate core and persona directories that the assembler expects.
 // Core dir: files NOT classified as persona-only, plus registry.yaml.
@@ -149,11 +118,6 @@ func buildCoreAndPersonaDirs(
 	if err := registry.Save(coreDir); err != nil {
 		t.Fatalf("save registry: %v", err)
 	}
-
-	// Re-key AgentPatches from extractor format (agent name) to assembler
-	// format (relative file path). This bridges the key format mismatch
-	// between the two pipeline stages.
-	rekeyAgentPatches(manifest, sourceFiles)
 
 	return coreDir, personaDir
 }

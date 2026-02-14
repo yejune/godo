@@ -44,14 +44,14 @@ func TestClassify_TRUST5Section_DetectedAsPersona(t *testing.T) {
 		Sections: []*model.Section{
 			{
 				Level:     2,
-				Title:     "## Implementation Guidelines",
+				Title:     "Implementation Guidelines",
 				Content:   "## Implementation Guidelines\n\nFollow clean code principles.",
 				StartLine: 1,
 				EndLine:   3,
 			},
 			{
 				Level:     3,
-				Title:     "### TRUST 5 Compliance",
+				Title:     "TRUST 5 Compliance",
 				Content:   "### TRUST 5 Compliance\n\n- Tested: 85%+ coverage\n- Readable: Clear naming\n- Unified: Consistent style\n- Secured: OWASP compliance\n- Trackable: Conventional commits",
 				StartLine: 4,
 				EndLine:   10,
@@ -99,14 +99,14 @@ func TestClassify_NoPersonaContent_AllCore(t *testing.T) {
 		Sections: []*model.Section{
 			{
 				Level:     2,
-				Title:     "## Overview",
+				Title:     "Overview",
 				Content:   "## Overview\n\nGeneric agent overview.",
 				StartLine: 1,
 				EndLine:   3,
 			},
 			{
 				Level:     2,
-				Title:     "## Guidelines",
+				Title:     "Guidelines",
 				Content:   "## Guidelines\n\nFollow best practices.",
 				StartLine: 4,
 				EndLine:   6,
@@ -139,7 +139,7 @@ func TestClassify_NestedChildren_PersonaDetected(t *testing.T) {
 
 	child := &model.Section{
 		Level:     3,
-		Title:     "### TAG Chain",
+		Title:     "TAG Chain",
 		Content:   "### TAG Chain\n\nTraceability system.",
 		StartLine: 4,
 		EndLine:   6,
@@ -150,7 +150,7 @@ func TestClassify_NestedChildren_PersonaDetected(t *testing.T) {
 		Sections: []*model.Section{
 			{
 				Level:     2,
-				Title:     "## Methodology",
+				Title:     "Methodology",
 				Content:   "## Methodology\n\nMethodology section.",
 				StartLine: 1,
 				EndLine:   6,
@@ -312,21 +312,21 @@ func TestClassify_FullDocument_AllDetected(t *testing.T) {
 		Sections: []*model.Section{
 			{
 				Level:     2,
-				Title:     "## Backend Development",
+				Title:     "Backend Development",
 				Content:   "## Backend Development\n\nImplement server-side features.\nRead specs from .moai/specs/SPEC-{ID}/spec.md",
 				StartLine: 1,
 				EndLine:   4,
 			},
 			{
 				Level:     3,
-				Title:     "### TRUST 5 Compliance",
+				Title:     "TRUST 5 Compliance",
 				Content:   "### TRUST 5 Compliance\n\n- Tested: 85%+\n- Readable: Clean code\n- Unified: Consistent\n- Secured: OWASP\n- Trackable: Commits",
 				StartLine: 5,
 				EndLine:   12,
 			},
 			{
 				Level:     3,
-				Title:     "### Error Handling",
+				Title:     "Error Handling",
 				Content:   "### Error Handling\n\nHandle errors properly.",
 				StartLine: 13,
 				EndLine:   15,
@@ -399,7 +399,7 @@ func TestClassify_NilFrontmatter_NoSkillRefs(t *testing.T) {
 		Sections: []*model.Section{
 			{
 				Level:     2,
-				Title:     "## Testing Rules",
+				Title:     "Testing Rules",
 				Content:   "## Testing Rules\n\nFollow testing guidelines.",
 				StartLine: 1,
 				EndLine:   3,

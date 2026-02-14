@@ -111,17 +111,17 @@ func TestCompileHeaderPatterns_MatchExamples(t *testing.T) {
 		header  string
 		wantIdx int // index in compiled that should match, -1 for no match
 	}{
-		{"TRUST 5 Compliance", "### TRUST 5 Compliance", 0},
-		{"TRUST5 Validation", "## TRUST5 Validation", 0},
-		{"trust 5 framework", "## trust 5 framework", 0},
-		{"TRUST 5 Framework with caps", "### TRUST 5 Framework", 0},
-		{"Security & TRUST 5", "### Security & TRUST 5", 1},
-		{"security & trust 5", "## security & trust 5", 1},
-		{"TAG Chain", "### TAG Chain", 2},
-		{"tag chain case insensitive", "## TAG Chain Integrity", 2},
-		{"Research TAG System", "### Research TAG System", 3},
-		{"No match", "### Some Other Section", -1},
-		{"Partial TRUST mention", "### Using TRUST principles", -1},
+		{"TRUST 5 Compliance", "TRUST 5 Compliance", 0},
+		{"TRUST5 Validation", "TRUST5 Validation", 0},
+		{"trust 5 framework", "trust 5 framework", 0},
+		{"TRUST 5 Framework with caps", "TRUST 5 Framework", 0},
+		{"Security & TRUST 5", "Security & TRUST 5", 1},
+		{"security & trust 5", "security & trust 5", 1},
+		{"TAG Chain", "TAG Chain", 2},
+		{"tag chain case insensitive", "TAG Chain Integrity", 2},
+		{"Research TAG System", "Research TAG System", 3},
+		{"No match", "Some Other Section", -1},
+		{"Partial TRUST mention", "Using TRUST principles", -1},
 	}
 
 	for _, tt := range tests {

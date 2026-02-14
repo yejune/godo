@@ -44,25 +44,25 @@ func NewDefaultRegistry() *PatternRegistry {
 	return &PatternRegistry{
 		HeaderPatterns: []HeaderPattern{
 			{
-				Pattern:     `(?i)^###?\s+TRUST\s*5\s+(Compliance|Validation|Framework)`,
+				Pattern:     `(?i)^TRUST\s*5\s+(Compliance|Validation|Framework)`,
 				SlotID:      "QUALITY_FRAMEWORK",
 				Category:    "quality_framework",
 				Description: "TRUST 5 quality compliance section in agent body",
 			},
 			{
-				Pattern:     `(?i)^###?\s+Security\s+&\s+TRUST\s+5`,
+				Pattern:     `(?i)^Security\s+&\s+TRUST\s+5`,
 				SlotID:      "QUALITY_SECURITY_FRAMEWORK",
 				Category:    "quality_framework",
 				Description: "Combined security and TRUST 5 section",
 			},
 			{
-				Pattern:     `(?i)^###?\s+TAG\s+Chain`,
+				Pattern:     `(?i)^TAG\s+Chain`,
 				SlotID:      "TRACEABILITY_SYSTEM",
 				Category:    "methodology",
 				Description: "TAG chain traceability system section",
 			},
 			{
-				Pattern:     `(?i)^###?\s+Research\s+TAG\s+System`,
+				Pattern:     `(?i)^Research\s+TAG\s+System`,
 				SlotID:      "TRACEABILITY_SYSTEM",
 				Category:    "methodology",
 				Description: "Research TAG system integration",

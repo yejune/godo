@@ -1,8 +1,6 @@
 package extractor
 
 import (
-	"strings"
-
 	"github.com/do-focus/convert/internal/detector"
 	"github.com/do-focus/convert/internal/model"
 	"github.com/do-focus/convert/internal/template"
@@ -183,30 +181,17 @@ func (e *AgentExtractor) extractPersonaSkills(
 	// Update core frontmatter
 	coreDoc.Frontmatter.Skills = coreSkills
 
-	// Record persona skills in agent patch
+	// Record persona skills in agent patch.
+	// Use the document's relative file path as key (e.g., "agents/moai/expert-backend.md")
+	// so it matches the assembler's PatchAgent expectation of file-path keys.
 	if len(extractedSkills) > 0 {
-		agentName := coreDoc.Frontmatter.Name
-		if agentName == "" {
-			// Fallback: derive name from path
-			agentName = deriveAgentName(coreDoc.Path)
-		}
-		patch, ok := manifest.AgentPatches[agentName]
+		key := coreDoc.Path
+		patch, ok := manifest.AgentPatches[key]
 		if !ok {
 			patch = &model.AgentPatch{}
-			manifest.AgentPatches[agentName] = patch
+			manifest.AgentPatches[key] = patch
 		}
 		patch.AppendSkills = append(patch.AppendSkills, extractedSkills...)
 	}
 }
 
-// deriveAgentName extracts an agent name from a file path.
-// e.g., "agents/moai/expert-backend.md" -> "expert-backend"
-func deriveAgentName(path string) string {
-	// Remove directory prefix and .md suffix
-	name := path
-	if idx := strings.LastIndex(name, "/"); idx >= 0 {
-		name = name[idx+1:]
-	}
-	name = strings.TrimSuffix(name, ".md")
-	return name
-}

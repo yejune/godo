@@ -157,9 +157,9 @@ func TestE2E_ExtractFullDirectory(t *testing.T) {
 	// ----- AgentPatches: persona skills extracted from expert-backend -----
 	// expert-backend lists moai-foundation-core and moai-foundation-quality,
 	// both matching SkillPatterns, so they should be in AgentPatches.
-	patch, ok := manifest.AgentPatches["expert-backend"]
+	patch, ok := manifest.AgentPatches["agents/expert-backend.md"]
 	if !ok {
-		t.Fatal("manifest.AgentPatches missing 'expert-backend'")
+		t.Fatal("manifest.AgentPatches missing 'agents/expert-backend.md'")
 	}
 	wantSkills := map[string]bool{
 		"moai-foundation-core":    false,
@@ -172,7 +172,7 @@ func TestE2E_ExtractFullDirectory(t *testing.T) {
 	}
 	for skill, found := range wantSkills {
 		if !found {
-			t.Errorf("AgentPatches[expert-backend].AppendSkills missing %q, got %v", skill, patch.AppendSkills)
+			t.Errorf("AgentPatches[agents/expert-backend.md].AppendSkills missing %q, got %v", skill, patch.AppendSkills)
 		}
 	}
 
@@ -297,9 +297,9 @@ func TestE2E_ExtractVerifiesCoreDocStructure(t *testing.T) {
 	}
 
 	// Persona skill should be in AgentPatches
-	patch, ok := manifest.AgentPatches["expert-backend"]
+	patch, ok := manifest.AgentPatches["agents/expert-backend.md"]
 	if !ok {
-		t.Fatal("AgentPatches missing 'expert-backend'")
+		t.Fatal("AgentPatches missing 'agents/expert-backend.md'")
 	}
 	found := false
 	for _, s := range patch.AppendSkills {

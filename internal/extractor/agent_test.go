@@ -106,8 +106,8 @@ func TestExtractAgent_WithPersonaSections_Extraction(t *testing.T) {
 			},
 			{
 				Level:     3,
-				Title:     "### TRUST 5 Compliance",
-				Content:   "### TRUST 5 Compliance\n\n- Tested: 85%+ coverage\n- Readable: Clear naming\n- Unified: Consistent style\n- Secured: OWASP compliance\n- Trackable: Conventional commits",
+				Title:     "TRUST 5 Compliance",
+				Content:   "TRUST 5 Compliance\n\n- Tested: 85%+ coverage\n- Readable: Clear naming\n- Unified: Consistent style\n- Secured: OWASP compliance\n- Trackable: Conventional commits",
 				StartLine: 4,
 				EndLine:   10,
 			},
@@ -182,15 +182,15 @@ func TestExtractAgent_MixedCorePesonaSections_SlotMarkersInserted(t *testing.T) 
 			},
 			{
 				Level:     3,
-				Title:     "### TRUST 5 Validation",
-				Content:   "### TRUST 5 Validation\n\nValidation rules here.",
+				Title:     "TRUST 5 Validation",
+				Content:   "TRUST 5 Validation\n\nValidation rules here.",
 				StartLine: 4,
 				EndLine:   6,
 			},
 			{
 				Level:     3,
-				Title:     "### TAG Chain",
-				Content:   "### TAG Chain\n\nTraceability entries.",
+				Title:     "TAG Chain",
+				Content:   "TAG Chain\n\nTraceability entries.",
 				StartLine: 7,
 				EndLine:   9,
 			},
@@ -250,9 +250,9 @@ func TestExtractAgent_MixedCorePesonaSections_SlotMarkersInserted(t *testing.T) 
 	if manifest.AgentPatches == nil {
 		t.Fatal("manifest agent patches is nil")
 	}
-	patch, ok := manifest.AgentPatches["expert-backend"]
+	patch, ok := manifest.AgentPatches["agents/moai/expert-backend.md"]
 	if !ok {
-		t.Fatal("manifest agent patches missing 'expert-backend'")
+		t.Fatal("manifest agent patches missing 'agents/moai/expert-backend.md'")
 	}
 	foundMoaiSkill := false
 	for _, s := range patch.AppendSkills {
@@ -391,9 +391,9 @@ func TestExtractAgent_PersonaSkillsExtractedFromFrontmatter(t *testing.T) {
 	}
 
 	// Manifest agent patch should list extracted persona skills
-	patch, ok := manifest.AgentPatches["expert-backend"]
+	patch, ok := manifest.AgentPatches["agents/moai/expert-backend.md"]
 	if !ok {
-		t.Fatal("manifest agent patches missing 'expert-backend'")
+		t.Fatal("manifest agent patches missing 'agents/moai/expert-backend.md'")
 	}
 	if len(patch.AppendSkills) != 2 {
 		t.Errorf("patch AppendSkills count = %d, want 2; got %v", len(patch.AppendSkills), patch.AppendSkills)

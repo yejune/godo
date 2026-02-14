@@ -192,9 +192,9 @@ func TestOrchestrator_MixedFileTypes(t *testing.T) {
 	// (e.g., "TRUST 5 Compliance" not "### TRUST 5 Compliance"), while the detector
 	// regex expects the '#' prefix. This is a known pre-existing mismatch between
 	// the parser and detector. Skill-based extraction still works via frontmatter.
-	patch, ok := manifest.AgentPatches["expert-backend"]
+	patch, ok := manifest.AgentPatches["agents/expert-backend.md"]
 	if !ok {
-		t.Error("manifest AgentPatches should contain 'expert-backend'")
+		t.Error("manifest AgentPatches should contain 'agents/expert-backend.md'")
 	} else {
 		found := false
 		for _, s := range patch.AppendSkills {
