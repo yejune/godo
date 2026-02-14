@@ -1,6 +1,7 @@
 package assembler
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -562,5 +563,296 @@ func TestMergeFile_NoSlots_CopiesAsIs(t *testing.T) {
 
 	if string(data) != coreContent {
 		t.Errorf("expected content copied as-is.\nexpected:\n%s\ngot:\n%s", coreContent, string(data))
+	}
+}
+
+func TestMergeSettings_CorePlusPersonaHooks(t *testing.T) {
+	reg := newTestRegistry(nil)
+	personaDir := t.TempDir()
+	coreDir := t.TempDir()
+	outputDir := t.TempDir()
+
+	// Create core settings file with permissions and outputStyle.
+	coreSettings := map[string]interface{}{
+		"permissions": map[string]interface{}{
+			"allow": []interface{}{"Read", "Write"},
+		},
+		"outputStyle": "pair",
+	}
+	coreData, _ := json.MarshalIndent(coreSettings, "", "  ")
+	coreSettingsPath := filepath.Join(coreDir, "settings.json")
+	if err := os.WriteFile(coreSettingsPath, coreData, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Manifest with persona hooks.
+	manifest := &model.PersonaManifest{
+		Hooks: map[string][]model.HookEntry{
+			"PreToolUse": {
+				{Command: "godo hook pre-tool", Timeout: 5000},
+			},
+			"PostToolUse": {
+				{Command: "godo hook post-tool"},
+			},
+		},
+	}
+
+	m := NewMerger(coreDir, personaDir, outputDir, manifest, reg)
+	err := m.MergeSettings(coreSettingsPath)
+	if err != nil {
+		t.Fatalf("MergeSettings error: %v", err)
+	}
+
+	// Read output settings.json.
+	outPath := filepath.Join(outputDir, "settings.json")
+	data, err := os.ReadFile(outPath)
+	if err != nil {
+		t.Fatalf("read output settings: %v", err)
+	}
+
+	var result map[string]interface{}
+	if err := json.Unmarshal(data, &result); err != nil {
+		t.Fatalf("unmarshal output settings: %v", err)
+	}
+
+	// Core fields preserved.
+	if result["outputStyle"] != "pair" {
+		t.Errorf("expected outputStyle 'pair', got %v", result["outputStyle"])
+	}
+	perms, ok := result["permissions"]
+	if !ok {
+		t.Fatal("expected permissions field preserved")
+	}
+	permMap, ok := perms.(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected permissions as map, got %T", perms)
+	}
+	if _, ok := permMap["allow"]; !ok {
+		t.Error("expected permissions.allow preserved")
+	}
+
+	// Persona hooks injected.
+	hooks, ok := result["hooks"]
+	if !ok {
+		t.Fatal("expected hooks field in merged settings")
+	}
+	hooksMap, ok := hooks.(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected hooks as map, got %T", hooks)
+	}
+	if _, ok := hooksMap["PreToolUse"]; !ok {
+		t.Error("expected PreToolUse hook in merged settings")
+	}
+	if _, ok := hooksMap["PostToolUse"]; !ok {
+		t.Error("expected PostToolUse hook in merged settings")
+	}
+}
+
+func TestMergeSettings_NoPersonaHooks(t *testing.T) {
+	reg := newTestRegistry(nil)
+	personaDir := t.TempDir()
+	coreDir := t.TempDir()
+	outputDir := t.TempDir()
+
+	coreSettings := map[string]interface{}{
+		"outputStyle": "direct",
+	}
+	coreData, _ := json.MarshalIndent(coreSettings, "", "  ")
+	coreSettingsPath := filepath.Join(coreDir, "settings.json")
+	if err := os.WriteFile(coreSettingsPath, coreData, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	// No hooks in manifest.
+	manifest := &model.PersonaManifest{}
+
+	m := NewMerger(coreDir, personaDir, outputDir, manifest, reg)
+	err := m.MergeSettings(coreSettingsPath)
+	if err != nil {
+		t.Fatalf("MergeSettings error: %v", err)
+	}
+
+	outPath := filepath.Join(outputDir, "settings.json")
+	data, err := os.ReadFile(outPath)
+	if err != nil {
+		t.Fatalf("read output settings: %v", err)
+	}
+
+	var result map[string]interface{}
+	if err := json.Unmarshal(data, &result); err != nil {
+		t.Fatalf("unmarshal output settings: %v", err)
+	}
+
+	if result["outputStyle"] != "direct" {
+		t.Errorf("expected outputStyle 'direct', got %v", result["outputStyle"])
+	}
+	// No hooks field should be present when no persona hooks.
+	if _, ok := result["hooks"]; ok {
+		t.Error("expected no hooks field when persona has no hooks")
+	}
+}
+
+func TestCopyCommands(t *testing.T) {
+	reg := newTestRegistry(nil)
+	personaDir := t.TempDir()
+	coreDir := t.TempDir()
+	outputDir := t.TempDir()
+
+	// Create persona command files.
+	cmdDir := filepath.Join(personaDir, "commands")
+	if err := os.MkdirAll(cmdDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	cmd1Content := "# Plan command\nCreate a plan."
+	if err := os.WriteFile(filepath.Join(cmdDir, "do-plan.md"), []byte(cmd1Content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cmd2Content := "# Style command\nSwitch style."
+	subDir := filepath.Join(cmdDir, "sub")
+	if err := os.MkdirAll(subDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(subDir, "do-style.md"), []byte(cmd2Content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	manifest := &model.PersonaManifest{
+		Commands: []string{"commands/do-plan.md", "commands/sub/do-style.md"},
+	}
+
+	m := NewMerger(coreDir, personaDir, outputDir, manifest, reg)
+	result, err := m.CopyCommands()
+	if err != nil {
+		t.Fatalf("CopyCommands error: %v", err)
+	}
+
+	if result.FilesWritten != 2 {
+		t.Errorf("expected 2 files written, got %d", result.FilesWritten)
+	}
+
+	// Verify first command.
+	out1 := filepath.Join(outputDir, "commands", "do-plan.md")
+	data1, err := os.ReadFile(out1)
+	if err != nil {
+		t.Fatalf("read command 1: %v", err)
+	}
+	if string(data1) != cmd1Content {
+		t.Errorf("command 1 content mismatch.\nexpected:\n%s\ngot:\n%s", cmd1Content, string(data1))
+	}
+
+	// Verify second command (nested).
+	out2 := filepath.Join(outputDir, "commands", "sub", "do-style.md")
+	data2, err := os.ReadFile(out2)
+	if err != nil {
+		t.Fatalf("read command 2: %v", err)
+	}
+	if string(data2) != cmd2Content {
+		t.Errorf("command 2 content mismatch.\nexpected:\n%s\ngot:\n%s", cmd2Content, string(data2))
+	}
+}
+
+func TestCopyCommands_EmptyList(t *testing.T) {
+	reg := newTestRegistry(nil)
+	personaDir := t.TempDir()
+	coreDir := t.TempDir()
+	outputDir := t.TempDir()
+
+	manifest := &model.PersonaManifest{
+		Commands: nil,
+	}
+
+	m := NewMerger(coreDir, personaDir, outputDir, manifest, reg)
+	result, err := m.CopyCommands()
+	if err != nil {
+		t.Fatalf("CopyCommands error: %v", err)
+	}
+
+	if result.FilesWritten != 0 {
+		t.Errorf("expected 0 files written for empty commands, got %d", result.FilesWritten)
+	}
+}
+
+func TestCopyHookScripts(t *testing.T) {
+	reg := newTestRegistry(nil)
+	personaDir := t.TempDir()
+	coreDir := t.TempDir()
+	outputDir := t.TempDir()
+
+	// Create persona hook script files.
+	hookDir := filepath.Join(personaDir, "hooks")
+	if err := os.MkdirAll(hookDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	script1 := "#!/bin/bash\ngodo hook pre-tool \"$@\""
+	if err := os.WriteFile(filepath.Join(hookDir, "pre-tool.sh"), []byte(script1), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	script2 := "#!/bin/bash\ngodo hook post-tool \"$@\""
+	if err := os.WriteFile(filepath.Join(hookDir, "post-tool.sh"), []byte(script2), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	manifest := &model.PersonaManifest{
+		HookScripts: []string{"hooks/pre-tool.sh", "hooks/post-tool.sh"},
+	}
+
+	m := NewMerger(coreDir, personaDir, outputDir, manifest, reg)
+	result, err := m.CopyHookScripts()
+	if err != nil {
+		t.Fatalf("CopyHookScripts error: %v", err)
+	}
+
+	if result.FilesWritten != 2 {
+		t.Errorf("expected 2 files written, got %d", result.FilesWritten)
+	}
+
+	// Verify first script.
+	out1 := filepath.Join(outputDir, "hooks", "pre-tool.sh")
+	data1, err := os.ReadFile(out1)
+	if err != nil {
+		t.Fatalf("read hook script 1: %v", err)
+	}
+	if string(data1) != script1 {
+		t.Errorf("hook script 1 content mismatch.\nexpected:\n%s\ngot:\n%s", script1, string(data1))
+	}
+
+	// Verify executable permission preserved.
+	info, err := os.Stat(out1)
+	if err != nil {
+		t.Fatalf("stat hook script 1: %v", err)
+	}
+	if info.Mode().Perm()&0o111 == 0 {
+		t.Errorf("expected hook script to be executable, got mode %v", info.Mode())
+	}
+
+	// Verify second script.
+	out2 := filepath.Join(outputDir, "hooks", "post-tool.sh")
+	data2, err := os.ReadFile(out2)
+	if err != nil {
+		t.Fatalf("read hook script 2: %v", err)
+	}
+	if string(data2) != script2 {
+		t.Errorf("hook script 2 content mismatch.\nexpected:\n%s\ngot:\n%s", script2, string(data2))
+	}
+}
+
+func TestCopyHookScripts_EmptyList(t *testing.T) {
+	reg := newTestRegistry(nil)
+	personaDir := t.TempDir()
+	coreDir := t.TempDir()
+	outputDir := t.TempDir()
+
+	manifest := &model.PersonaManifest{
+		HookScripts: nil,
+	}
+
+	m := NewMerger(coreDir, personaDir, outputDir, manifest, reg)
+	result, err := m.CopyHookScripts()
+	if err != nil {
+		t.Fatalf("CopyHookScripts error: %v", err)
+	}
+
+	if result.FilesWritten != 0 {
+		t.Errorf("expected 0 files written for empty hook scripts, got %d", result.FilesWritten)
 	}
 }

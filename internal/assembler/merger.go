@@ -1,6 +1,7 @@
 package assembler
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -235,4 +236,149 @@ func (m *Merger) PatchAgent(relPath string) error {
 	}
 
 	return nil
+}
+
+// MergeSettings reads core settings.json, injects persona-specific hooks from
+// the manifest, and writes the merged result to the output directory.
+func (m *Merger) MergeSettings(coreSettingsPath string) error {
+	data, err := os.ReadFile(coreSettingsPath)
+	if err != nil {
+		return &model.ErrAssembly{
+			Phase:   "merge_settings",
+			File:    "settings.json",
+			Message: fmt.Sprintf("read core settings: %v", err),
+		}
+	}
+
+	var settings map[string]interface{}
+	if err := json.Unmarshal(data, &settings); err != nil {
+		return &model.ErrAssembly{
+			Phase:   "merge_settings",
+			File:    "settings.json",
+			Message: fmt.Sprintf("parse core settings: %v", err),
+		}
+	}
+
+	// Inject persona hooks if present.
+	if len(m.manifest.Hooks) > 0 {
+		settings["hooks"] = m.manifest.Hooks
+	}
+
+	buf, err := json.MarshalIndent(settings, "", "  ")
+	if err != nil {
+		return &model.ErrAssembly{
+			Phase:   "merge_settings",
+			File:    "settings.json",
+			Message: fmt.Sprintf("marshal merged settings: %v", err),
+		}
+	}
+	buf = append(buf, '\n')
+
+	dstPath := filepath.Join(m.outputDir, "settings.json")
+	if err := os.MkdirAll(filepath.Dir(dstPath), 0o755); err != nil {
+		return &model.ErrAssembly{
+			Phase:   "merge_settings",
+			File:    "settings.json",
+			Message: fmt.Sprintf("create output dir: %v", err),
+		}
+	}
+
+	if err := os.WriteFile(dstPath, buf, 0o644); err != nil {
+		return &model.ErrAssembly{
+			Phase:   "merge_settings",
+			File:    "settings.json",
+			Message: fmt.Sprintf("write merged settings: %v", err),
+		}
+	}
+
+	return nil
+}
+
+// CopyCommands copies persona-specific command files listed in the manifest
+// from personaDir to outputDir, preserving relative paths.
+func (m *Merger) CopyCommands() (*MergeResult, error) {
+	result := &MergeResult{}
+
+	for _, relPath := range m.manifest.Commands {
+		srcPath := filepath.Join(m.personaDir, relPath)
+		dstPath := filepath.Join(m.outputDir, relPath)
+
+		data, err := os.ReadFile(srcPath)
+		if err != nil {
+			return nil, &model.ErrAssembly{
+				Phase:   "copy_commands",
+				File:    relPath,
+				Message: fmt.Sprintf("read command file: %v", err),
+			}
+		}
+
+		if err := os.MkdirAll(filepath.Dir(dstPath), 0o755); err != nil {
+			return nil, &model.ErrAssembly{
+				Phase:   "copy_commands",
+				File:    relPath,
+				Message: fmt.Sprintf("create output dir: %v", err),
+			}
+		}
+
+		if err := os.WriteFile(dstPath, data, 0o644); err != nil {
+			return nil, &model.ErrAssembly{
+				Phase:   "copy_commands",
+				File:    relPath,
+				Message: fmt.Sprintf("write command file: %v", err),
+			}
+		}
+
+		result.FilesWritten++
+	}
+
+	return result, nil
+}
+
+// CopyHookScripts copies persona-specific hook scripts listed in the manifest
+// from personaDir to outputDir, preserving relative paths and file permissions.
+func (m *Merger) CopyHookScripts() (*MergeResult, error) {
+	result := &MergeResult{}
+
+	for _, relPath := range m.manifest.HookScripts {
+		srcPath := filepath.Join(m.personaDir, relPath)
+
+		info, err := os.Stat(srcPath)
+		if err != nil {
+			return nil, &model.ErrAssembly{
+				Phase:   "copy_hook_scripts",
+				File:    relPath,
+				Message: fmt.Sprintf("stat hook script: %v", err),
+			}
+		}
+
+		data, err := os.ReadFile(srcPath)
+		if err != nil {
+			return nil, &model.ErrAssembly{
+				Phase:   "copy_hook_scripts",
+				File:    relPath,
+				Message: fmt.Sprintf("read hook script: %v", err),
+			}
+		}
+
+		dstPath := filepath.Join(m.outputDir, relPath)
+		if err := os.MkdirAll(filepath.Dir(dstPath), 0o755); err != nil {
+			return nil, &model.ErrAssembly{
+				Phase:   "copy_hook_scripts",
+				File:    relPath,
+				Message: fmt.Sprintf("create output dir: %v", err),
+			}
+		}
+
+		if err := os.WriteFile(dstPath, data, info.Mode().Perm()); err != nil {
+			return nil, &model.ErrAssembly{
+				Phase:   "copy_hook_scripts",
+				File:    relPath,
+				Message: fmt.Sprintf("write hook script: %v", err),
+			}
+		}
+
+		result.FilesWritten++
+	}
+
+	return result, nil
 }
