@@ -3,7 +3,9 @@ package cli
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/do-focus/convert/internal/detector"
 	"github.com/do-focus/convert/internal/extractor"
@@ -18,7 +20,10 @@ var extractCmd = &cobra.Command{
 	Long: `Extract walks a .claude/ source directory, separates methodology-agnostic
 core templates from persona-specific content, and writes:
   - Core templates to <out>/core/
-  - Persona manifest to <out>/personas/<name>/manifest.yaml`,
+  - Persona manifest to <out>/personas/<name>/manifest.yaml
+
+Source can be a local directory (--src) or a GitHub repository (--repo).
+The --src and --repo flags are mutually exclusive.`,
 	RunE: runExtract,
 }
 
@@ -26,25 +31,107 @@ var (
 	extractSrc     string
 	extractOut     string
 	extractPersona string
+	extractRepo    string
+	extractBranch  string
 )
 
 func init() {
-	extractCmd.Flags().StringVar(&extractSrc, "src", "", "source .claude/ directory path (required)")
+	extractCmd.Flags().StringVar(&extractSrc, "src", "", "source .claude/ directory path")
+	extractCmd.Flags().StringVar(&extractRepo, "repo", "", "GitHub repository URL or shorthand (e.g., org/repo)")
+	extractCmd.Flags().StringVar(&extractBranch, "branch", "", "branch or tag to clone (default: repository default branch)")
 	extractCmd.Flags().StringVar(&extractOut, "out", "", "output directory for core templates and persona manifest (required)")
 	extractCmd.Flags().StringVar(&extractPersona, "persona", "", "persona name (default: auto-detect from source)")
-	_ = extractCmd.MarkFlagRequired("src")
 	_ = extractCmd.MarkFlagRequired("out")
 	rootCmd.AddCommand(extractCmd)
 }
 
-func runExtract(cmd *cobra.Command, args []string) error {
-	// Validate source directory exists
-	info, err := os.Stat(extractSrc)
+// expandRepoURL normalizes a repository reference into a full git clone URL.
+//   - "org/repo"                   -> "https://github.com/org/repo.git"
+//   - "github.com/org/repo"        -> "https://github.com/org/repo.git"
+//   - "https://github.com/o/r"     -> used as-is
+//   - "https://github.com/o/r.git" -> used as-is
+func expandRepoURL(raw string) string {
+	// Already a full URL — use as-is
+	if strings.HasPrefix(raw, "https://") || strings.HasPrefix(raw, "http://") || strings.HasPrefix(raw, "git@") {
+		return raw
+	}
+
+	// "github.com/org/repo" -> strip domain prefix, treat as shorthand
+	if strings.HasPrefix(raw, "github.com/") {
+		raw = strings.TrimPrefix(raw, "github.com/")
+	}
+
+	// "org/repo" shorthand
+	raw = strings.TrimSuffix(raw, ".git")
+	return "https://github.com/" + raw + ".git"
+}
+
+// cloneRepo performs a shallow git clone and returns the temp directory path.
+// The caller is responsible for removing the temp directory.
+func cloneRepo(repoURL, branch string) (string, error) {
+	tmpDir, err := os.MkdirTemp("", "convert-clone-*")
 	if err != nil {
-		return fmt.Errorf("source directory %q: %w", extractSrc, err)
+		return "", fmt.Errorf("create temp directory: %w", err)
+	}
+
+	args := []string{"clone", "--depth", "1"}
+	if branch != "" {
+		args = append(args, "--branch", branch)
+	}
+	args = append(args, repoURL, tmpDir)
+
+	cmd := exec.Command("git", args...)
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		// Clean up on clone failure
+		os.RemoveAll(tmpDir)
+		return "", fmt.Errorf("git clone %s: %w", repoURL, err)
+	}
+
+	return tmpDir, nil
+}
+
+func runExtract(cmd *cobra.Command, args []string) error {
+	// Validate mutually exclusive flags
+	hasSrc := extractSrc != ""
+	hasRepo := extractRepo != ""
+
+	if hasSrc && hasRepo {
+		return fmt.Errorf("--src and --repo are mutually exclusive; provide one, not both")
+	}
+	if !hasSrc && !hasRepo {
+		return fmt.Errorf("either --src or --repo is required")
+	}
+
+	srcDir := extractSrc
+
+	// Handle --repo: clone and resolve .claude/ directory
+	if hasRepo {
+		repoURL := expandRepoURL(extractRepo)
+		fmt.Fprintf(cmd.OutOrStdout(), "Cloning %s ...\n", repoURL)
+
+		tmpDir, err := cloneRepo(repoURL, extractBranch)
+		if err != nil {
+			return err
+		}
+		defer os.RemoveAll(tmpDir)
+
+		claudeDir := filepath.Join(tmpDir, ".claude")
+		info, err := os.Stat(claudeDir)
+		if err != nil || !info.IsDir() {
+			return fmt.Errorf("repository does not contain a .claude/ directory")
+		}
+
+		srcDir = claudeDir
+	}
+
+	// Validate source directory exists
+	info, err := os.Stat(srcDir)
+	if err != nil {
+		return fmt.Errorf("source directory %q: %w", srcDir, err)
 	}
 	if !info.IsDir() {
-		return fmt.Errorf("source %q is not a directory", extractSrc)
+		return fmt.Errorf("source %q is not a directory", srcDir)
 	}
 
 	// Set up detector and pattern registry
@@ -56,7 +143,7 @@ func runExtract(cmd *cobra.Command, args []string) error {
 
 	// Create orchestrator and run extraction
 	orch := extractor.NewExtractorOrchestrator(det, patternReg)
-	registry, manifest, err := orch.Extract(extractSrc)
+	registry, manifest, err := orch.Extract(srcDir)
 	if err != nil {
 		return fmt.Errorf("extraction failed: %w", err)
 	}
