@@ -1,0 +1,25 @@
+name: test-persona
+version: "1.0.0"
+description: Test persona for unit testing
+
+claude_md: CLAUDE.md
+
+agents:
+  - agents/custom-agent.md
+skills:
+  - skills/custom-skill.md
+rules: []
+styles:
+  - styles/test-style.md
+commands: []
+
+slot_content:
+  QUALITY_FRAMEWORK: content/quality-framework.md
+  SPEC_PATH_PATTERN: ".test/specs/SPEC-{ID}"
+
+agent_patches:
+  expert-backend:
+    append_skills:
+      - test-foundation-core
+    remove_skills:
+      - moai-foundation-core
