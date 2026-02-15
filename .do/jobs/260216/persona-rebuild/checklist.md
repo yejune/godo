@@ -8,18 +8,18 @@
 
 ## 작업 목록
 
-- [ ] #1 Phase 1a: 캐릭터 파일 YAML frontmatter 재작성 (4파일)
+- [o] #1 Phase 1a: 캐릭터 파일 YAML frontmatter 재작성 (4파일)
   - 담당: expert-backend
   - 서브: checklists/01_persona-files.md
   - 파일: characters/young-f.md, young-m.md, senior-f.md, senior-m.md
 
-- [ ] #2 Phase 1b: 스피너 YAML 파일 신규 생성 (4파일)
+- [o] #2 Phase 1b: 스피너 YAML 파일 신규 생성 (4파일)
   - 담당: expert-backend
   - 서브: checklists/01_persona-files.md
   - 파일: spinners/young-f.yaml, young-m.yaml, senior-f.yaml, senior-m.yaml
   - depends on: #1 (캐릭터 형식 확정 후 스피너 작성)
 
-- [ ] #3 Phase 1c: 스타일 파일 새 위치 생성 + persona.yaml 업데이트 (4파일)
+- [o] #3 Phase 1c: 스타일 파일 새 위치 생성 + persona.yaml 업데이트 (4파일)
   - 담당: expert-backend
   - 서브: checklists/01_persona-files.md
   - 파일: styles/sprint.md, pair.md, direct.md, persona.yaml
@@ -84,19 +84,19 @@
   - 파일: internal/extractor/orchestrator.go, internal/assembler/orchestrator.go
   - depends on: #12
 
-- [ ] #14 Phase 5a: sprint.md MoAI 잔재 제거 (1파일)
+- [o] #14 Phase 5a: sprint.md MoAI 잔재 제거 (1파일)
   - 담당: expert-backend
   - 서브: checklists/05_style-cleanup.md
   - 파일: personas/do/styles/sprint.md
   - depends on: #3 (스타일 파일이 새 위치에 존재)
 
-- [ ] #15 Phase 5b: pair.md MoAI 잔재 제거 + 크기 축소 (1파일)
+- [o] #15 Phase 5b: pair.md MoAI 잔재 제거 + 크기 축소 (1파일)
   - 담당: expert-backend
   - 서브: checklists/05_style-cleanup.md
   - 파일: personas/do/styles/pair.md
   - depends on: #3
 
-- [ ] #16 Phase 5c: direct.md MoAI 잔재 제거 (1파일)
+- [o] #16 Phase 5c: direct.md MoAI 잔재 제거 (1파일)
   - 담당: expert-backend
   - 서브: checklists/05_style-cleanup.md
   - 파일: personas/do/styles/direct.md
@@ -107,34 +107,34 @@
   - 서브: checklists/05_style-cleanup.md
   - depends on: #7, #8, #9, #10, #14, #15, #16
 
-- [ ] #18 Phase 6a: manager-ddd.md, manager-tdd.md 에이전트 정의 Do 철학 반영 (2파일)
+- [o] #18 Phase 6a: manager-ddd.md, manager-tdd.md 에이전트 정의 Do 철학 반영 (2파일)
   - 담당: expert-backend
   - 서브: checklists/06_agents-philosophy.md
   - 파일: agents/do/manager-ddd.md, agents/do/manager-tdd.md
 
-- [ ] #19 Phase 6b: manager-quality.md, manager-project.md, team-quality.md Do 철학 반영 (3파일)
+- [o] #19 Phase 6b: manager-quality.md, manager-project.md, team-quality.md Do 철학 반영 (3파일)
   - 담당: expert-backend
   - 서브: checklists/06_agents-philosophy.md
   - 파일: agents/do/manager-quality.md, agents/do/manager-project.md, agents/do/team-quality.md
   - depends on: #18 (일관된 패턴 확립 후)
 
-- [ ] #20 Phase 7: rules/ 개발 규칙 갱신 (2파일)
+- [o] #20 Phase 7: rules/ 개발 규칙 갱신 (2파일)
   - 담당: expert-backend
   - 서브: checklists/07_rules-update.md
   - 파일: rules/do/workflow/spec-workflow.md, rules/do/workflow/workflow-modes.md
 
-- [ ] #21 Phase 8a: SKILL.md + reference.md 스킬 철학 반영 (2파일)
+- [o] #21 Phase 8a: SKILL.md + reference.md 스킬 철학 반영 (2파일)
   - 담당: expert-backend
   - 서브: checklists/08_skills-philosophy.md
   - 파일: skills/do/SKILL.md, skills/do/references/reference.md
 
-- [ ] #22 Phase 8b: workflows/ 스킬 파일 Do 철학 반영 (6파일)
+- [o] #22 Phase 8b: workflows/ 스킬 파일 Do 철학 반영 (6파일)
   - 담당: expert-backend
   - 서브: checklists/08_skills-philosophy.md
   - 파일: skills/do/workflows/do.md, team-do.md, report.md, run.md, plan.md, test.md
   - depends on: #21 (SKILL.md 패턴 확립 후)
 
-- [ ] #23 Phase 9: commands/ 확인 및 갱신 (5파일)
+- [o] #23 Phase 9: commands/ 확인 및 갱신 (5파일)
   - 담당: expert-backend
   - 서브: checklists/09_commands-update.md
   - 파일: commands/do/setup.md, style.md, mode.md, checklist.md, plan.md
@@ -181,12 +181,12 @@
 
 | Phase | 항목 수 | 상태 |
 |-------|--------|------|
-| Phase 1 (파일 생성) | #1, #2, #3 | [ ] |
+| Phase 1 (파일 생성) | #1, #2, #3 | [o] |
 | Phase 2 (PersonaLoader) | #4, #5, #6 | [ ] |
 | Phase 3 (Hook 연결) | #7, #8, #9, #10 | [ ] |
 | Phase 4 (convert 도구) | #11, #12, #13 | [ ] |
-| Phase 5 (스타일 정리) | #14, #15, #16, #17 | [ ] |
-| Phase 6 (agents 철학 반영) | #18, #19 | [ ] |
-| Phase 7 (rules 갱신) | #20 | [ ] |
-| Phase 8 (skills 철학 반영) | #21, #22 | [ ] |
-| Phase 9 (commands 갱신) | #23, #24 | [ ] |
+| Phase 5 (스타일 정리) | #14, #15, #16, #17 | [o] #14,#15,#16 / [ ] #17 |
+| Phase 6 (agents 철학 반영) | #18, #19 | [o] |
+| Phase 7 (rules 갱신) | #20 | [o] |
+| Phase 8 (skills 철학 반영) | #21, #22 | [o] |
+| Phase 9 (commands 갱신) | #23, #24 | [o] #23 / [ ] #24 |
