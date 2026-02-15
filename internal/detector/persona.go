@@ -13,16 +13,23 @@ type compiledHeaderPattern struct {
 	re      *regexp.Regexp
 }
 
+// compiledContentPattern pairs a ContentPattern with its pre-compiled regexp.
+type compiledContentPattern struct {
+	pattern ContentPattern
+	re      *regexp.Regexp
+}
+
 // PersonaDetector identifies persona-specific content within parsed documents.
 // It uses a PatternRegistry to match headers, paths, and skills that indicate
 // methodology-coupled content (TRUST5, SPEC workflow, etc.).
 type PersonaDetector struct {
-	registry *PatternRegistry
-	compiled []*compiledHeaderPattern
+	registry        *PatternRegistry
+	compiled        []*compiledHeaderPattern
+	compiledContent []*compiledContentPattern
 }
 
-// NewPersonaDetector creates a PersonaDetector with pre-compiled header regexps.
-// Returns an error if any header pattern regex fails to compile.
+// NewPersonaDetector creates a PersonaDetector with pre-compiled header and
+// content pattern regexps. Returns an error if any pattern regex fails to compile.
 func NewPersonaDetector(registry *PatternRegistry) (*PersonaDetector, error) {
 	compiled := make([]*compiledHeaderPattern, len(registry.HeaderPatterns))
 	for i, hp := range registry.HeaderPatterns {
@@ -35,9 +42,23 @@ func NewPersonaDetector(registry *PatternRegistry) (*PersonaDetector, error) {
 			re:      re,
 		}
 	}
+
+	compiledContent := make([]*compiledContentPattern, len(registry.ContentPatterns))
+	for i, cp := range registry.ContentPatterns {
+		re, err := regexp.Compile(cp.Pattern)
+		if err != nil {
+			return nil, err
+		}
+		compiledContent[i] = &compiledContentPattern{
+			pattern: cp,
+			re:      re,
+		}
+	}
+
 	return &PersonaDetector{
-		registry: registry,
-		compiled: compiled,
+		registry:        registry,
+		compiled:        compiled,
+		compiledContent: compiledContent,
 	}, nil
 }
 
@@ -160,6 +181,25 @@ func (d *PersonaDetector) DetectPathPatterns(content string) []model.PathMatch {
 	// Sort by line then column for deterministic output
 	sortPathMatches(matches)
 
+	return matches
+}
+
+// DetectContentPatterns finds inline content pattern matches in body text.
+// Returns matches with their byte offsets for replacement.
+func (d *PersonaDetector) DetectContentPatterns(content string) []model.ContentMatch {
+	var matches []model.ContentMatch
+
+	for _, ccp := range d.compiledContent {
+		locs := ccp.re.FindAllStringIndex(content, -1)
+		for _, loc := range locs {
+			matches = append(matches, model.ContentMatch{
+				Original: content[loc[0]:loc[1]],
+				SlotID:   ccp.pattern.SlotID,
+				Start:    loc[0],
+				End:      loc[1],
+			})
+		}
+	}
 	return matches
 }
 

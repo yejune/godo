@@ -257,3 +257,87 @@ func TestIsWholeFilePersonaRule(t *testing.T) {
 		}
 	}
 }
+
+func TestNewDefaultRegistry_ContentPatternCounts(t *testing.T) {
+	reg := NewDefaultRegistry()
+
+	if got := len(reg.ContentPatterns); got != 2 {
+		t.Errorf("ContentPatterns count = %d, want 2", got)
+	}
+}
+
+func TestNewDefaultRegistry_ContentPatternSlotIDs(t *testing.T) {
+	reg := NewDefaultRegistry()
+
+	expectedSlots := map[string]bool{
+		"QUALITY_GATE_TEXT":       false,
+		"QUALITY_PRINCIPLES_TEXT": false,
+	}
+
+	for _, cp := range reg.ContentPatterns {
+		if _, ok := expectedSlots[cp.SlotID]; ok {
+			expectedSlots[cp.SlotID] = true
+		}
+	}
+
+	for slotID, found := range expectedSlots {
+		if !found {
+			t.Errorf("expected slot ID %q not found in ContentPatterns", slotID)
+		}
+	}
+}
+
+func TestCompileContentPatterns_AllCompile(t *testing.T) {
+	reg := NewDefaultRegistry()
+
+	compiled, err := reg.CompileContentPatterns()
+	if err != nil {
+		t.Fatalf("CompileContentPatterns() returned error: %v", err)
+	}
+
+	if len(compiled) != len(reg.ContentPatterns) {
+		t.Errorf("compiled count = %d, want %d", len(compiled), len(reg.ContentPatterns))
+	}
+
+	for i, re := range compiled {
+		if re == nil {
+			t.Errorf("compiled[%d] is nil for pattern %q", i, reg.ContentPatterns[i].Pattern)
+		}
+	}
+}
+
+func TestCompileContentPatterns_MatchExamples(t *testing.T) {
+	reg := NewDefaultRegistry()
+	compiled, err := reg.CompileContentPatterns()
+	if err != nil {
+		t.Fatalf("CompileContentPatterns() error: %v", err)
+	}
+
+	tests := []struct {
+		name    string
+		input   string
+		wantIdx int // index in compiled that should match, -1 for no match
+	}{
+		{"TRUST 5 quality gates", "TRUST 5 quality gates passed", 0},
+		{"TRUST5 quality gates", "TRUST5 quality gates passed", 0},
+		{"TRUST 5 principles", "Follow TRUST 5 principles", 1},
+		{"no match on plain TRUST", "Using TRUST methodology", -1},
+		{"no match on TRUST 5 alone", "TRUST 5 is great", -1},
+		{"no match on quality alone", "quality gates are important", -1},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			matchIdx := -1
+			for i, re := range compiled {
+				if re.MatchString(tt.input) {
+					matchIdx = i
+					break
+				}
+			}
+			if matchIdx != tt.wantIdx {
+				t.Errorf("input %q: matched pattern index = %d, want %d", tt.input, matchIdx, tt.wantIdx)
+			}
+		})
+	}
+}

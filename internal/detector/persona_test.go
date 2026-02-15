@@ -440,3 +440,112 @@ func TestDetectPathPatterns_LineColumnAccuracy(t *testing.T) {
 		t.Errorf("SlotID = %q, want DOCS_PATH_PATTERN", matches[0].SlotID)
 	}
 }
+
+func TestDetectContentPatterns_TRUST5QualityGates(t *testing.T) {
+	reg := NewDefaultRegistry()
+	det, err := NewPersonaDetector(reg)
+	if err != nil {
+		t.Fatalf("NewPersonaDetector() error: %v", err)
+	}
+
+	content := "All SPEC requirements implemented\n- TRUST 5 quality gates passed\n- 85%+ coverage"
+
+	matches := det.DetectContentPatterns(content)
+
+	if len(matches) != 1 {
+		t.Fatalf("DetectContentPatterns count = %d, want 1", len(matches))
+	}
+
+	if matches[0].SlotID != "QUALITY_GATE_TEXT" {
+		t.Errorf("matches[0].SlotID = %q, want %q", matches[0].SlotID, "QUALITY_GATE_TEXT")
+	}
+	if matches[0].Original != "TRUST 5 quality gates" {
+		t.Errorf("matches[0].Original = %q, want %q", matches[0].Original, "TRUST 5 quality gates")
+	}
+	if matches[0].Start < 0 || matches[0].End <= matches[0].Start {
+		t.Errorf("invalid offsets: Start=%d, End=%d", matches[0].Start, matches[0].End)
+	}
+}
+
+func TestDetectContentPatterns_MultipleMatches(t *testing.T) {
+	reg := NewDefaultRegistry()
+	det, err := NewPersonaDetector(reg)
+	if err != nil {
+		t.Fatalf("NewPersonaDetector() error: %v", err)
+	}
+
+	content := "- TRUST 5 quality gates passed\n- Follow TRUST 5 principles in depth"
+
+	matches := det.DetectContentPatterns(content)
+
+	if len(matches) != 2 {
+		t.Fatalf("DetectContentPatterns count = %d, want 2", len(matches))
+	}
+
+	slotIDs := map[string]bool{}
+	for _, m := range matches {
+		slotIDs[m.SlotID] = true
+	}
+	if !slotIDs["QUALITY_GATE_TEXT"] {
+		t.Error("QUALITY_GATE_TEXT not found in matches")
+	}
+	if !slotIDs["QUALITY_PRINCIPLES_TEXT"] {
+		t.Error("QUALITY_PRINCIPLES_TEXT not found in matches")
+	}
+}
+
+func TestDetectContentPatterns_NoFalsePositives(t *testing.T) {
+	reg := NewDefaultRegistry()
+	det, err := NewPersonaDetector(reg)
+	if err != nil {
+		t.Fatalf("NewPersonaDetector() error: %v", err)
+	}
+
+	tests := []struct {
+		name    string
+		content string
+	}{
+		{"plain trust word", "We trust our system to be reliable."},
+		{"TRUST alone", "Follow TRUST methodology for best results."},
+		{"quality gates without TRUST", "All quality gates must pass before merge."},
+		{"TRUST 5 without qualifier", "The TRUST 5 framework is documented here."},
+		{"number 5 alone", "Step 5 quality check is important."},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			matches := det.DetectContentPatterns(tt.content)
+			if len(matches) != 0 {
+				t.Errorf("DetectContentPatterns(%q) count = %d, want 0", tt.content, len(matches))
+			}
+		})
+	}
+}
+
+func TestDetectContentPatterns_EmptyContent(t *testing.T) {
+	reg := NewDefaultRegistry()
+	det, err := NewPersonaDetector(reg)
+	if err != nil {
+		t.Fatalf("NewPersonaDetector() error: %v", err)
+	}
+
+	matches := det.DetectContentPatterns("")
+
+	if len(matches) != 0 {
+		t.Errorf("DetectContentPatterns('') count = %d, want 0", len(matches))
+	}
+}
+
+func TestDetectContentPatterns_NoContentPatterns(t *testing.T) {
+	reg := &PatternRegistry{} // empty registry, no content patterns
+	det, err := NewPersonaDetector(reg)
+	if err != nil {
+		t.Fatalf("NewPersonaDetector() error: %v", err)
+	}
+
+	matches := det.DetectContentPatterns("TRUST 5 quality gates passed")
+
+	if len(matches) != 0 {
+		t.Errorf("DetectContentPatterns with empty registry count = %d, want 0", len(matches))
+	}
+}

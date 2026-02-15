@@ -4,6 +4,21 @@ import (
 	"regexp"
 )
 
+// ContentPattern matches inline text strings in document bodies.
+// Unlike HeaderPattern (which matches section headers for section-level slotting),
+// ContentPattern matches arbitrary text within body content for inline replacement
+// with {{SLOT_ID}} markers.
+//
+// Use case: "Follow TRUST 5 quality gates" in language rule files should become
+// "Follow {{QUALITY_GATE_TEXT}}" so a different persona can inject
+// its own quality framework name.
+type ContentPattern struct {
+	Pattern     string // Regex pattern to match in body text
+	SlotID      string // Inline slot ID to replace with: {{SLOT_ID}}
+	Category    string // "quality_framework", "methodology", etc.
+	Description string // Human-readable description
+}
+
 // PatternRegistry holds all detection patterns organized by category.
 // Patterns are matched against markdown headers, content text, and
 // frontmatter fields to identify persona-specific content.
@@ -11,9 +26,10 @@ type PatternRegistry struct {
 	HeaderPatterns  []HeaderPattern
 	PathPatterns    []PathPattern
 	SkillPatterns   []SkillPattern
-	WholeFileAgents []string // agent names that are 100% persona
-	WholeFileSkills []string // skill names that are 100% persona
-	WholeFileRules  []string // rule files that are 100% persona
+	ContentPatterns []ContentPattern // Inline text patterns for body replacement
+	WholeFileAgents []string         // agent names that are 100% persona
+	WholeFileSkills []string         // skill names that are 100% persona
+	WholeFileRules  []string         // rule files that are 100% persona
 }
 
 // HeaderPattern matches markdown section headers that indicate persona content.
@@ -93,6 +109,21 @@ func NewDefaultRegistry() *PatternRegistry {
 			{SkillName: "moai-workflow-spec", Category: "SPEC workflow"},
 			{SkillName: "moai-workflow-project", Category: "SPEC project init"},
 		},
+		// Inline content patterns for text replacement in rule bodies
+		ContentPatterns: []ContentPattern{
+			{
+				Pattern:     `TRUST\s*5\s+quality\s+gates`,
+				SlotID:      "QUALITY_GATE_TEXT",
+				Category:    "quality_framework",
+				Description: "TRUST 5 quality gates reference in rule/workflow text",
+			},
+			{
+				Pattern:     `TRUST\s*5\s+principles`,
+				SlotID:      "QUALITY_PRINCIPLES_TEXT",
+				Category:    "quality_framework",
+				Description: "TRUST 5 principles reference in output style text",
+			},
+		},
 		WholeFileAgents: []string{
 			"manager-spec",
 			"manager-ddd",
@@ -155,6 +186,20 @@ func (r *PatternRegistry) CompileHeaderPatterns() ([]*regexp.Regexp, error) {
 	compiled := make([]*regexp.Regexp, len(r.HeaderPatterns))
 	for i, hp := range r.HeaderPatterns {
 		re, err := regexp.Compile(hp.Pattern)
+		if err != nil {
+			return nil, err
+		}
+		compiled[i] = re
+	}
+	return compiled, nil
+}
+
+// CompileContentPatterns compiles all content pattern regexes and returns them.
+// Returns an error if any pattern fails to compile.
+func (r *PatternRegistry) CompileContentPatterns() ([]*regexp.Regexp, error) {
+	compiled := make([]*regexp.Regexp, len(r.ContentPatterns))
+	for i, cp := range r.ContentPatterns {
+		re, err := regexp.Compile(cp.Pattern)
 		if err != nil {
 			return nil, err
 		}

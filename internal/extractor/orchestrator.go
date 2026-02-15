@@ -3,6 +3,7 @@ package extractor
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"path/filepath"
 	"strings"
 
@@ -54,7 +55,7 @@ func NewExtractorOrchestrator(det *detector.PersonaDetector, reg *detector.Patte
 		registry: reg,
 		agent:   NewAgentExtractor(det, reg),
 		skill:   NewSkillExtractor(reg),
-		rule:    NewRuleExtractor(reg),
+		rule:    NewRuleExtractor(reg, det),
 		style:   NewStyleExtractor(),
 		claudeM: NewClaudeMDExtractor(),
 	}
@@ -382,8 +383,38 @@ func walkAndRegister(reg *template.Registry, sections []*model.Section, docPath 
 				})
 			}
 		}
+		// Register inline {{SLOT_ID}} markers from content pattern extraction
+		registerInlineSlots(reg, sec, docPath)
+
 		if len(sec.Children) > 0 {
 			walkAndRegister(reg, sec.Children, docPath)
+		}
+	}
+}
+
+// inlineSlotPattern matches {{SLOT_ID}} in section content.
+var inlineSlotExtractRe = regexp.MustCompile(`\{\{([A-Z][A-Z0-9_]*)\}\}`)
+
+// registerInlineSlots finds {{SLOT_ID}} inline markers in section content
+// and adds them to the template registry.
+func registerInlineSlots(reg *template.Registry, sec *model.Section, docPath string) {
+	matches := inlineSlotExtractRe.FindAllStringSubmatch(sec.Content, -1)
+	for _, m := range matches {
+		slotID := m[1]
+		// Only add if not already registered (avoid duplicates from section slots)
+		if _, exists := reg.Slots[slotID]; !exists {
+			reg.AddSlot(slotID, &template.SlotEntry{
+				Category:    "content_pattern",
+				Scope:       "rule",
+				Description: fmt.Sprintf("Inline content pattern slot in '%s'", sec.Title),
+				MarkerType:  "inline",
+				FoundIn: []template.SlotLocation{
+					{
+						Path: docPath,
+						Line: sec.StartLine,
+					},
+				},
+			})
 		}
 	}
 }
