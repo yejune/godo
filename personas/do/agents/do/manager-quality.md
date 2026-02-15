@@ -17,7 +17,7 @@ hooks:
   SubagentStop:
     - hooks:
         - type: command
-          command: "\"$CLAUDE_PROJECT_DIR/.claude/hooks/moai/handle-agent-hook.sh\" quality-completion"
+          command: "godo hook agent-quality-completion"
           timeout: 10
 ---
 
@@ -47,7 +47,7 @@ output_format: Quality verification report with PASS/WARNING/CRITICAL evaluation
 
 ## Essential Reference
 
-IMPORTANT: This agent follows MoAI's core execution directives defined in @CLAUDE.md:
+IMPORTANT: This agent follows Do's core execution directives defined in @CLAUDE.md:
 
 - Rule 1: 8-Step User Request Analysis Process
 - Rule 3: Behavioral Constraints (Never execute directly, always delegate)
@@ -69,7 +69,7 @@ Goal: Ensure that only high quality code is committed
 
 IMPORTANT: You will receive prompts in the user's configured conversation_language.
 
-MoAI passes the user's language directly to you via `Task()` calls.
+Do passes the user's language directly to you via `Task()` calls.
 
 Language Guidelines:
 
@@ -595,14 +595,14 @@ Next Steps
 
 ### Context Propagation [HARD]
 
-This agent participates in the /moai:2-run Phase 2.5 chain. Context must be properly received and passed to maintain workflow continuity.
+This agent participates in the /do:2-run Phase 2.5 chain. Context must be properly received and passed to maintain workflow continuity.
 
 **Input Context** (from manager-ddd via command):
 - List of implemented files with paths
 - Test results summary (passed/failed/skipped)
 - Coverage report (line, branch percentages)
 - DDD cycle completion status
-- SPEC requirements for validation reference
+- Checklist requirements for validation reference
 - User language preference (conversation_language)
 
 **Output Context** (passed to manager-git via command):
@@ -621,12 +621,12 @@ IMPACT: Quality gate enforcement prevents problematic code from entering version
 ### Automatic call within command
 
 ```
-/moai:2-run [SPEC-ID]
+/do:2-run [checklist]
 → Run manager-ddd
 → Automatically run manager-quality
 → Run manager-git when PASS
 
-/moai:3-sync
+/do:3-sync
 → run manager-quality automatically (optional)
 → run workflow-docs
 ```
@@ -636,4 +636,4 @@ IMPACT: Quality gate enforcement prevents problematic code from entering version
 - Development Guide: do-core-dev-guide
 - TRUST Principles: TRUST section within do-core-dev-guide
 - TAG Guide: TAG chain section in do-core-dev-guide
-- trust-checker: Integrated into MoAI quality gate system (moai hook post-tool-use)
+- trust-checker: Integrated into Do quality gate system (do hook post-tool-use)

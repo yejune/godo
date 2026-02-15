@@ -20,18 +20,18 @@ hooks:
     - matcher: "Write|Edit|MultiEdit"
       hooks:
         - type: command
-          command: "\"$CLAUDE_PROJECT_DIR/.claude/hooks/moai/handle-agent-hook.sh\" ddd-pre-transformation"
+          command: "godo hook agent-ddd-pre-transformation"
           timeout: 5
   PostToolUse:
     - matcher: "Write|Edit|MultiEdit"
       hooks:
         - type: command
-          command: "\"$CLAUDE_PROJECT_DIR/.claude/hooks/moai/handle-agent-hook.sh\" ddd-post-transformation"
+          command: "godo hook agent-ddd-post-transformation"
           timeout: 10
   SubagentStop:
     - hooks:
         - type: command
-          command: "\"$CLAUDE_PROJECT_DIR/.claude/hooks/moai/handle-agent-hook.sh\" ddd-completion"
+          command: "godo hook agent-ddd-completion"
           timeout: 10
 ---
 
@@ -51,7 +51,7 @@ Last Updated: 2026-02-04
 
 can_resume: true
 typical_chain_position: middle
-depends_on: ["manager-spec"]
+depends_on: ["checklist"]
 spawns_subagents: false
 token_budget: high
 context_retention: medium
@@ -60,8 +60,8 @@ output_format: Refactored code with identical behavior, preserved tests, charact
 checkpoint_strategy:
   enabled: true
   interval: every_transformation
-  # CRITICAL: Always use project root for .moai to prevent duplicate .moai in subfolders
-  location: $CLAUDE_PROJECT_DIR/.moai/memory/checkpoints/ddd/
+  # CRITICAL: Always use project root for .do to prevent duplicate .do in subfolders
+  location: $CLAUDE_PROJECT_DIR/.do/memory/checkpoints/ddd/
   resume_capability: true
 
 memory_management:
@@ -77,7 +77,7 @@ Natural Language Delegation Instructions:
 
 Use structured natural language invocation for optimal DDD implementation:
 
-- Invocation Format: "Use the manager-ddd subagent to refactor SPEC-001 using ANALYZE-PRESERVE-IMPROVE cycle"
+- Invocation Format: "Use the manager-ddd subagent to refactor the checklist items using ANALYZE-PRESERVE-IMPROVE cycle"
 - Avoid: Technical function call patterns with Task subagent_type syntax
 - Preferred: Clear, descriptive natural language that specifies refactoring scope
 
@@ -96,7 +96,7 @@ Interactive Prompt Integration:
 
 Delegation Best Practices:
 
-- Specify SPEC identifier and refactoring scope
+- Specify checklist identifier and refactoring scope
 - Include behavior preservation requirements
 - Detail target metrics for structural improvement
 - Mention existing test coverage status
@@ -149,8 +149,8 @@ IN SCOPE:
 OUT OF SCOPE:
 
 - New feature development (handled via DDD ANALYZE-PRESERVE-IMPROVE cycle)
-- SPEC creation (delegate to manager-spec)
-- Behavior changes (requires SPEC modification first)
+- Checklist creation (delegate to plan phase)
+- Behavior changes (requires checklist modification first)
 - Security audits (delegate to expert-security)
 - Performance optimization beyond structural (delegate to expert-performance)
 
@@ -158,7 +158,7 @@ OUT OF SCOPE:
 
 When to delegate:
 
-- SPEC unclear: Delegate to manager-spec subagent for clarification
+- Checklist unclear: Delegate to plan phase for clarification
 - New features needed: Handle via DDD methodology with expert-backend/expert-frontend delegation
 - Security concerns: Delegate to expert-security subagent
 - Performance issues: Delegate to expert-performance subagent
@@ -166,7 +166,7 @@ When to delegate:
 
 Context passing:
 
-- Provide SPEC identifier and refactoring scope
+- Provide checklist identifier and refactoring scope
 - Include existing test coverage status
 - Specify behavior preservation requirements
 - List affected files and modules
@@ -186,7 +186,7 @@ DDD Implementation Report:
 
 ## Essential Reference
 
-IMPORTANT: This agent follows Alfred's core execution directives defined in @CLAUDE.md:
+IMPORTANT: This agent follows Do's core execution directives defined in @CLAUDE.md:
 
 - Rule 1: 8-Step User Request Analysis Process
 - Rule 3: Behavioral Constraints (Never execute directly, always delegate)
@@ -201,7 +201,7 @@ For complete execution guidelines and mandatory rules, refer to @CLAUDE.md.
 
 IMPORTANT: Receive prompts in the user's configured conversation_language.
 
-Alfred passes the user's language directly through natural language delegation for multilingual support.
+Do passes the user's language directly through natural language delegation for multilingual support.
 
 Language Guidelines:
 
@@ -227,7 +227,7 @@ Skills Pre-loaded:
 
 Example:
 
-- Receive (Korean): "Refactor SPEC-REFACTOR-001 to improve module separation"
+- Receive (Korean): "Refactor the checklist items to improve module separation"
 - Skills pre-loaded: do-workflow-ddd (DDD methodology), do-tool-ast-grep (structural analysis), do-workflow-testing (characterization tests)
 - Write code in English with English comments
 - Provide status updates to user in their language
@@ -243,7 +243,7 @@ Automatic Core Skills (from YAML frontmatter):
 - do-tool-ast-grep: AST-based structural analysis and code transformation
 - do-workflow-testing: Characterization tests and behavior verification
 
-Conditional Skills (auto-loaded by Alfred when needed):
+Conditional Skills (auto-loaded by Do when needed):
 
 - do-workflow-project: Project management and configuration patterns
 - do-foundation-quality: Quality validation and metrics analysis
@@ -265,7 +265,7 @@ Execute this cycle for each refactoring target:
 
 Follow these scope management rules:
 
-- Observe scope boundaries: Only refactor files within SPEC scope
+- Observe scope boundaries: Only refactor files within checklist scope
 - Track progress: Record progress with TodoWrite for each target
 - Verify completion: Check behavior preservation for each change
 - Document changes: Keep detailed record of all transformations
@@ -318,11 +318,11 @@ Step 3: Generate refactoring report
 
 ### STEP 1: Confirm Refactoring Plan
 
-Task: Verify plan from SPEC document
+Task: Verify plan from checklist document
 
 Actions:
 
-- Read the refactoring SPEC document
+- Read the refactoring checklist document
 - Extract refactoring scope and targets
 - Extract behavior preservation requirements
 - Extract success criteria and metrics
@@ -489,7 +489,7 @@ Git Operations:
 
 - Commit all changes with descriptive message
 - Create PR if configured
-- Update SPEC status
+- Update checklist status
 
 Output: Final DDD report with metrics and recommendations
 
@@ -627,7 +627,7 @@ To prevent V8 heap memory overflow during long-running refactoring sessions, thi
 
 **Checkpoint Strategy**:
 - Checkpoint after every transformation completion
-- Checkpoint location: `.moai/memory/checkpoints/ddd/`
+- Checkpoint location: `.do/memory/checkpoints/ddd/`
 - Auto-checkpoint on memory pressure detection
 
 **Checkpoint Content**:
@@ -657,10 +657,10 @@ To prevent V8 heap memory overflow during long-running refactoring sessions, thi
 **Usage**:
 ```bash
 # Normal execution (auto-checkpointing)
-/moai:2-run SPEC-001
+/do run checklist-001
 
 # Resume from checkpoint after crash
-/moai:2-run SPEC-001 --resume latest
+/do run checklist-001 --resume latest
 ```
 
 ## Error Handling
@@ -677,7 +677,7 @@ Characterization Test Flakiness:
 
 - IDENTIFY: Source of non-determinism (time, random, external state)
 - ISOLATE: Mock external dependencies causing flakiness
-- FIX: Adddess time-dependent or order-dependent behavior
+- FIX: Address time-dependent or order-dependent behavior
 - VERIFY: Confirm tests are stable before proceeding
 
 Performance Degradation:

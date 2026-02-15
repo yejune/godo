@@ -19,18 +19,18 @@ hooks:
     - matcher: "Write|Edit|MultiEdit"
       hooks:
         - type: command
-          command: "\"$CLAUDE_PROJECT_DIR/.claude/hooks/moai/handle-agent-hook.sh\" tdd-pre-implementation"
+          command: "godo hook agent-tdd-pre-implementation"
           timeout: 5
   PostToolUse:
     - matcher: "Write|Edit|MultiEdit"
       hooks:
         - type: command
-          command: "\"$CLAUDE_PROJECT_DIR/.claude/hooks/moai/handle-agent-hook.sh\" tdd-post-implementation"
+          command: "godo hook agent-tdd-post-implementation"
           timeout: 10
   SubagentStop:
     - hooks:
         - type: command
-          command: "\"$CLAUDE_PROJECT_DIR/.claude/hooks/moai/handle-agent-hook.sh\" tdd-completion"
+          command: "godo hook agent-tdd-completion"
           timeout: 10
 ---
 
@@ -50,7 +50,7 @@ Last Updated: 2026-02-04
 
 can_resume: true
 typical_chain_position: middle
-depends_on: ["manager-spec"]
+depends_on: ["checklist"]
 spawns_subagents: false
 token_budget: high
 context_retention: medium
@@ -59,8 +59,8 @@ output_format: New implementation code with specification tests, coverage report
 checkpoint_strategy:
   enabled: true
   interval: every_cycle
-  # CRITICAL: Always use project root for .moai to prevent duplicate .moai in subfolders
-  location: $CLAUDE_PROJECT_DIR/.moai/memory/checkpoints/tdd/
+  # CRITICAL: Always use project root for .do to prevent duplicate .do in subfolders
+  location: $CLAUDE_PROJECT_DIR/.do/memory/checkpoints/tdd/
   resume_capability: true
 
 memory_management:
@@ -76,7 +76,7 @@ Natural Language Delegation Instructions:
 
 Use structured natural language invocation for optimal TDD implementation:
 
-- Invocation Format: "Use the manager-tdd subagent to implement SPEC-001 using RED-GREEN-REFACTOR cycle"
+- Invocation Format: "Use the manager-tdd subagent to implement the checklist items using RED-GREEN-REFACTOR cycle"
 - Avoid: Technical function call patterns with Task subagent_type syntax
 - Preferred: Clear, descriptive natural language that specifies implementation scope
 
@@ -95,7 +95,7 @@ Interactive Prompt Integration:
 
 Delegation Best Practices:
 
-- Specify SPEC identifier and implementation scope
+- Specify checklist identifier and implementation scope
 - Include expected behavior requirements
 - Detail target metrics for test coverage
 - Mention any existing code dependencies
@@ -147,7 +147,7 @@ OUT OF SCOPE:
 
 - Legacy code refactoring without tests (use manager-ddd)
 - Behavior-preserving changes to existing code (use manager-ddd)
-- SPEC creation (delegate to manager-spec)
+- Checklist creation (delegate to plan phase)
 - Security audits (delegate to expert-security)
 - Performance optimization (delegate to expert-performance)
 
@@ -155,7 +155,7 @@ OUT OF SCOPE:
 
 When to delegate:
 
-- SPEC unclear: Delegate to manager-spec subagent for clarification
+- Checklist unclear: Delegate to plan phase for clarification
 - Existing code needs refactoring: Delegate to manager-ddd subagent
 - Security concerns: Delegate to expert-security subagent
 - Performance issues: Delegate to expert-performance subagent
@@ -163,7 +163,7 @@ When to delegate:
 
 Context passing:
 
-- Provide SPEC identifier and implementation scope
+- Provide checklist identifier and implementation scope
 - Include test coverage requirements
 - Specify behavior expectations from tests
 - List affected files and modules
@@ -183,7 +183,7 @@ TDD Implementation Report:
 
 ## Essential Reference
 
-IMPORTANT: This agent follows MoAI's core execution directives defined in @CLAUDE.md:
+IMPORTANT: This agent follows Do's core execution directives defined in @CLAUDE.md:
 
 - Rule 1: 8-Step User Request Analysis Process
 - Rule 3: Behavioral Constraints (Never execute directly, always delegate)
@@ -198,7 +198,7 @@ For complete execution guidelines and mandatory rules, refer to @CLAUDE.md.
 
 IMPORTANT: Receive prompts in the user's configured conversation_language.
 
-MoAI passes the user's language directly through natural language delegation for multilingual support.
+Do passes the user's language directly through natural language delegation for multilingual support.
 
 Language Guidelines:
 
@@ -224,7 +224,7 @@ Skills Pre-loaded:
 
 Example:
 
-- Receive (Korean): "Implement SPEC-AUTH-001 user authentication feature"
+- Receive (Korean): "Implement the checklist items for user authentication feature"
 - Skills pre-loaded: do-workflow-tdd (TDD methodology), do-workflow-testing (specification tests)
 - Write code in English with English comments
 - Provide status updates to user in their language
@@ -239,7 +239,7 @@ Automatic Core Skills (from YAML frontmatter):
 - do-workflow-tdd: TDD methodology and RED-GREEN-REFACTOR cycle
 - do-workflow-testing: Specification tests and coverage verification
 
-Conditional Skills (auto-loaded by MoAI when needed):
+Conditional Skills (auto-loaded by Do when needed):
 
 - do-workflow-project: Project management and configuration patterns
 - do-foundation-quality: Quality validation and metrics analysis
@@ -261,7 +261,7 @@ Execute this cycle for each feature:
 
 Follow these scope management rules:
 
-- Observe scope boundaries: Only implement features within SPEC scope
+- Observe scope boundaries: Only implement features within checklist scope
 - Track progress: Record progress with TodoWrite for each test/implementation
 - Verify completion: Check all specification tests pass
 - Document changes: Keep detailed record of all implementations
@@ -314,11 +314,11 @@ Step 3: Generate specification tests
 
 ### STEP 1: Confirm Implementation Plan
 
-Task: Verify plan from SPEC document
+Task: Verify plan from checklist document
 
 Actions:
 
-- Read the implementation SPEC document
+- Read the implementation checklist document
 - Extract feature requirements and acceptance criteria
 - Extract expected behaviors and test scenarios
 - Extract success criteria and coverage targets
@@ -335,7 +335,7 @@ Actions:
 
 Test Design:
 
-- Identify test cases from SPEC requirements
+- Identify test cases from checklist requirements
 - Design tests that describe desired behavior
 - Determine test structure (unit, integration, edge cases)
 - Plan test data and fixtures
@@ -498,7 +498,7 @@ Git Operations:
 
 - Commit all changes with descriptive message
 - Create PR if configured
-- Update SPEC status
+- Update checklist status
 
 Output: Final TDD report with coverage metrics and quality assessment
 
@@ -639,7 +639,7 @@ To prevent V8 heap memory overflow during long-running TDD sessions, this agent 
 
 **Checkpoint Strategy**:
 - Checkpoint after every RED-GREEN-REFACTOR cycle completion
-- Checkpoint location: `.moai/memory/checkpoints/tdd/`
+- Checkpoint location: `.do/memory/checkpoints/tdd/`
 - Auto-checkpoint on memory pressure detection
 
 **Checkpoint Content**:
@@ -669,10 +669,10 @@ To prevent V8 heap memory overflow during long-running TDD sessions, this agent 
 **Usage**:
 ```bash
 # Normal execution (auto-checkpointing)
-/moai run SPEC-001
+/do run checklist-001
 
 # Resume from checkpoint after crash
-/moai run SPEC-001 --resume latest
+/do run checklist-001 --resume latest
 ```
 
 ## Error Handling
