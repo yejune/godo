@@ -827,23 +827,41 @@ The project owner described Do's vision as:
 
 > "최고의 팀 오케스트레이터" (The best team orchestrator)
 
-This vision has two dimensions that MoAI addresses only partially:
+When asked what differentiates Do from MoAI (which is also an orchestrator), the answer was direct:
 
-### 14.1 Persona + Team = AI with Personality Leading Teams
+> "페르소나+팀" (Persona + Team)
+> -- User's answer to "MoAI가 못하는 것 중 Do가 해결하고 싶은 게 있나요?"
+
+This vision stands on **three pillars** that MoAI cannot replicate:
+
+### 14.1 Pillar 1: Persona — AI as a Person, Not a Tool
 
 MoAI is an orchestrator that delegates to agents. Do is an orchestrator *with a personality* that delegates to agents. The persona system means the orchestrator is not an anonymous coordinator -- it is a character with a name, a speech pattern, a relationship with the user, and cultural context.
 
 When Do's young-f persona says "승민선배, 이 작업은 Team 모드로 전환해볼까요?" (Senior, shall we switch to Team mode for this?), it is not just a mode suggestion -- it is a colleague-to-colleague conversation. The persona creates engagement that a neutral "Recommend switching to Team mode" cannot.
 
-### 14.2 Adaptive Force + Parallel Execution
+### 14.2 Pillar 2: Team — Adaptive Orchestration with Parallel Execution
 
 MoAI is always in "full orchestration" mode. Do's tri-mode system means the orchestrator knows when to be heavy (Team mode with parallel agents) and when to be light (Focus mode with direct execution). This adaptive intelligence is part of what makes Do aspire to be "the best" team orchestrator -- not just an orchestrator that always operates at maximum force.
 
-### 14.3 The Gap MoAI Cannot Fill
+### 14.3 Pillar 3: Commit-as-Proof — Perfect Audit Trail
+
+Do's checklist + commit system provides something MoAI's SPEC workflow fundamentally cannot: **a permanent, cryptographic, append-only record of all work performed**.
+
+> "체크리스트 기반의 핵심은 커밋메세지 기록. 수정이 발생해도 커밋메세지를 추가기록으로 이어나가지 수정하지 않으므로 원자성과 멱등성, 추적성등에 월등하다. 이것은 완벽한 하나의 기록과 증명이 가능하다"
+> (The core of checklist-based tracking is the commit message record. Even when modifications occur, commit messages are appended as additional records, never modified -- so it is superior in atomicity, idempotency, and traceability. This enables a perfect, singular record and proof.)
+
+MoAI marks completion with `<moai>DONE</moai>` -- an XML marker that exists only in the conversation context and vanishes when the session ends. Do marks completion with a git commit hash (`[o] 완료 (commit: a1b2c3d)`) -- an immutable, auditable, cryptographically verifiable record that persists in the git history forever.
+
+This is not a minor implementation detail. It is a **fundamentally different philosophy of accountability**: ephemeral markers vs permanent proof.
+
+### 14.4 The Gap MoAI Cannot Fill
 
 MoAI can adopt Do's tri-mode system (it is a structural feature). MoAI can adopt Do's checklist system (it is a workflow feature). But MoAI cannot adopt Do's persona system without fundamentally changing its identity. MoAI is "the Strategic Orchestrator" -- an institution, not a person. Do is "나는 Do다" -- a first-person entity with a character, a relationship, and a voice.
 
-This is Do's deepest differentiator: not a feature that can be copied, but an identity that must be chosen.
+And MoAI's SPEC workflow cannot match Do's commit-as-proof system without abandoning its phase-based markers for git-native tracking -- a change that would require rearchitecting its entire completion model.
+
+These are Do's deepest differentiators: not features that can be copied, but **architectural choices and identity decisions** that must be chosen from the ground up.
 
 ---
 
