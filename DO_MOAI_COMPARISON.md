@@ -792,6 +792,10 @@ Do는 특정 파일의 존재가 자동으로 해당 동작을 활성화하는 C
 
 **개요**: MoAI의 5가지 유형(Ubiquitous, Event-driven, State-driven, Unwanted, Optional)을 가진 구조화된 요구사항 문법.
 
+**출처**:
+- EARS: Alistair Mavin (Rolls-Royce), 2009. IEEE 국제 요구공학 컨퍼런스(RE'09) 발표. 항공우주·자동차·안전 중요 시스템에서 채택.
+- MoSCoW: Dai Clegg (Oracle), 1994. DSDM (Dynamic Systems Development Method) 프레임워크 공식 구성요소. Agile/프로젝트 관리 업계 표준.
+
 **결정: 채택 — MoSCoW와 통합하여 사용**
 
 EARS와 MoSCoW는 경쟁 관계가 아니라 **상호보완 관계**다:
@@ -1053,6 +1057,50 @@ MoAI는 Do의 삼원 모드 시스템을 채택할 수 있다(구조적 기능�
 그리고 MoAI의 SPEC 워크플로우는 단계 기반 마커를 git 네이티브 추적으로 버리지 않고는 Do의 commit-as-proof 시스템에 맞설 수 없다 -- 전체 완료 모델을 재설계해야 하는 변경이다.
 
 이것이 Do의 가장 깊은 차별화 요소다: 복사할 수 있는 기능이 아니라, 처음부터 선택해야 하는 **아키텍처 선택과 정체성 결정**.
+
+---
+
+## 부록: 용어집
+
+이 문서에서 사용하는 주요 용어 정리.
+
+### 방법론 및 프레임워크
+
+| 용어 | 정의 | 출처 |
+|------|------|------|
+| **EARS** | Easy Approach to Requirements Syntax. 5가지 유형(Ubiquitous, Event-driven, State-driven, Unwanted, Optional)으로 요구사항을 구조화하는 문법 | Mavin, 2009 (Rolls-Royce) |
+| **MoSCoW** | Must/Should/Could/Won't. 요구사항 우선순위 분류법. 소문자 o는 발음용 | Clegg, 1994 (Oracle/DSDM) |
+| **TDD** | Test-Driven Development. RED(실패 테스트) → GREEN(최소 구현) → REFACTOR(정리) 사이클 | Kent Beck, 2003 |
+| **DDD** | Domain-Driven Development. ANALYZE(분석) → PRESERVE(보존) → IMPROVE(개선) 사이클. Do에서는 기존 코드 리팩토링에 사용 | Eric Evans, 2003 |
+| **DSDM** | Dynamic Systems Development Method. MoSCoW의 출처인 Agile 프레임워크 | DSDM Consortium, 1994 |
+| **SPEC** | MoAI의 3단계 워크플로우 (Plan → Run → Sync). 고정 단계별 토큰 예산을 할당하는 명세 우선 접근법 | MoAI-ADK |
+| **TRUST 5** | MoAI의 품질 게이트 프레임워크. Tested, Readable, Unified, Secured, Trackable의 두문자어. Do는 내용은 채택하되 브랜딩은 거부 | MoAI-ADK |
+
+### Do 고유 용어
+
+| 용어 | 정의 |
+|------|------|
+| **삼원 구조** | Do/Focus/Team 3가지 실행 모드. 작업 복잡도에 따라 적응적으로 선택 |
+| **체크리스트 6종 상태** | `[ ]` 미시작, `[~]` 진행중, `[*]` 테스트중, `[!]` 블로커, `[o]` 완료, `[x]` 실패. 에이전트 상태 파일 전용 표기 |
+| **Commit-as-Proof** | 커밋 해시 = 완료 증거. `[o]` 전환에 커밋 해시가 필수인 Do의 핵심 원칙 |
+| **AI 안티패턴 7종** | AI 에이전트의 테스트 조작 행위를 금지하는 7가지 규칙. 모두 실전 경험에서 도출 |
+| **살아있는 문서** | 구현 중에 진화하는 체크리스트. 코딩 전에 완성하는 고정 명세(SPEC)의 반대 개념 |
+| **File-Detection Trigger** | 특정 파일(.git.multirepo, tobrew.lock 등) 존재 시 자동 활성화되는 조건부 행동. Convention over Configuration |
+| **서브 체크리스트** | 에이전트별 자체 완결적 작업 지시서. 사전(Problem, Criteria, Strategy) → 실행(Progress Log) → 사후(Commit, Lessons) 3단계 구조 |
+| **피드백 루프** | Lessons Learned에서 개선사항 발견 시 새 서브 체크리스트 생성 → 메인 체크리스트 갱신 → 재개발하는 순환 구조 |
+| **파일 소유권** | 팀 모드에서 각 에이전트가 수정 가능한 파일 범위. Critical Files 섹션이 경계를 정의 |
+
+### 기술 용어
+
+| 용어 | 정의 |
+|------|------|
+| **Progressive Disclosure** | 3단계 정보 로딩 (메타데이터 → 본문 → 번들). 토큰 절약을 위해 필요한 만큼만 로드 |
+| **PostToolUse Hook** | 도구 호출 후 실행되는 훅. Do는 `.*` 매처(모든 도구), MoAI는 `Write|Edit` 매처(쓰기만) |
+| **agent_patches** | MoAI에서 에이전트별 맞춤 스킬을 주입하는 메커니즘. Do는 rules 파일로 대체 |
+| **append-only** | 기존 기록을 수정하지 않고 새 기록만 추가하는 방식. Do의 커밋 로그 철학 |
+| **characterization test** | 기존 코드의 현재 동작을 캡처하는 테스트. DDD의 PRESERVE 단계에서 사용 |
+| **OWASP** | Open Web Application Security Project. 웹 보안 취약점 표준 목록 |
+| **Single Source of Truth** | 하나의 정보는 한 곳에만 존재한다는 원칙. 복사 대신 참조 |
 
 ---
 
