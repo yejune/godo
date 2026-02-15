@@ -14,6 +14,7 @@ type BrandSlotifier struct {
 
 	// skillNameRe matches the brand prefix in skill name contexts:
 	// "moai-" followed by a lowercase letter (e.g., moai-lang-python, moai-domain-backend).
+	// Captures the first letter after the hyphen so it can be preserved in the replacement.
 	skillNameRe *regexp.Regexp
 }
 
@@ -23,10 +24,10 @@ func NewBrandSlotifier(brand string) *BrandSlotifier {
 	if brand == "" {
 		return nil
 	}
-	// Match brand prefix at word boundary followed by hyphen and lowercase letter.
-	// This targets skill name patterns like "moai-lang-python" while avoiding
-	// false positives in unrelated text.
-	re := regexp.MustCompile(`\b` + regexp.QuoteMeta(brand) + `-(?=[a-z])`)
+	// Match brand prefix at word boundary followed by hyphen and a lowercase letter.
+	// Captures the lowercase letter so it can be preserved in the replacement.
+	// Go's regexp/syntax does not support lookahead (?=), so we capture and restore.
+	re := regexp.MustCompile(`\b` + regexp.QuoteMeta(brand) + `-([a-z])`)
 
 	return &BrandSlotifier{
 		brand:       brand,
@@ -56,8 +57,8 @@ func (s *BrandSlotifier) SlotifyContent(content string) string {
 	content = strings.ReplaceAll(content, "."+s.brand+"/", ".{{slot:BRAND_DIR}}/")
 
 	// 4. Skill name prefix: moai-lang-python → {{slot:BRAND}}-lang-python
-	// Uses word-boundary regex to avoid matching inside unrelated words.
-	content = s.skillNameRe.ReplaceAllString(content, "{{slot:BRAND}}-")
+	// The regex captures the first lowercase letter after the hyphen and restores it.
+	content = s.skillNameRe.ReplaceAllString(content, "{{slot:BRAND}}-$1")
 
 	return content
 }

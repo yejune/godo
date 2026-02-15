@@ -10,6 +10,7 @@ import (
 
 	"github.com/do-focus/convert/internal/detector"
 	"github.com/do-focus/convert/internal/extractor"
+	"github.com/do-focus/convert/internal/template"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
@@ -148,34 +149,64 @@ func runExtract(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("extraction failed: %w", err)
 	}
 
+	// Create BrandSlotifier from detected persona name.
+	// This will be used to strip brand prefixes from core skill paths
+	// and replace brand references in core file content with slot variables.
+	personaName := extractPersona
+	if personaName == "" {
+		personaName = manifest.Name
+	}
+	slotifier := extractor.NewBrandSlotifier(personaName)
+
+	// Remap FoundIn paths in registry slots before saving.
+	// This ensures registry.yaml references the stripped skill names
+	// (e.g., "skills/lang-python/SKILL.md" instead of "skills/moai-lang-python/SKILL.md").
+	if slotifier != nil {
+		remapRegistryPaths(registry, slotifier)
+	}
+
 	// Save core templates (registry.yaml) to <out>/core/
 	coreDir := filepath.Join(extractOut, "core")
 	if err := registry.Save(coreDir); err != nil {
 		return fmt.Errorf("save core templates: %w", err)
 	}
 
-	// Copy core files to <out>/core/
+	// Copy core files to <out>/core/ with brand slotification.
+	// For each core file:
+	//   - RemapCorePath: strip brand prefix from skill dir names in the output path
+	//   - SlotifyContent: replace brand references with {{slot:BRAND}} etc. in text files
 	coreFileCount := 0
 	for _, relPath := range manifest.CoreFiles {
 		src := filepath.Join(manifest.SourceDir, relPath)
-		dst := filepath.Join(coreDir, relPath)
-		if err := copyFile(src, dst); err != nil {
-			return fmt.Errorf("copy core file %s: %w", relPath, err)
+		dstRelPath := relPath
+		if slotifier != nil {
+			dstRelPath = slotifier.RemapCorePath(relPath)
+		}
+		dst := filepath.Join(coreDir, dstRelPath)
+
+		if slotifier != nil && isTextFile(relPath) {
+			if err := copyFileSlotified(src, dst, slotifier); err != nil {
+				return fmt.Errorf("copy core file %s: %w", relPath, err)
+			}
+		} else {
+			if err := copyFile(src, dst); err != nil {
+				return fmt.Errorf("copy core file %s: %w", relPath, err)
+			}
 		}
 		coreFileCount++
 	}
 
-	// Determine persona name
-	personaName := extractPersona
-	if personaName == "" {
-		personaName = manifest.Name
+	// Determine persona name for output directory
+	outputPersonaName := extractPersona
+	if outputPersonaName == "" {
+		outputPersonaName = manifest.Name
 	}
-	if personaName == "" {
-		personaName = "default"
+	if outputPersonaName == "" {
+		outputPersonaName = "default"
 	}
 
 	// Save persona manifest to <out>/personas/<name>/manifest.yaml
-	personaDir := filepath.Join(extractOut, "personas", personaName)
+	personaDir := filepath.Join(extractOut, "personas", outputPersonaName)
 	if err := os.MkdirAll(personaDir, 0o755); err != nil {
 		return fmt.Errorf("create persona dir %s: %w", personaDir, err)
 	}
@@ -204,6 +235,70 @@ func runExtract(cmd *cobra.Command, args []string) error {
 	fmt.Fprintf(cmd.OutOrStdout(), "Extracted %d core files, %d persona files to %s\n", coreFileCount, personaFileCount, extractOut)
 	fmt.Fprintf(cmd.OutOrStdout(), "  Core:    %s (%d files + registry.yaml)\n", coreDir, coreFileCount)
 	fmt.Fprintf(cmd.OutOrStdout(), "  Persona: %s (%d files + manifest.yaml)\n", personaDir, personaFileCount)
+
+	return nil
+}
+
+// remapRegistryPaths updates all FoundIn paths in registry slot entries
+// to use stripped skill names (e.g., "skills/lang-python/" instead of "skills/moai-lang-python/").
+func remapRegistryPaths(reg *template.Registry, slotifier *extractor.BrandSlotifier) {
+	for _, entry := range reg.Slots {
+		for i := range entry.FoundIn {
+			entry.FoundIn[i].Path = slotifier.RemapCorePath(entry.FoundIn[i].Path)
+		}
+	}
+}
+
+// textExtensions lists file extensions that should have brand references slotified.
+var textExtensions = map[string]bool{
+	".md":   true,
+	".yaml": true,
+	".yml":  true,
+	".json": true,
+	".py":   true,
+	".sh":   true,
+	".go":   true,
+	".ts":   true,
+	".js":   true,
+	".tsx":  true,
+	".jsx":  true,
+	".txt":  true,
+	".toml": true,
+	".cfg":  true,
+	".ini":  true,
+	".html": true,
+	".css":  true,
+}
+
+// isTextFile returns true if the file extension indicates a text file
+// whose content should be slotified.
+func isTextFile(relPath string) bool {
+	ext := strings.ToLower(filepath.Ext(relPath))
+	return textExtensions[ext]
+}
+
+// copyFileSlotified reads a text file, applies brand slotification to its content,
+// and writes the result to the destination path.
+func copyFileSlotified(src, dst string, slotifier *extractor.BrandSlotifier) error {
+	data, err := os.ReadFile(src)
+	if err != nil {
+		return fmt.Errorf("read source %s: %w", src, err)
+	}
+
+	srcInfo, err := os.Stat(src)
+	if err != nil {
+		return fmt.Errorf("stat source %s: %w", src, err)
+	}
+
+	content := slotifier.SlotifyContent(string(data))
+
+	if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
+		return fmt.Errorf("create parent dir for %s: %w", dst, err)
+	}
+
+	if err := os.WriteFile(dst, []byte(content), srcInfo.Mode().Perm()); err != nil {
+		return fmt.Errorf("write destination %s: %w", dst, err)
+	}
 
 	return nil
 }
