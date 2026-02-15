@@ -84,7 +84,7 @@ func TestFillContent_InlineSlot(t *testing.T) {
 	}
 }
 
-func TestFillContent_UnfilledSlotFallsBackToDefault(t *testing.T) {
+func TestFillContent_UndefinedSlotPreservedAsIs(t *testing.T) {
 	reg := newTestRegistry(map[string]*template.SlotEntry{
 		"QUALITY_FRAMEWORK": {
 			Category:   "section",
@@ -98,43 +98,79 @@ func TestFillContent_UnfilledSlotFallsBackToDefault(t *testing.T) {
 		},
 	})
 
-	// Manifest with no slot content -- forces registry default fallback.
+	// Manifest with no slot content — undefined slots must be preserved.
 	manifest := &model.PersonaManifest{
 		SlotContent: map[string]string{},
 	}
 
 	filler := NewSlotFiller(reg, manifest, "")
 
-	// Section slot fallback.
+	// Section slot: not in slot_content → falls back to registry default.
 	sectionInput := "<!-- BEGIN_SLOT:QUALITY_FRAMEWORK -->\noriginal\n<!-- END_SLOT:QUALITY_FRAMEWORK -->"
 	filled, resolved, warnings := filler.FillContent(sectionInput)
 
-	if len(resolved) != 1 || resolved[0] != "QUALITY_FRAMEWORK" {
-		t.Errorf("section: expected resolved=[QUALITY_FRAMEWORK], got %v", resolved)
+	if len(resolved) != 1 {
+		t.Errorf("section: expected 1 resolved slot, got %d: %v", len(resolved), resolved)
 	}
 	if len(warnings) != 1 {
-		t.Errorf("section: expected 1 warning, got %d: %v", len(warnings), warnings)
+		t.Errorf("section: expected 1 warning about registry default, got %d: %v", len(warnings), warnings)
 	}
-
 	expectedSection := "<!-- BEGIN_SLOT:QUALITY_FRAMEWORK -->\ndefault quality content\n<!-- END_SLOT:QUALITY_FRAMEWORK -->"
 	if filled != expectedSection {
-		t.Errorf("section filled mismatch.\nexpected:\n%s\ngot:\n%s", expectedSection, filled)
+		t.Errorf("section: expected registry default content.\nexpected:\n%s\ngot:\n%s", expectedSection, filled)
 	}
 
-	// Inline slot fallback.
+	// Inline slot: not in slot_content, must be preserved as-is.
 	inlineInput := "Read from {{SPEC_PATH}} now."
 	filled2, resolved2, warnings2 := filler.FillContent(inlineInput)
 
-	if len(resolved2) != 1 || resolved2[0] != "SPEC_PATH" {
-		t.Errorf("inline: expected resolved=[SPEC_PATH], got %v", resolved2)
+	if len(resolved2) != 0 {
+		t.Errorf("inline: expected no resolved slots, got %v", resolved2)
 	}
-	if len(warnings2) != 1 {
-		t.Errorf("inline: expected 1 warning, got %d: %v", len(warnings2), warnings2)
+	if len(warnings2) != 0 {
+		t.Errorf("inline: expected no warnings, got %v", warnings2)
+	}
+	if filled2 != inlineInput {
+		t.Errorf("inline: expected content preserved as-is.\nexpected: %s\ngot: %s", inlineInput, filled2)
+	}
+}
+
+func TestFillContent_MixedDefinedAndUndefinedSlots(t *testing.T) {
+	reg := newTestRegistry(map[string]*template.SlotEntry{
+		"TOOL_NAME": {
+			Category:   "path_pattern",
+			MarkerType: "inline",
+			Default:    "moai",
+		},
+		"PRIMARY_USERS": {
+			Category:   "path_pattern",
+			MarkerType: "inline",
+			Default:    "",
+		},
+	})
+
+	// Only TOOL_NAME defined; PRIMARY_USERS is NOT in slot_content.
+	manifest := &model.PersonaManifest{
+		SlotContent: map[string]string{
+			"TOOL_NAME": "godo",
+		},
 	}
 
-	expectedInline := "Read from .moai/specs/ now."
-	if filled2 != expectedInline {
-		t.Errorf("inline filled mismatch.\nexpected: %s\ngot: %s", expectedInline, filled2)
+	filler := NewSlotFiller(reg, manifest, "")
+
+	input := "Use {{TOOL_NAME}} for {{PRIMARY_USERS}} users."
+	filled, resolved, warnings := filler.FillContent(input)
+
+	if len(resolved) != 1 || resolved[0] != "TOOL_NAME" {
+		t.Errorf("expected resolved=[TOOL_NAME], got %v", resolved)
+	}
+	if len(warnings) != 0 {
+		t.Errorf("expected no warnings, got %v", warnings)
+	}
+
+	expected := "Use godo for {{PRIMARY_USERS}} users."
+	if filled != expected {
+		t.Errorf("mixed fill mismatch.\nexpected: %s\ngot: %s", expected, filled)
 	}
 }
 

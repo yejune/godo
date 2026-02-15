@@ -49,7 +49,7 @@ func (f *SlotFiller) FillContent(content string) (string, []string, []string) {
 	resolvedSet := map[string]bool{}
 	var warnings []string
 
-	// 1. Fill section slots.
+	// 1. Fill section slots — always resolve via registry (persona → default fallback).
 	result := sectionSlotRe.ReplaceAllStringFunc(content, func(match string) string {
 		sub := sectionSlotRe.FindStringSubmatch(match)
 		if len(sub) < 4 {
@@ -68,27 +68,35 @@ func (f *SlotFiller) FillContent(content string) (string, []string, []string) {
 			return match
 		}
 
-		resolvedSet[slotID] = true
-
-		// Check if this fell back to registry default (no persona content).
+		// Warn if persona didn't define this slot (registry default was used).
 		if f.manifest == nil || f.manifest.SlotContent == nil {
 			warnings = append(warnings, fmt.Sprintf("slot %q: using registry default", slotID))
 		} else if _, hasPersona := f.manifest.SlotContent[slotID]; !hasPersona {
 			warnings = append(warnings, fmt.Sprintf("slot %q: using registry default", slotID))
 		}
 
+		resolvedSet[slotID] = true
+
 		begin := fmt.Sprintf(model.SectionSlotBegin, slotID)
 		end := fmt.Sprintf(model.SectionSlotEnd, slotID)
 		return begin + "\n" + resolved + "\n" + end
 	})
 
-	// 2. Fill inline slots.
+	// 2. Fill inline slots — only replace if persona defines the slot.
 	result = inlineSlotRe.ReplaceAllStringFunc(result, func(match string) string {
 		sub := inlineSlotRe.FindStringSubmatch(match)
 		if len(sub) < 2 {
 			return match
 		}
 		slotID := sub[1]
+
+		// Skip slots not defined in persona's slot_content — preserve as-is.
+		if f.manifest == nil || f.manifest.SlotContent == nil {
+			return match
+		}
+		if _, hasPersona := f.manifest.SlotContent[slotID]; !hasPersona {
+			return match
+		}
 
 		resolved, err := f.registry.ResolveSlot(slotID, f.manifest, f.personaDir)
 		if err != nil {
@@ -97,13 +105,6 @@ func (f *SlotFiller) FillContent(content string) (string, []string, []string) {
 		}
 
 		resolvedSet[slotID] = true
-
-		// Check if this fell back to registry default.
-		if f.manifest == nil || f.manifest.SlotContent == nil {
-			warnings = append(warnings, fmt.Sprintf("slot %q: using registry default", slotID))
-		} else if _, hasPersona := f.manifest.SlotContent[slotID]; !hasPersona {
-			warnings = append(warnings, fmt.Sprintf("slot %q: using registry default", slotID))
-		}
 
 		return resolved
 	})
