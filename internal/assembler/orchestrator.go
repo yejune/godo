@@ -159,6 +159,8 @@ func (a *Assembler) copyPersonaFiles(merger *Merger, result *AssembleResult) err
 	files = append(files, a.manifest.Skills...)
 	files = append(files, a.manifest.Rules...)
 	files = append(files, a.manifest.Styles...)
+	files = append(files, a.manifest.Characters...)
+	files = append(files, a.manifest.Spinners...)
 	files = append(files, a.manifest.Commands...)
 	files = append(files, a.manifest.HookScripts...)
 

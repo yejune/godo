@@ -32,11 +32,13 @@ type PersonaManifest struct {
 	ClaudeMD string `yaml:"claude_md"` // Path to persona's CLAUDE.md
 
 	// Asset directories (relative to persona root)
-	Agents   []string `yaml:"agents"`
-	Skills   []string `yaml:"skills"`
-	Rules    []string `yaml:"rules"`
-	Styles   []string `yaml:"styles"`
-	Commands []string `yaml:"commands"`
+	Agents     []string `yaml:"agents"`
+	Skills     []string `yaml:"skills"`
+	Rules      []string `yaml:"rules"`
+	Styles     []string `yaml:"styles"`
+	Characters []string `yaml:"characters"`
+	Spinners   []string `yaml:"spinners"`
+	Commands   []string `yaml:"commands"`
 
 	// Hook configuration - event name to hook commands
 	Hooks       map[string][]HookEntry `yaml:"hooks,omitempty"`

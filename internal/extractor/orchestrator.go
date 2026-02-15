@@ -34,6 +34,8 @@ const (
 	fileTypeSettings
 	fileTypeCommand
 	fileTypeHook
+	fileTypeCharacter
+	fileTypeSpinner
 	fileTypeAsset // non-markdown files in known directories (skills, etc.)
 )
 
@@ -41,23 +43,25 @@ const (
 // to the appropriate sub-extractor, and aggregates all core templates into
 // a TemplateRegistry and all persona content into a merged PersonaManifest.
 type ExtractorOrchestrator struct {
-	registry *detector.PatternRegistry
-	agent   *AgentExtractor
-	skill   *SkillExtractor
-	rule    *RuleExtractor
-	style   *StyleExtractor
-	claudeM *ClaudeMDExtractor
+	registry  *detector.PatternRegistry
+	agent     *AgentExtractor
+	skill     *SkillExtractor
+	rule      *RuleExtractor
+	style     *StyleExtractor
+	character *CharacterExtractor
+	claudeM   *ClaudeMDExtractor
 }
 
 // NewExtractorOrchestrator creates an orchestrator wired with all sub-extractors.
 func NewExtractorOrchestrator(det *detector.PersonaDetector, reg *detector.PatternRegistry) *ExtractorOrchestrator {
 	return &ExtractorOrchestrator{
-		registry: reg,
-		agent:   NewAgentExtractor(det, reg),
-		skill:   NewSkillExtractor(reg),
-		rule:    NewRuleExtractor(reg, det),
-		style:   NewStyleExtractor(),
-		claudeM: NewClaudeMDExtractor(),
+		registry:  reg,
+		agent:     NewAgentExtractor(det, reg),
+		skill:     NewSkillExtractor(reg),
+		rule:      NewRuleExtractor(reg, det),
+		style:     NewStyleExtractor(),
+		character: NewCharacterExtractor(),
+		claudeM:   NewClaudeMDExtractor(),
 	}
 }
 
@@ -99,7 +103,7 @@ func (o *ExtractorOrchestrator) Extract(srcDir string) (*template.Registry, *mod
 			return nil // skip non-relevant files
 		}
 
-		// Settings and commands/hooks use different extraction APIs (not Document-based)
+		// Settings, commands, hooks, and spinners use different extraction APIs (not Document-based)
 		switch ft {
 		case fileTypeSettings:
 			// Settings are persona files
@@ -113,6 +117,11 @@ func (o *ExtractorOrchestrator) Extract(srcDir string) (*template.Registry, *mod
 			return nil
 		case fileTypeHook:
 			merged.HookScripts = append(merged.HookScripts, relPath)
+			merged.PersonaFiles[relPath] = path
+			return nil
+		case fileTypeSpinner:
+			// Spinners are YAML files tracked as persona paths.
+			merged.Spinners = append(merged.Spinners, relPath)
 			merged.PersonaFiles[relPath] = path
 			return nil
 		case fileTypeAsset:
@@ -218,6 +227,8 @@ func (o *ExtractorOrchestrator) route(ft fileType, doc *model.Document) (*model.
 		return o.rule.Extract(doc)
 	case fileTypeStyle:
 		return o.style.Extract(doc)
+	case fileTypeCharacter:
+		return o.character.Extract(doc)
 	case fileTypeClaudeMD:
 		return o.claudeM.Extract(doc)
 	default:
@@ -290,6 +301,14 @@ func classifyFile(relPath string) fileType {
 		if strings.HasSuffix(normalized, ".md") {
 			return fileTypeStyle
 		}
+	case "characters":
+		if strings.HasSuffix(normalized, ".md") {
+			return fileTypeCharacter
+		}
+	case "spinners":
+		if strings.HasSuffix(normalized, ".yaml") || strings.HasSuffix(normalized, ".yml") {
+			return fileTypeSpinner
+		}
 	case "commands":
 		return fileTypeCommand
 	case "hooks":
@@ -313,6 +332,8 @@ func mergeManifest(dst, src *model.PersonaManifest) {
 	dst.Skills = append(dst.Skills, src.Skills...)
 	dst.Rules = append(dst.Rules, src.Rules...)
 	dst.Styles = append(dst.Styles, src.Styles...)
+	dst.Characters = append(dst.Characters, src.Characters...)
+	dst.Spinners = append(dst.Spinners, src.Spinners...)
 	dst.Commands = append(dst.Commands, src.Commands...)
 	dst.HookScripts = append(dst.HookScripts, src.HookScripts...)
 
