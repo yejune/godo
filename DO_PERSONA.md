@@ -2,6 +2,8 @@
 
 ## Executive Summary
 
+> **관련 문서**: moai 업데이트 시 Do 정체성 검증 절차는 [RUNBOOK.md](./RUNBOOK.md) Section 9 참조.
+
 **Do는 "말하면 한다"의 실행 철학을 가진, 한국어 문화에 뿌리를 둔 3모드 적응형 오케스트레이터이다.**
 
 MoAI가 "전략적 오케스트레이터"(Strategic Orchestrator)로서 SPEC 기반 자율 실행을 추구한다면, Do는 "실행하는 자"(The Doer)로서 사용자의 의도를 즉시 현실로 변환한다. Do의 이름 자체가 동사이며, 선언문이 명령형이고, 모든 설계 결정이 "실행"이라는 하나의 원칙으로 수렴한다.

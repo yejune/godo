@@ -981,7 +981,7 @@ diff ./extracted-moai-vOLD/core/registry.yaml ./extracted-moai-vNEW/core/registr
 ## 9. Do 페르소나 정체성 검증
 
 이 섹션은 moai 코드가 변경되었을 때 Do 페르소나의 고유 정체성이 보존되는지 검증하는 가이드이다.
-상세 정체성 정의는 `.do/jobs/260215/do-persona-design/do-identity.md`를, 파일별 출처 추적은 `.do/jobs/260215/do-persona-design/conversion-manifest.md`를 참조한다.
+Do 페르소나의 고유 철학과 Identity Boundaries는 [DO_PERSONA.md](./DO_PERSONA.md) 참조. 파일별 출처 추적은 `.do/jobs/260215/do-persona-design/conversion-manifest.md`를 참조한다.
 
 ### 9.1 moai 코드 변경 시 Do 정체성 체크리스트
 
@@ -1151,7 +1151,7 @@ Step 3: Convert
 ├── core 변경 → 자동 반영 (re-extract만으로 충분)
 ├── persona mechanical 변환 → 치환표 적용 (Section 9.2)
 ├── persona structural 변환 → 수동 검토 + 재작성
-│   ├── do-identity.md 참조하여 정체성 보존 확인
+│   ├── DO_PERSONA.md 참조하여 정체성 보존 확인
 │   ├── conversion-manifest.md 참조하여 출처/유형 확인
 │   └── 변경 의도를 Do 방법론으로 "번역"
 ├── 신규 기능 → 판단 (Section 4.4 D)
@@ -1178,6 +1178,6 @@ Step 5: Assemble & Deploy
 
 1. **정체성 보존 우선**: moai의 기능 추가보다 Do의 정체성 보존이 우선이다.
 2. **기계적 치환 최대화**: 자동화 가능한 부분은 자동화하여 실수를 줄인다.
-3. **구조적 변환은 신중하게**: structural 파일은 do-identity.md의 Architecture Decisions를 참조하여 Do 철학에 맞게 변환한다.
+3. **구조적 변환은 신중하게**: structural 파일은 DO_PERSONA.md의 Architecture Decisions를 참조하여 Do 철학에 맞게 변환한다.
 4. **검증은 자동으로**: 모든 변환 후 자동 검증 스크립트를 실행한다.
 5. **HARD 규칙은 무조건 반영**: moai의 HARD 규칙 변경은 Do에도 반영하되, Do 방법론으로 번역한다.
