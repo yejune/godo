@@ -975,3 +975,209 @@ diff -rq ./extracted-moai-vOLD/core ./extracted-moai-vNEW/core
 diff -rq ./extracted-moai-vOLD/personas/moai ./extracted-moai-vNEW/personas/moai
 diff ./extracted-moai-vOLD/core/registry.yaml ./extracted-moai-vNEW/core/registry.yaml
 ```
+
+---
+
+## 9. Do 페르소나 정체성 검증
+
+이 섹션은 moai 코드가 변경되었을 때 Do 페르소나의 고유 정체성이 보존되는지 검증하는 가이드이다.
+상세 정체성 정의는 `.do/jobs/260215/do-persona-design/do-identity.md`를, 파일별 출처 추적은 `.do/jobs/260215/do-persona-design/conversion-manifest.md`를 참조한다.
+
+### 9.1 moai 코드 변경 시 Do 정체성 체크리스트
+
+moai-adk가 업데이트될 때마다 아래 항목을 순서대로 확인한다.
+
+#### Step 1: 정체성 경계(Identity Boundaries) 침범 여부
+
+| 정체성 요소 | 보호 수준 | 확인 방법 | 침범 시 조치 |
+|------------|----------|----------|-------------|
+| 삼원 실행 구조 (Do/Focus/Team) | CRITICAL | `grep "나는 Do다" personas/do/CLAUDE.md` | 절대 변경 금지. moai 변경 무시. |
+| 체크리스트 시스템 (`[o][~][*][!][x]`) | CRITICAL | `grep "\[o\]" personas/do/skills/do/workflows/run.md` | 절대 변경 금지. |
+| 페르소나 4종 캐릭터 | HIGH | `ls personas/do/characters/` (4개 파일) | moai에 캐릭터 추가돼도 Do 캐릭터는 독립. |
+| 스타일 3종 (sprint/pair/direct) | HIGH | `ls personas/do/output-styles/do/` (3개 파일) | moai 스타일 변경과 무관. |
+| godo 직접 호출 패턴 | HIGH | `grep "godo hook" personas/do/settings.json` | shell wrapper 도입 금지. |
+| 한국어 선언문 | HIGH | `grep "말하면 한다" personas/do/CLAUDE.md` | 영어로 대체 금지. |
+| 6개 개별 커맨드 | MEDIUM | `ls personas/do/commands/do/` (6개 파일) | `/moai` 통합 진입점으로 전환 금지. |
+| Jobs 디렉토리 경로 | MEDIUM | `grep "plansDirectory" personas/do/settings.json` | `.moai/specs/` 패턴 도입 금지. |
+| DO_* 환경변수 체계 | MEDIUM | `grep "DO_MODE" personas/do/` | `.moai/config/*.yaml` 방식으로 전환 금지. |
+
+#### Step 2: moai 변경이 Do에 미치는 영향 분류
+
+변경된 각 파일을 아래 기준으로 분류한다:
+
+```
+moai 파일이 변경됐을 때:
+├── Do 정체성 경계를 침범하는가?
+│   ├── YES → 변경 거부 (Do 정체성 보존)
+│   └── NO → 계속
+├── core 파일인가? (agents/moai/ 밖, skills/moai* 밖)
+│   ├── YES → 자동 반영 (re-extract)
+│   └── NO → persona 파일 → 아래 분류 계속
+├── HARD 규칙 추가/삭제인가?
+│   ├── YES → Do에 무조건 반영 (방법론에 맞게 번역)
+│   └── NO → 계속
+├── 구조적 변경인가? (섹션 추가/삭제/재구성)
+│   ├── YES → Do 대응 파일 수동 검토
+│   └── NO → 기계적 치환 가능 여부 확인
+```
+
+#### Step 3: 변환 후 자동 검증 실행
+
+```bash
+# 정체성 보존 자동 검증 (9.3 스크립트 참조)
+cd ~/Work/new/convert
+bash .do/jobs/260215/do-persona-design/verify-identity.sh
+# 또는 conversion-manifest.md의 Automated Verification Commands 참조
+```
+
+### 9.2 파일별 변환 유형
+
+| 변환 유형 | 설명 | 파일 수 | 자동화 | 예시 |
+|----------|------|---------|--------|------|
+| **mechanical** | find/replace만으로 충분 (브랜드명, 경로) | 3 | YES | workflow-modes.md |
+| **structural** | 개념/구조가 다름, 재작성 필요 | 12 | NO | CLAUDE.md, SKILL.md, workflows |
+| **original** | moai에 없는 Do 고유 파일 | 12 | NO | commands, characters |
+| **removed** | moai에 있지만 Do에 불필요 | 16 | YES | hooks, sync/fix/loop workflows |
+| **absorbed** | moai skill이 Do rules에 통합됨 | 7 | N/A | 6 override skills |
+
+**기계적 치환 가능한 패턴**:
+
+| 패턴 | 치환 |
+|------|------|
+| `agents/moai/` | `agents/do/` |
+| `.moai/` | `.do/` |
+| `moai-` (skill prefix) | `do-` |
+| `skills/moai/` | `skills/do/` |
+| `moai hook` | `godo hook` |
+| `moai statusline` | `godo statusline` |
+
+**수동 검토 필요한 파일** (structural 변환):
+
+| 파일 | 검토 포인트 |
+|------|-----------|
+| `CLAUDE.md` | 삼원 구조, 한국어 혼합, 체크리스트 워크플로우 보존 |
+| `SKILL.md` | Mode Router, Intent Router, Execution Directive |
+| `manifest.yaml` | hook_scripts 빈 배열, slot_content/agent_patches 비어있음 |
+| `settings.json` | godo 직접 호출, SubagentStop, UserPromptSubmit |
+| `workflows/plan.md` | Analysis->Architecture->Plan (SPEC 아님) |
+| `workflows/run.md` | Checklist 기반 (SPEC 아님) |
+| `output-styles/do/*.md` | sprint/pair/direct (moai/r2d2/yoda 아님) |
+
+### 9.3 Identity Boundary 위반 감지
+
+#### 자동 grep 패턴
+
+다음 명령어로 정체성 위반을 감지한다:
+
+```bash
+PERSONA=./personas/do
+
+# 1. moai 브랜드 잔존 (persona 파일에 moai 문자열)
+echo "=== moai 브랜드 잔존 ==="
+grep -ri "moai" ${PERSONA}/CLAUDE.md ${PERSONA}/skills/do/ \
+  ${PERSONA}/commands/do/ ${PERSONA}/output-styles/do/ 2>/dev/null | \
+  grep -v "moai-constitution" | grep -v "^Binary"
+# 결과: 0줄이어야 함
+
+# 2. SPEC 패턴 잔존 (Do는 SPEC 미사용)
+echo "=== SPEC 패턴 잔존 ==="
+grep -ri "SPEC-[0-9]" ${PERSONA}/ 2>/dev/null
+grep -ri "EARS" ${PERSONA}/CLAUDE.md ${PERSONA}/skills/ 2>/dev/null
+# 결과: 0줄이어야 함
+
+# 3. shell wrapper 잔존
+echo "=== Shell wrapper 잔존 ==="
+grep -r "handle-.*\.sh" ${PERSONA}/ 2>/dev/null
+grep -r "hooks/moai/" ${PERSONA}/ 2>/dev/null
+# 결과: 0줄이어야 함
+
+# 4. .moai/ 경로 잔존
+echo "=== .moai/ 경로 잔존 ==="
+grep -r "\.moai/" ${PERSONA}/ 2>/dev/null
+# 결과: 0줄이어야 함
+
+# 5. moai CLI 참조 (godo가 아닌)
+echo "=== moai CLI 잔존 ==="
+grep -r '"moai ' ${PERSONA}/ 2>/dev/null
+grep -r "moai hook" ${PERSONA}/ 2>/dev/null
+# 결과: 0줄이어야 함
+
+# 6. 삼원 구조 건재 확인
+echo "=== 삼원 구조 건재 ==="
+grep -c "나는 Do다" ${PERSONA}/CLAUDE.md    # 1이어야 함
+grep -c "나는 Focus다" ${PERSONA}/CLAUDE.md # 1이어야 함
+grep -c "나는 Team이다" ${PERSONA}/CLAUDE.md # 1이어야 함
+
+# 7. 페르소나 호칭 건재
+echo "=== 페르소나 호칭 건재 ==="
+grep -c "선배" ${PERSONA}/characters/young-f.md 2>/dev/null  # 1+ 이어야 함
+grep -c "선배님" ${PERSONA}/characters/young-m.md 2>/dev/null # 1+ 이어야 함
+
+# 8. Completion marker 교체 확인 (Do는 XML 마커 미사용)
+echo "=== XML 마커 잔존 ==="
+grep -r "<moai>" ${PERSONA}/ 2>/dev/null
+# 결과: 0줄이어야 함
+```
+
+#### 수동 체크 항목
+
+| # | 항목 | 확인 방법 | 기대값 |
+|---|------|----------|--------|
+| 1 | CLAUDE.md에 삼원 선언문 3개 | 육안 확인 | 3개 모두 존재 |
+| 2 | CLAUDE.md가 한국어+영어 혼합 | 육안 확인 | 한국어 섹션 다수 |
+| 3 | settings.json에 godo 직접 호출 | `cat settings.json \| grep godo` | 7개 hook 모두 godo |
+| 4 | manifest.yaml에 hook_scripts 빈 배열 | `grep hook_scripts manifest.yaml` | `hook_scripts: []` |
+| 5 | 스타일이 sprint/pair/direct | `ls output-styles/do/` | 3개 파일 |
+| 6 | 커맨드가 /do:* 개별 방식 | `ls commands/do/` | 6개 파일 |
+| 7 | Jobs 경로가 `.do/jobs/` | `grep plansDirectory settings.json` | `.do/jobs` |
+| 8 | 페르소나 캐릭터 4종 | `ls characters/` | 4개 파일 |
+
+### 9.4 변환 워크플로우
+
+moai 업데이트 시 Do 페르소나를 동기화하는 전체 워크플로우.
+
+```
+Step 1: 변경 감지
+├── moai-adk git diff 확인 (Section 4.1)
+├── 변경 파일을 4가지 카테고리로 분류 (Section 4.2)
+└── 정체성 경계 침범 여부 확인 (Section 9.1 Step 1)
+
+Step 2: Extract
+├── 새 버전으로 extract 실행 (Section 3.2)
+├── core diff 확인 (자동 반영 대상)
+└── persona diff 확인 (수동 검토 대상)
+
+Step 3: Convert
+├── core 변경 → 자동 반영 (re-extract만으로 충분)
+├── persona mechanical 변환 → 치환표 적용 (Section 9.2)
+├── persona structural 변환 → 수동 검토 + 재작성
+│   ├── do-identity.md 참조하여 정체성 보존 확인
+│   ├── conversion-manifest.md 참조하여 출처/유형 확인
+│   └── 변경 의도를 Do 방법론으로 "번역"
+├── 신규 기능 → 판단 (Section 4.4 D)
+└── HARD 규칙 변경 → Do에 무조건 반영
+
+Step 4: Verify
+├── 자동 검증 스크립트 실행 (Section 9.3)
+├── assemble 검증 (Section 3.5)
+│   ├── 미치환 슬롯 0개
+│   ├── moai 참조 잔존 0개
+│   ├── HARD 규칙 수 확인
+│   └── 구조 비교 (이전 결과와)
+├── 정체성 경계 건재 확인 (삼원 구조, 체크리스트, 페르소나, godo)
+└── roundtrip 검증 (moai 측)
+
+Step 5: Assemble & Deploy
+├── assemble 실행
+├── do-focus 프로젝트에 결과 복사/비교
+├── versions.yaml 업데이트 (Section 4.6)
+└── 변경 이력 기록
+```
+
+#### 핵심 원칙
+
+1. **정체성 보존 우선**: moai의 기능 추가보다 Do의 정체성 보존이 우선이다.
+2. **기계적 치환 최대화**: 자동화 가능한 부분은 자동화하여 실수를 줄인다.
+3. **구조적 변환은 신중하게**: structural 파일은 do-identity.md의 Architecture Decisions를 참조하여 Do 철학에 맞게 변환한다.
+4. **검증은 자동으로**: 모든 변환 후 자동 검증 스크립트를 실행한다.
+5. **HARD 규칙은 무조건 반영**: moai의 HARD 규칙 변경은 Do에도 반영하되, Do 방법론으로 번역한다.
