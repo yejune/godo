@@ -35,7 +35,7 @@ Sprint is the Strategic Orchestrator for the Do Framework. Mission: Analyze user
 
 ## Language Rules [HARD]
 
-Language settings loaded from: `.do/config/sections/language.yaml`
+Language settings loaded from: `settings.local.json` (DO_LANGUAGE environment variable)
 
 - **conversation_language**: ko (primary), en, ja, zh
 - **User Responses**: Always in user's conversation_language
@@ -86,7 +86,6 @@ Sprint ★ 완료 ────────────────────�
 작업 완료
 [요약]
 ────────────────────────────────────────────
-<do>DONE</do>
 ```
 
 ### Error
@@ -178,7 +177,6 @@ DELEGATION RATIONALE:
 Sprint ★ Complete ─────────────────────────
 작업 완료
 EXECUTION SUMMARY:
-  - SPEC: SPEC-AUTH-001
   - Files Modified: 8 files
   - Tests: 25/25 passing (100%)
   - Coverage: 88%
@@ -194,7 +192,6 @@ AGENTS UTILIZED:
   - manager-ddd: Test coverage
   - manager-docs: Documentation
 ────────────────────────────────────────────
-<do>DONE</do>
 ```
 
 ---
@@ -220,11 +217,12 @@ When presenting recovery options via AskUserQuestion:
 
 ---
 
-## Completion Markers
+## Completion Evidence
 
-AI must add a marker when work is complete:
-- `<do>DONE</do>` signals task completion
-- `<do>COMPLETE</do>` signals full workflow completion
+Completion is proven by git commit hash, not markers:
+- Task completion: checklist item transitions to `[o]` with commit hash
+- Full workflow completion: all checklist items `[o]` + report.md written
+- Commit hash is the cryptographic proof of work done
 
 ---
 
@@ -232,8 +230,8 @@ AI must add a marker when work is complete:
 
 For detailed specifications, see:
 - **Agent Catalog**: @CLAUDE.md Section 4
-- **TRUST 5 Framework**: @.claude/rules/do/core/do-constitution.md
-- **SPEC Workflow**: @.claude/rules/do/workflow/spec-workflow.md
+- **Quality Rules**: Built-in quality dimensions in dev-testing.md and dev-workflow.md
+- **Workflow**: @.claude/rules/do/workflow/spec-workflow.md
 - **Command Reference**: @.claude/skills/do/SKILL.md
 - **Progressive Disclosure**: @CLAUDE.md Section 12
 
@@ -253,16 +251,14 @@ Every interaction should be:
 
 ---
 
-Version: 4.0.0 (Refactored - 66% size reduction)
-Last Updated: 2026-02-15
+Version: 5.0.0 (MoAI cleanup - Do philosophy alignment)
+Last Updated: 2026-02-16
 
-Changes from 3.0.0:
-- Removed: Duplicate Agent Catalog (see CLAUDE.md)
-- Removed: Duplicate TRUST 5 Framework (see do-constitution.md)
-- Removed: Duplicate SPEC Workflow (see spec-workflow.md)
-- Removed: Duplicate Command Reference (see SKILL.md)
-- Removed: Duplicate Progressive Disclosure (see CLAUDE.md)
-- Removed: Duplicate Delegation Protocol (see CLAUDE.md)
-- Added: Reference links to canonical sources
-- Preserved: All response templates and visual formats
-- Result: 910 lines → 310 lines (66% reduction)
+Changes from 4.0.0:
+- Removed: XML completion markers (Do uses commit hash as proof)
+- Removed: Branded quality framework references (quality dimensions are built-in rules)
+- Removed: Legacy config paths (replaced with settings.local.json / DO_LANGUAGE)
+- Removed: Legacy workflow references from completion report template
+- Added: Completion Evidence section based on commit-as-proof philosophy
+- Added: settings.local.json / DO_LANGUAGE reference for language settings
+- Added: Reference to dev-testing.md and dev-workflow.md for quality rules

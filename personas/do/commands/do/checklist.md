@@ -29,13 +29,15 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 - [ ] (작업 항목을 추가하세요)
 
 ## 상태 범례
-- `[ ]` 미시작
-- `[~]` 진행중
-- `[*]` 테스트중
-- `[o]` 완료
-- `[x]` 실패
+- `[ ]` 미시작 (pending)
+- `[~]` 진행중 (in progress)
+- `[*]` 테스트중 (testing)
+- `[!]` 블로커 (blocked)
+- `[o]` 완료 (done) -- 커밋 해시 필수
+- `[x]` 실패 (failed)
 
-> 상태 변경 시 변경일시 기록: `[o] 제목 (2026-02-11 17:30)`
+> 금지된 전이: [ ]->[o] (테스트 없이 완료 불가), [ ]->[x], [ ]->[*]
+> 상태 변경 시 변경일시 기록: `[o] 제목 (2026-02-11 17:30, commit: a1b2c3d)`
 ```
 
 **인자가 `status`이면**:
@@ -49,21 +51,44 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 - 파일: `.do/jobs/{YY}/{MM}/{DD}/{title}/checklists/{order}_{agent-topic}.md`
 - 템플릿:
 
-```
-# {agent-topic}
+```markdown
+# {agent-topic}: {작업 제목}
+상태: [ ] | 담당: {에이전트}
 
-## 문제 요약
+## Problem Summary
+- 무엇을 해결하는가
+- 왜 이 작업이 필요한가
 
-## 해결해야 하는 것
+## Acceptance Criteria
+- [ ] 측정 가능한 완료 조건
+- [ ] 검증 완료 (테스트 또는 대안 검증)
+- [ ] 커밋 완료
 
-## 해결 방안
+## Test Strategy
+- {unit: file_test.go | pass (빌드 확인: go build ./...)}
+
+## Solution Approach
+- 선택한 접근법 (대안 최소 1개 언급)
 
 ## Critical Files
-1. **수정 대상:**
-2. **참조 파일:**
-3. **테스트 파일:**
+- **수정 대상**: `path/to/file` -- 변경 이유
+- **참조 파일**: `path/to/ref` -- 참조 이유
+- **테스트 파일**: `path/to/test`
 
-## 해결 과정에서 겪은 문제
+## Risks
+- 깨질 수 있는 것 / 주의할 점
 
-## 최종 소회 / 배운 점
+## Progress Log
+- {timestamp} [~] 작업 시작
+
+## FINAL STEP: Commit (절대 생략 금지)
+- [ ] `git add` -- 변경된 파일만 스테이징 (본인 파일만)
+- [ ] `git diff --cached` -- 의도한 변경만 포함 확인
+- [ ] `git commit` -- WHY 포함
+- [ ] 커밋 해시를 Progress Log에 기록
+
+## Lessons Learned (완료 시 작성)
+- 잘된 점:
+- 어려웠던 점:
+- 다음에 다르게 할 점:
 ```
