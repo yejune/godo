@@ -24,8 +24,8 @@ func TestBrandDeslotifier_DeslotifyContent(t *testing.T) {
 	}
 }
 
-func TestBrandDeslotifier_DeslotifyContent_PartialBrand(t *testing.T) {
-	// Only Brand set, BrandDir and BrandCmd empty — only BRAND replaced.
+func TestBrandDeslotifier_DeslotifyContent_BrandOnlyInfersDirAndCmd(t *testing.T) {
+	// Only Brand set — BrandDir and BrandCmd are inferred as ".do" and "/do".
 	manifest := &model.PersonaManifest{
 		Brand: "do",
 	}
@@ -33,9 +33,9 @@ func TestBrandDeslotifier_DeslotifyContent_PartialBrand(t *testing.T) {
 
 	input := "Use {{slot:BRAND}} with {{slot:BRAND_DIR}} and {{slot:BRAND_CMD}}."
 	got := d.DeslotifyContent(input)
-	expected := "Use do with {{slot:BRAND_DIR}} and {{slot:BRAND_CMD}}."
+	expected := "Use do with .do and /do."
 	if got != expected {
-		t.Errorf("partial brand mismatch.\nexpected: %s\ngot:      %s", expected, got)
+		t.Errorf("brand-only infer mismatch.\nexpected: %s\ngot:      %s", expected, got)
 	}
 }
 
@@ -57,11 +57,48 @@ func TestBrandDeslotifier_NilManifest(t *testing.T) {
 	}
 }
 
-func TestBrandDeslotifier_EmptyBrand(t *testing.T) {
-	manifest := &model.PersonaManifest{Brand: ""}
+func TestBrandDeslotifier_EmptyBrandAndName(t *testing.T) {
+	manifest := &model.PersonaManifest{Brand: "", Name: ""}
 	d := NewBrandDeslotifier(manifest)
 	if d != nil {
-		t.Error("expected nil deslotifier for empty brand")
+		t.Error("expected nil deslotifier for empty brand and name")
+	}
+}
+
+func TestBrandDeslotifier_InferBrandFromName(t *testing.T) {
+	// When Brand is empty but Name is set, brand should be inferred.
+	manifest := &model.PersonaManifest{Name: "moai"}
+	d := NewBrandDeslotifier(manifest)
+	if d == nil {
+		t.Fatal("expected non-nil deslotifier when Name is set")
+	}
+
+	input := "Use {{slot:BRAND}} tool. Config in {{slot:BRAND_DIR}}/config. Run {{slot:BRAND_CMD}} plan."
+	got := d.DeslotifyContent(input)
+	expected := "Use moai tool. Config in .moai/config. Run /moai plan."
+	if got != expected {
+		t.Errorf("infer brand mismatch.\nexpected: %s\ngot:      %s", expected, got)
+	}
+}
+
+func TestBrandDeslotifier_ExplicitBrandOverridesName(t *testing.T) {
+	// Explicit Brand takes precedence over Name.
+	manifest := &model.PersonaManifest{
+		Name:     "moai",
+		Brand:    "do",
+		BrandDir: ".do",
+		BrandCmd: "/do",
+	}
+	d := NewBrandDeslotifier(manifest)
+	if d == nil {
+		t.Fatal("expected non-nil deslotifier")
+	}
+
+	input := "{{slot:BRAND}} at {{slot:BRAND_DIR}} run {{slot:BRAND_CMD}}"
+	got := d.DeslotifyContent(input)
+	expected := "do at .do run /do"
+	if got != expected {
+		t.Errorf("explicit brand mismatch.\nexpected: %s\ngot:      %s", expected, got)
 	}
 }
 

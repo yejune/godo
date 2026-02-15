@@ -156,6 +156,10 @@ func (m *Merger) PatchAgent(relPath string) error {
 
 	content := string(data)
 
+	// Apply brand deslotification before YAML parsing to prevent {{slot:BRAND}}
+	// from breaking YAML syntax in frontmatter fields like skills.
+	content = m.deslotifier.DeslotifyContent(content)
+
 	// Split into raw YAML frontmatter and body.
 	rawYaml, body, hasFM := parser.SplitFrontmatter(content)
 	if !hasFM {
@@ -403,6 +407,11 @@ func (m *Merger) applySkillMappingsToFile(agentPath string) (bool, error) {
 	}
 
 	content := string(data)
+
+	// Apply brand deslotification before YAML parsing to prevent {{slot:BRAND}}
+	// from breaking YAML syntax in frontmatter fields like skills.
+	content = m.deslotifier.DeslotifyContent(content)
+
 	rawYaml, body, hasFM := parser.SplitFrontmatter(content)
 	if !hasFM {
 		return false, nil

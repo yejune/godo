@@ -18,15 +18,36 @@ type BrandDeslotifier struct {
 }
 
 // NewBrandDeslotifier creates a BrandDeslotifier from the manifest's brand fields.
-// Returns nil if the manifest is nil or has an empty Brand field.
+// If Brand is empty but Name is set, brand is inferred from the manifest name
+// and default conventions are applied (BrandDir = ".name", BrandCmd = "/name").
+// Returns nil if both Brand and Name are empty.
 func NewBrandDeslotifier(manifest *model.PersonaManifest) *BrandDeslotifier {
-	if manifest == nil || manifest.Brand == "" {
+	if manifest == nil {
 		return nil
 	}
+
+	brand := manifest.Brand
+	if brand == "" {
+		brand = manifest.Name
+	}
+	if brand == "" {
+		return nil
+	}
+
+	brandDir := manifest.BrandDir
+	if brandDir == "" {
+		brandDir = "." + brand
+	}
+
+	brandCmd := manifest.BrandCmd
+	if brandCmd == "" {
+		brandCmd = "/" + brand
+	}
+
 	return &BrandDeslotifier{
-		brand:    manifest.Brand,
-		brandDir: manifest.BrandDir,
-		brandCmd: manifest.BrandCmd,
+		brand:    brand,
+		brandDir: brandDir,
+		brandCmd: brandCmd,
 	}
 }
 
