@@ -46,6 +46,17 @@ type PersonaManifest struct {
 
 	// Frontmatter patches for core agents
 	AgentPatches map[string]*AgentPatch `yaml:"agent_patches"`
+
+	// SourceDir is the absolute path of the source directory used during extraction.
+	// Used to resolve relative paths when copying files.
+	SourceDir string `yaml:"source_dir,omitempty"`
+
+	// CoreFiles lists relative paths of files classified as core (templates).
+	CoreFiles []string `yaml:"core_files,omitempty"`
+
+	// PersonaFiles maps relative path -> absolute source path for persona files.
+	// Used by the assembler to copy persona content to the output directory.
+	PersonaFiles map[string]string `yaml:"persona_files,omitempty"`
 }
 
 // AgentPatch defines modifications to apply to a core agent file.

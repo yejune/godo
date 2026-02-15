@@ -67,6 +67,8 @@ func (o *ExtractorOrchestrator) Extract(srcDir string) (*template.Registry, *mod
 	merged := &model.PersonaManifest{
 		SlotContent:  make(map[string]string),
 		AgentPatches: make(map[string]*model.AgentPatch),
+		PersonaFiles: make(map[string]string),
+		SourceDir:    srcDir,
 	}
 
 	err := filepath.Walk(srcDir, func(path string, info os.FileInfo, walkErr error) error {
@@ -96,14 +98,18 @@ func (o *ExtractorOrchestrator) Extract(srcDir string) (*template.Registry, *mod
 		// Settings and commands/hooks use different extraction APIs (not Document-based)
 		switch ft {
 		case fileTypeSettings:
+			// Settings are persona files
+			merged.PersonaFiles[relPath] = path
 			return o.extractSettings(path, merged)
 		case fileTypeCommand:
 			// Commands are tracked as persona paths; the full extraction
 			// with copy is done by the assembler. Here we just record the path.
 			merged.Commands = append(merged.Commands, relPath)
+			merged.PersonaFiles[relPath] = path
 			return nil
 		case fileTypeHook:
 			merged.HookScripts = append(merged.HookScripts, relPath)
+			merged.PersonaFiles[relPath] = path
 			return nil
 		}
 
@@ -118,6 +124,15 @@ func (o *ExtractorOrchestrator) Extract(srcDir string) (*template.Registry, *mod
 		coreDoc, manifest, err := o.route(ft, doc)
 		if err != nil {
 			return fmt.Errorf("extract %s: %w", relPath, err)
+		}
+
+		// Track file: core files go to CoreFiles, persona files go to PersonaFiles
+		if coreDoc != nil {
+			merged.CoreFiles = append(merged.CoreFiles, relPath)
+		}
+		if coreDoc == nil {
+			// Whole-file persona: no core doc returned
+			merged.PersonaFiles[relPath] = path
 		}
 
 		// Merge manifest into the combined result
@@ -150,6 +165,10 @@ func (o *ExtractorOrchestrator) Extract(srcDir string) (*template.Registry, *mod
 			if extErr != nil {
 				return nil, nil, fmt.Errorf("extract project-root CLAUDE.md: %w", extErr)
 			}
+
+			// Track project-root CLAUDE.md as a persona file
+			merged.PersonaFiles["CLAUDE.md"] = claudePath
+
 			mergeManifest(merged, manifest)
 		}
 	}
@@ -289,6 +308,22 @@ func mergeManifest(dst, src *model.PersonaManifest) {
 			dst.Settings = make(map[string]interface{})
 		}
 		dst.Settings[k] = v
+	}
+
+	// Merge SourceDir (prefer non-empty)
+	if src.SourceDir != "" && dst.SourceDir == "" {
+		dst.SourceDir = src.SourceDir
+	}
+
+	// Merge CoreFiles
+	dst.CoreFiles = append(dst.CoreFiles, src.CoreFiles...)
+
+	// Merge PersonaFiles
+	for k, v := range src.PersonaFiles {
+		if dst.PersonaFiles == nil {
+			dst.PersonaFiles = make(map[string]string)
+		}
+		dst.PersonaFiles[k] = v
 	}
 }
 

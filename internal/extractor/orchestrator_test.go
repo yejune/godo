@@ -3,6 +3,7 @@ package extractor
 import (
 	"os"
 	"path/filepath"
+	"sort"
 	"testing"
 
 	"github.com/do-focus/convert/internal/detector"
@@ -58,6 +59,17 @@ func TestOrchestrator_EmptyDirectory(t *testing.T) {
 	if len(manifest.Agents) != 0 {
 		t.Errorf("manifest Agents count = %d, want 0", len(manifest.Agents))
 	}
+
+	// File tracking: empty directory should have SourceDir set, no files tracked
+	if manifest.SourceDir != dir {
+		t.Errorf("manifest SourceDir = %q, want %q", manifest.SourceDir, dir)
+	}
+	if len(manifest.CoreFiles) != 0 {
+		t.Errorf("manifest CoreFiles count = %d, want 0", len(manifest.CoreFiles))
+	}
+	if len(manifest.PersonaFiles) != 0 {
+		t.Errorf("manifest PersonaFiles count = %d, want 0", len(manifest.PersonaFiles))
+	}
 }
 
 func TestOrchestrator_SingleAgentFile(t *testing.T) {
@@ -85,6 +97,17 @@ func TestOrchestrator_SingleAgentFile(t *testing.T) {
 	if len(registry.Slots) != 0 {
 		t.Errorf("registry slots count = %d, want 0", len(registry.Slots))
 	}
+
+	// File tracking: core agent should appear in CoreFiles, not PersonaFiles
+	if len(manifest.CoreFiles) != 1 {
+		t.Fatalf("manifest CoreFiles count = %d, want 1", len(manifest.CoreFiles))
+	}
+	if manifest.CoreFiles[0] != "agents/expert-generic.md" {
+		t.Errorf("manifest CoreFiles[0] = %q, want %q", manifest.CoreFiles[0], "agents/expert-generic.md")
+	}
+	if len(manifest.PersonaFiles) != 0 {
+		t.Errorf("manifest PersonaFiles count = %d, want 0, got %v", len(manifest.PersonaFiles), manifest.PersonaFiles)
+	}
 }
 
 func TestOrchestrator_WholeFilePersonaAgent(t *testing.T) {
@@ -106,6 +129,17 @@ func TestOrchestrator_WholeFilePersonaAgent(t *testing.T) {
 	}
 	if manifest.Agents[0] != "agents/moai/manager-spec.md" {
 		t.Errorf("manifest Agents[0] = %q, want %q", manifest.Agents[0], "agents/moai/manager-spec.md")
+	}
+
+	// File tracking: persona agent should be in PersonaFiles, not CoreFiles
+	if len(manifest.CoreFiles) != 0 {
+		t.Errorf("manifest CoreFiles count = %d, want 0", len(manifest.CoreFiles))
+	}
+	absPath := filepath.Join(dir, "agents/moai/manager-spec.md")
+	if got, ok := manifest.PersonaFiles["agents/moai/manager-spec.md"]; !ok {
+		t.Error("manifest PersonaFiles missing 'agents/moai/manager-spec.md'")
+	} else if got != absPath {
+		t.Errorf("manifest PersonaFiles[agents/moai/manager-spec.md] = %q, want %q", got, absPath)
 	}
 }
 
@@ -208,6 +242,59 @@ func TestOrchestrator_MixedFileTypes(t *testing.T) {
 			t.Errorf("agent patch AppendSkills should contain 'moai-foundation-core', got %v", patch.AppendSkills)
 		}
 	}
+
+	// File tracking: SourceDir
+	if manifest.SourceDir != dir {
+		t.Errorf("manifest SourceDir = %q, want %q", manifest.SourceDir, dir)
+	}
+
+	// File tracking: CoreFiles should contain core and mixed agents, core skills, core rules
+	// Core files: expert-backend.md (mixed, returns coreDoc), do-foundation-claude.md (core skill), dev-testing.md (core rule)
+	coreSet := make(map[string]bool)
+	for _, f := range manifest.CoreFiles {
+		coreSet[f] = true
+	}
+	wantCore := []string{
+		"agents/expert-backend.md",
+		"skills/do-foundation-claude.md",
+		"rules/dev-testing.md",
+	}
+	for _, want := range wantCore {
+		if !coreSet[want] {
+			t.Errorf("manifest CoreFiles missing %q, got %v", want, manifest.CoreFiles)
+		}
+	}
+
+	// File tracking: PersonaFiles should contain persona-only files
+	wantPersona := []string{
+		"CLAUDE.md",
+		"agents/moai/manager-ddd.md",
+		"skills/moai-workflow-ddd.md",
+		"styles/pair.md",
+		"output-styles/moai/sprint.md",
+		"rules/do/workflow/spec-workflow.md",
+		"settings.json",
+		"commands/help.md",
+		"hooks/pre-tool.sh",
+	}
+	for _, want := range wantPersona {
+		absPath := filepath.Join(dir, want)
+		if got, ok := manifest.PersonaFiles[want]; !ok {
+			t.Errorf("manifest PersonaFiles missing %q, got keys: %v", want, personaFileKeys(manifest.PersonaFiles))
+		} else if got != absPath {
+			t.Errorf("manifest PersonaFiles[%q] = %q, want %q", want, got, absPath)
+		}
+	}
+}
+
+// personaFileKeys returns sorted keys of a PersonaFiles map for test output.
+func personaFileKeys(m map[string]string) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
 }
 
 func TestOrchestrator_SkipsGitDirectory(t *testing.T) {
@@ -247,6 +334,14 @@ func TestOrchestrator_SkipsNonRelevantFiles(t *testing.T) {
 	if manifest.ClaudeMD != "" {
 		t.Errorf("manifest ClaudeMD = %q, want empty", manifest.ClaudeMD)
 	}
+
+	// Non-relevant files should not appear in CoreFiles or PersonaFiles
+	if len(manifest.CoreFiles) != 0 {
+		t.Errorf("manifest CoreFiles count = %d, want 0", len(manifest.CoreFiles))
+	}
+	if len(manifest.PersonaFiles) != 0 {
+		t.Errorf("manifest PersonaFiles count = %d, want 0", len(manifest.PersonaFiles))
+	}
 }
 
 
@@ -282,6 +377,19 @@ func TestOrchestrator_ClaudeMDAtProjectRoot(t *testing.T) {
 	if manifest.ClaudeMD != "CLAUDE.md" {
 		t.Errorf("manifest ClaudeMD = %q, want %q", manifest.ClaudeMD, "CLAUDE.md")
 	}
+
+	// File tracking: project-root CLAUDE.md should be in PersonaFiles
+	claudeAbsPath := filepath.Join(projectRoot, "CLAUDE.md")
+	if got, ok := manifest.PersonaFiles["CLAUDE.md"]; !ok {
+		t.Error("manifest PersonaFiles missing 'CLAUDE.md' (project root)")
+	} else if got != claudeAbsPath {
+		t.Errorf("manifest PersonaFiles[CLAUDE.md] = %q, want %q", got, claudeAbsPath)
+	}
+
+	// File tracking: agent inside .claude/ should be in CoreFiles
+	if len(manifest.CoreFiles) != 1 {
+		t.Errorf("manifest CoreFiles count = %d, want 1", len(manifest.CoreFiles))
+	}
 }
 
 func TestOrchestrator_ClaudeMDInsideSrcDirTakesPrecedence(t *testing.T) {
@@ -312,6 +420,109 @@ func TestOrchestrator_ClaudeMDInsideSrcDirTakesPrecedence(t *testing.T) {
 	// The one inside srcDir should win
 	if manifest.ClaudeMD != "CLAUDE.md" {
 		t.Errorf("manifest ClaudeMD = %q, want %q", manifest.ClaudeMD, "CLAUDE.md")
+	}
+
+	// File tracking: inside-srcDir CLAUDE.md should be in PersonaFiles
+	insideAbsPath := filepath.Join(claudeDir, "CLAUDE.md")
+	if got, ok := manifest.PersonaFiles["CLAUDE.md"]; !ok {
+		t.Error("manifest PersonaFiles missing 'CLAUDE.md'")
+	} else if got != insideAbsPath {
+		t.Errorf("manifest PersonaFiles[CLAUDE.md] = %q, want %q", got, insideAbsPath)
+	}
+}
+
+func TestOrchestrator_FileTracking_Comprehensive(t *testing.T) {
+	orch := newTestOrchestrator(t)
+
+	files := map[string]string{
+		// Core agents (returns coreDoc != nil)
+		"agents/expert-backend.md":  "---\nname: expert-backend\ndescription: Backend expert\n---\n\n## Overview\n\nContent.\n",
+		"agents/expert-frontend.md": "---\nname: expert-frontend\ndescription: Frontend expert\n---\n\n## Overview\n\nContent.\n",
+		// Persona agents (whole-file persona)
+		"agents/moai/manager-spec.md": "---\nname: manager-spec\ndescription: SPEC manager\n---\n\n## SPEC\n\nContent.\n",
+		"agents/moai/manager-ddd.md":  "---\nname: manager-ddd\ndescription: DDD manager\n---\n\n## DDD\n\nContent.\n",
+		// Core skills
+		"skills/do-foundation-claude.md": "---\nname: do-foundation-claude\ndescription: Core skill\n---\n\n## Core\n\nContent.\n",
+		// Persona skills
+		"skills/moai-workflow-spec.md": "---\nname: moai-workflow-spec\ndescription: SPEC workflow\n---\n\n## SPEC\n\nContent.\n",
+		// Core rules
+		"rules/dev-testing.md":              "# Testing Rules\n\nContent.\n",
+		"rules/do/core/moai-constitution.md": "# Constitution\n\nContent.\n",
+		// Persona rules
+		"rules/do/workflow/spec-workflow.md": "# SPEC Workflow\n\nContent.\n",
+		// Styles (always persona)
+		"output-styles/moai/pair.md": "---\nname: pair\ndescription: Pair style\n---\n\n## Style\n\nContent.\n",
+		// Commands (always persona)
+		"commands/moai/plan.md": "Plan command content.",
+		// Hooks (always persona)
+		"hooks/moai/pre-tool.sh": "#!/bin/bash\necho hook",
+		// Settings (persona)
+		"settings.json": "{\"hooks\":{\"PreToolUse\":[{\"command\":\"test\"}]}}",
+	}
+
+	dir := setupTestDir(t, files)
+	_, manifest, err := orch.Extract(dir)
+	if err != nil {
+		t.Fatalf("Extract() error: %v", err)
+	}
+
+	// Verify SourceDir
+	if manifest.SourceDir != dir {
+		t.Errorf("SourceDir = %q, want %q", manifest.SourceDir, dir)
+	}
+
+	// Verify CoreFiles
+	sortedCore := make([]string, len(manifest.CoreFiles))
+	copy(sortedCore, manifest.CoreFiles)
+	sort.Strings(sortedCore)
+
+	wantCore := []string{
+		"agents/expert-backend.md",
+		"agents/expert-frontend.md",
+		"rules/dev-testing.md",
+		"rules/do/core/moai-constitution.md",
+		"skills/do-foundation-claude.md",
+	}
+	if len(sortedCore) != len(wantCore) {
+		t.Errorf("CoreFiles count = %d, want %d\ngot:  %v\nwant: %v", len(sortedCore), len(wantCore), sortedCore, wantCore)
+	} else {
+		for i, want := range wantCore {
+			if sortedCore[i] != want {
+				t.Errorf("CoreFiles[%d] = %q, want %q", i, sortedCore[i], want)
+			}
+		}
+	}
+
+	// Verify PersonaFiles contains all persona file paths with correct abs paths
+	wantPersona := []string{
+		"agents/moai/manager-ddd.md",
+		"agents/moai/manager-spec.md",
+		"commands/moai/plan.md",
+		"hooks/moai/pre-tool.sh",
+		"output-styles/moai/pair.md",
+		"rules/do/workflow/spec-workflow.md",
+		"settings.json",
+		"skills/moai-workflow-spec.md",
+	}
+	if len(manifest.PersonaFiles) != len(wantPersona) {
+		t.Errorf("PersonaFiles count = %d, want %d\ngot keys:  %v\nwant keys: %v",
+			len(manifest.PersonaFiles), len(wantPersona),
+			personaFileKeys(manifest.PersonaFiles), wantPersona)
+	}
+	for _, want := range wantPersona {
+		absPath := filepath.Join(dir, want)
+		if got, ok := manifest.PersonaFiles[want]; !ok {
+			t.Errorf("PersonaFiles missing %q", want)
+		} else if got != absPath {
+			t.Errorf("PersonaFiles[%q] = %q, want %q", want, got, absPath)
+		}
+	}
+
+	// Verify no overlap: a file should not be in both CoreFiles and PersonaFiles
+	for _, coreFile := range manifest.CoreFiles {
+		if _, ok := manifest.PersonaFiles[coreFile]; ok {
+			t.Errorf("file %q is in both CoreFiles and PersonaFiles", coreFile)
+		}
 	}
 }
 
