@@ -1,12 +1,12 @@
 # Workflow Modes
 
-Development methodology reference for MoAI-ADK SPEC workflow.
+Development methodology reference for Do checklist workflow.
 
 For phase overview, token strategy, and transitions, see @spec-workflow.md
 
 ## Methodology Selection
 
-The Run Phase adapts its workflow based on `quality.development_mode` in `.moai/config/sections/quality.yaml`:
+The Run Phase adapts its workflow based on `quality.development_mode` in `.do/config/sections/quality.yaml`:
 
 | Mode | Workflow Cycle | Best For | Agent Strategy |
 |------|---------------|----------|----------------|
@@ -34,7 +34,7 @@ Development methodology: Domain-Driven Development (ANALYZE-PRESERVE-IMPROVE)
 - Refactor with test validation
 
 Success Criteria:
-- All SPEC requirements implemented
+- All checklist requirements implemented
 - Characterization tests passing
 - Behavior snapshots stable (no regression)
 - 85%+ code coverage achieved
@@ -60,7 +60,7 @@ Development methodology: Test-Driven Development (RED-GREEN-REFACTOR)
 - Apply SOLID principles where appropriate
 
 Success Criteria:
-- All SPEC requirements implemented
+- All checklist requirements implemented
 - All tests passing (RED-GREEN-REFACTOR complete)
 - Minimum coverage per commit: 80% (configurable)
 - No test written after implementation code
@@ -87,7 +87,7 @@ Development methodology: Hybrid (TDD for new + DDD for legacy)
 - Deleted code - Verify characterization tests still pass
 
 Success Criteria:
-- All SPEC requirements implemented
+- All checklist requirements implemented
 - New code has TDD-level coverage (85%+)
 - Modified code has characterization tests
 - Overall coverage improvement trend
@@ -95,7 +95,7 @@ Success Criteria:
 
 ## Methodology Selection Guide
 
-### Auto-Detection (via /moai project or /moai init)
+### Auto-Detection (via /do project or /do init)
 
 The system automatically recommends a methodology based on project analysis:
 
@@ -110,8 +110,8 @@ The system automatically recommends a methodology based on project analysis:
 
 Users can override the auto-detected methodology:
 - During init: Select in the wizard or use `--development-mode` flag
-- After init: Edit `quality.development_mode` in `.moai/config/sections/quality.yaml`
-- Per session: Set `MOAI_DEVELOPMENT_MODE` environment variable
+- After init: Edit `quality.development_mode` in `.do/config/sections/quality.yaml`
+- Per session: Set `DO_DEVELOPMENT_MODE` environment variable
 
 ### Methodology Comparison
 

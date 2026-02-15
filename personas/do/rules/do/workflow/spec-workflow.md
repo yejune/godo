@@ -1,14 +1,14 @@
 # SPEC Workflow
 
-MoAI's three-phase development workflow with token budget management.
+Do's three-phase development workflow with token budget management.
 
 ## Phase Overview
 
 | Phase | Command | Agent | Token Budget | Purpose |
 |-------|---------|-------|--------------|---------|
-| Plan | /moai plan | manager-spec | 30K | Create SPEC document |
-| Run | /moai run | manager-ddd/tdd (per quality.yaml) | 180K | DDD/TDD implementation |
-| Sync | /moai sync | manager-docs | 40K | Documentation sync |
+| Plan | /do plan | manager-spec | 30K | Create plan and checklist |
+| Run | /do run | manager-ddd/tdd (per quality.yaml) | 180K | DDD/TDD implementation |
+| Sync | /do sync | manager-docs | 40K | Documentation sync |
 
 ## Plan Phase
 
@@ -21,7 +21,7 @@ Token Strategy:
 - Saves 45-50K tokens for implementation
 
 Output:
-- SPEC document at `.moai/specs/SPEC-XXX/spec.md`
+- Plan document at `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/plan.md`
 - EARS format requirements
 - Acceptance criteria
 - Technical approach
@@ -40,7 +40,7 @@ Development Methodology:
 - See @workflow-modes.md for detailed methodology cycles
 
 Success Criteria:
-- All SPEC requirements implemented
+- All checklist requirements implemented
 - Methodology-specific tests passing
 - 85%+ code coverage
 - TRUST 5 quality gates passed
@@ -63,13 +63,13 @@ Output:
 ## Completion Markers
 
 AI uses markers to signal task completion:
-- `<moai>DONE</moai>` - Task complete
-- `<moai>COMPLETE</moai>` - Full completion
+- `<do>DONE</do>` - Task complete
+- `<do>COMPLETE</do>` - Full completion
 
 ## Context Management
 
 /clear Strategy:
-- After /moai plan completion (mandatory)
+- After /do plan completion (mandatory)
 - When context exceeds 150K tokens
 - Before major phase transitions
 
@@ -81,12 +81,12 @@ Progressive Disclosure:
 ## Phase Transitions
 
 Plan to Run:
-- Trigger: SPEC document approved
-- Action: Execute /clear, then /moai run SPEC-XXX
+- Trigger: Checklist approved
+- Action: Execute /clear, then /do run
 
 Run to Sync:
 - Trigger: Implementation complete, tests passing
-- Action: Execute /moai sync SPEC-XXX
+- Action: Execute /do sync
 
 ## Agent Teams Variant
 
@@ -103,7 +103,7 @@ When team mode is enabled (workflow.team.enabled and AGENT_TEAMS env), phases ca
 ### Team Mode Plan Phase
 - TeamCreate for parallel research team
 - Teammates explore codebase, analyze requirements, design approach
-- MoAI synthesizes into SPEC document
+- Do synthesizes into checklist
 - Shutdown team, /clear before Run phase
 
 ### Team Mode Run Phase
