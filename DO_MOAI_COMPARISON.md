@@ -319,7 +319,39 @@ Lessons Learned는 단순 회고가 아니라 **개선 사이클의 시작점**�
           → 재완료 후 [o]
 ```
 
-예시: 에이전트가 로그인 API를 구현하고 Lessons Learned에 "에러 핸들링이 일관적이지 않다"고 기록했다면, 이것은 새로운 서브 체크리스트 항목 "에러 핸들링 통일"이 되어 개발 사이클을 다시 탄다. 체크리스트가 살아있는 문서인 이유가 여기에 있다.
+**핵심: 새 서브 체크리스트에는 반드시 근거가 존재해야 한다.**
+
+새로 생성된 서브 체크리스트의 Problem Summary에는 다음이 포함되어야 한다:
+- **발견 출처**: 어떤 서브 체크리스트의 Lessons Learned에서 발견되었는가 (파일 경로)
+- **발견 내용**: 구체적으로 무엇이 부족/잘못되었는가
+- **개선 목적**: 이 작업으로 무엇이 나아지는가
+- **원본 참조**: `triggered by: checklists/01_expert-backend.md#lessons-learned`
+
+동시에 원본 서브 체크리스트의 Lessons Learned에도 역참조를 남긴다:
+- **후속 작업**: `→ checklists/04_expert-backend-errorhandling.md로 분리`
+
+이 양방향 참조로 **발견 → 판단 → 개선 → 완료**의 전체 추적 경로가 문서에 남는다.
+
+**예시:**
+
+원본 `checklists/01_expert-backend.md`의 Lessons Learned:
+```
+## Lessons Learned
+- 잘된 점: JWT 토큰 발급/검증 로직이 깔끔하게 분리됨
+- 어려웠던 점: 에러 응답 형식이 엔드포인트마다 다름
+- 개선 필요: 에러 핸들링 통일 필요 → checklists/04_expert-backend-errorhandling.md로 분리
+```
+
+새로 생성된 `checklists/04_expert-backend-errorhandling.md`의 Problem Summary:
+```
+## Problem Summary
+- 발견 출처: checklists/01_expert-backend.md#lessons-learned
+- 발견 내용: 에러 응답 형식이 엔드포인트마다 달라 클라이언트 파싱이 불안정
+- 개선 목적: 전체 API 에러 응답을 통일된 형식(code, message, details)으로 표준화
+- 무엇을 해결하는가: 에러 응답 불일치로 인한 프론트엔드 파싱 실패 방지
+```
+
+이 구조 덕분에 어떤 서브 체크리스트든 "왜 이 작업이 존재하는가?"에 대한 답을 문서 자체에서 찾을 수 있다.
 
 #### MoAI와의 차이
 
