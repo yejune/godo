@@ -198,15 +198,24 @@ Do가 MoAI보다 2개 더 많은 hook 이벤트를 처리한다:
 
 MoAI는 `/moai` 단일 진입점 + 서브커맨드, Do는 개별 커맨드 방식.
 
-### 3.9 Multirepo 지원
+### 3.9 File-Detection Triggers
 
-`.git.multirepo` 파일 감지 시 작업 위치를 사용자에게 확인한다. MoAI에는 없는 기능.
+파일 존재 여부에 따라 자동 활성화되는 조건부 행동 패턴. MoAI에는 없는 Do 고유 메커니즘.
 
-### 3.10 릴리즈 워크플로우
+| 트리거 파일 | 감지 조건 | 활성화 행동 | 범위 |
+|------------|----------|-----------|------|
+| `.git.multirepo` | 프로젝트 루트에 존재 | 명령 실행 전 작업 위치(워크스페이스) 확인 | 모든 Bash 명령 |
+| `tobrew.lock` / `tobrew.*` | 프로젝트에 존재 | 모든 요청 기능 완료 시 릴리즈 프로세스 제안 | 작업 완료 시점 |
+| `docker-compose.yml` | 프로젝트에 존재 | Docker-first 개발 환경 규칙 활성화 | 전체 세션 |
 
-`tobrew.lock` 파일 감지 시 릴리즈 프로세스를 제안한다.
+**설계 원칙**: 설정 파일 없이 파일 존재만으로 행동을 전환한다. Convention over Configuration.
 
-### 3.11 설정 아키텍처 차이
+**확장 패턴**: 새 트리거 추가 시 동일 구조를 따른다:
+- 감지: 어떤 파일이 존재하면
+- 행동: 어떤 행동을 자동 활성화
+- 범위: 언제 체크하는가
+
+### 3.10 설정 아키텍처 차이
 
 Do는 `settings.local.json`의 `DO_*` 환경변수로 설정을 관리한다.
 
@@ -256,8 +265,7 @@ MoAI는 `.moai/config/sections/*.yaml` (YAML 분리)로 설정을 관리한다.
 | 26 | **Override Skills** | 6개 | 0개 (rules에 흡수) | 아키텍처 차이 |
 | 27 | **지식 주입 방식** | skill -> progressive disclosure | rules -> 항상 로드 | 근본적 아키텍처 차이 |
 | 28 | **agent_patches** | 20+ 에이전트에 override skill 주입 | 비어있음 | Do는 rules 참조로 충분 |
-| 29 | **Multirepo 지원** | 없음 | `.git.multirepo` 파일 기반 | Do 고유 |
-| 30 | **릴리즈 워크플로우** | sync 단계에서 처리 | tobrew 전용 독립 워크플로우 | Do 고유 |
+| 29 | **File-Detection Triggers** | 없음 | `.git.multirepo`, `tobrew.*`, `docker-compose.yml` 파일 감지 → 행동 자동 활성화 | Do 고유 (Convention over Configuration) |
 
 ---
 
@@ -466,6 +474,12 @@ moai가 업데이트되더라도 다음 Do 정체성 요소는 **절대 변경�
 
 **결정**: 커스텀 상태 기호 체계
 **근거**: 표준 마크다운 `[x]`는 "체크됨"과 "실패"를 구분할 수 없다. Do의 체크리스트는 6단계 상태 머신이므로 각 상태가 고유한 기호를 가져야 한다.
+
+### 8.9 왜 File-Detection Triggers인가? (설정 파일 대신)
+
+**결정**: 파일 존재 여부로 행동을 자동 활성화하는 트리거 패턴
+**MoAI와의 차이**: MoAI에는 해당 메커니즘 없음
+**근거**: Convention over Configuration. `.git.multirepo`가 존재하면 multirepo 워크플로우가 활성화되고, `tobrew.lock`이 존재하면 릴리즈 워크플로우가 활성화된다. 사용자가 별도로 설정할 필요가 없다. 파일을 추가/삭제하는 것만으로 행동이 전환되므로, 설정 오류의 가능성이 원천 차단된다.
 
 ---
 
