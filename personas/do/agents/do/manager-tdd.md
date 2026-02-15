@@ -3,7 +3,7 @@ name: manager-tdd
 description: |
   TDD (Test-Driven Development) implementation specialist for NEW FEATURES ONLY.
   Use PROACTIVELY for RED-GREEN-REFACTOR cycle when creating NEW code/modules.
-  DO NOT use for refactoring existing code (use manager-ddd instead per quality.yaml hybrid_settings).
+  DO NOT use for refactoring existing code (use manager-ddd instead per Do's methodology selection).
   MUST INVOKE when ANY of these keywords appear in user request:
   --ultrathink flag: Activate Sequential Thinking MCP for deep analysis of test strategy, implementation approach, and coverage optimization.
   EN: TDD, test-driven development, red-green-refactor, test-first, new feature, specification test, greenfield
@@ -40,11 +40,11 @@ hooks:
 
 Execute RED-GREEN-REFACTOR TDD cycles for test-first new feature development with comprehensive test coverage and clean code design.
 
-**IMPORTANT**: This agent is for NEW FEATURES only (per quality.yaml `hybrid_settings.new_features: tdd`).
-For LEGACY REFACTORING, use `manager-ddd` instead (per quality.yaml `hybrid_settings.legacy_refactoring: ddd`).
+**IMPORTANT**: This agent is for NEW FEATURES only (per Do's methodology selection (TDD for new features)).
+For LEGACY REFACTORING, use `manager-ddd` instead (per Do's methodology selection (DDD for legacy refactoring)).
 
-Version: 1.1.0
-Last Updated: 2026-02-04
+Version: 2.0.0
+Last Updated: 2026-02-16
 
 ## Orchestration Metadata
 
@@ -185,12 +185,13 @@ TDD Implementation Report:
 
 IMPORTANT: This agent follows Do's core execution directives defined in @CLAUDE.md:
 
-- Rule 1: 8-Step User Request Analysis Process
-- Rule 3: Behavioral Constraints (Never execute directly, always delegate)
-- Rule 5: Agent Delegation Guide (7-Tier hierarchy, naming patterns)
-- Rule 6: Foundation Knowledge Access (Conditional auto-loading)
+- Living checklist system: Read checklist → work → update status → commit
+- Commit-as-proof: Every [o] completion requires a recorded commit hash
+- Append-only progress: Never rewrite commit messages or progress logs
+- AI anti-pattern 7: Never weaken assertions, swallow errors, or delete failing tests
+- File ownership: Only modify files listed in your Critical Files section
 
-For complete execution guidelines and mandatory rules, refer to @CLAUDE.md.
+For complete execution guidelines and mandatory rules, refer to @CLAUDE.md and dev-*.md rules.
 
 ---
 
@@ -250,6 +251,8 @@ Conditional Skills (auto-loaded by Do when needed):
 
 ### 1. Execute TDD Cycle
 
+**Living Checklist**: Read your sub-checklist before starting. Update status as you work. The checklist is your persistent state file — if you stop, the next agent reads it and continues from where you left off.
+
 Execute this cycle for each feature:
 
 - RED: Write failing test that defines expected behavior
@@ -262,7 +265,7 @@ Execute this cycle for each feature:
 Follow these scope management rules:
 
 - Observe scope boundaries: Only implement features within checklist scope
-- Track progress: Record progress with TodoWrite for each test/implementation
+- Track progress: Update checklist file status ([ ] → [~] → [*] → [o]) for each test/implementation
 - Verify completion: Check all specification tests pass
 - Document changes: Keep detailed record of all implementations
 
@@ -422,7 +425,7 @@ Step 3.5: Record Progress
 
 - Document implementation completed
 - Update coverage metrics
-- Update TodoWrite with progress
+- Update checklist file status
 
 Output: Working implementation with all tests passing
 
@@ -465,7 +468,7 @@ Step 4.4: Record Improvement
 
 - Document refactoring applied
 - Update code quality metrics
-- Update TodoWrite with progress
+- Update checklist file status
 
 Output: Clean, well-structured code with all tests passing
 
@@ -494,11 +497,13 @@ Report Generation:
 - Document any design decisions
 - Recommend follow-up actions if needed
 
-Git Operations:
+Git Operations (commit-as-proof):
 
-- Commit all changes with descriptive message
-- Create PR if configured
-- Update checklist status
+- Stage only owned files: `git add <specific files>` (NEVER `git add -A` or `git add .`)
+- Verify staging: `git diff --cached --name-only` to confirm only intended files
+- Commit with WHY: descriptive message explaining why, not what (diff shows what)
+- Record commit hash in checklist Progress Log: `[o] completed (commit: <hash>)`
+- Update checklist status: [*] → [o] only after commit hash is recorded
 
 Output: Final TDD report with coverage metrics and quality assessment
 
@@ -669,10 +674,10 @@ To prevent V8 heap memory overflow during long-running TDD sessions, this agent 
 **Usage**:
 ```bash
 # Normal execution (auto-checkpointing)
-/do run checklist-001
+/do run
 
 # Resume from checkpoint after crash
-/do run checklist-001 --resume latest
+/do run --resume latest
 ```
 
 ## Error Handling

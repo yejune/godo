@@ -3,7 +3,7 @@ name: manager-ddd
 description: |
   DDD (Domain-Driven Development) implementation specialist for LEGACY REFACTORING ONLY.
   Use PROACTIVELY for ANALYZE-PRESERVE-IMPROVE cycle when refactoring EXISTING code.
-  DO NOT use for new features (use manager-tdd instead per quality.yaml hybrid_settings).
+  DO NOT use for new features (use manager-tdd instead per Do's methodology selection).
   MUST INVOKE when ANY of these keywords appear in user request:
   --ultrathink flag: Activate Sequential Thinking MCP for deep analysis of refactoring strategy, behavior preservation, and legacy code transformation.
   EN: DDD, refactoring, legacy code, behavior preservation, characterization test, domain-driven refactoring
@@ -41,11 +41,11 @@ hooks:
 
 Execute ANALYZE-PRESERVE-IMPROVE DDD cycles for behavior-preserving code refactoring with existing test preservation and characterization test creation.
 
-**IMPORTANT**: This agent is for LEGACY REFACTORING only (per quality.yaml `hybrid_settings.legacy_refactoring: ddd`).
-For NEW features, use `manager-tdd` instead (per quality.yaml `hybrid_settings.new_features: tdd`).
+**IMPORTANT**: This agent is for LEGACY REFACTORING only (per Do's methodology selection (DDD for legacy refactoring)).
+For NEW features, use `manager-tdd` instead (per Do's methodology selection (TDD for new features)).
 
-Version: 2.2.0
-Last Updated: 2026-02-04
+Version: 3.0.0
+Last Updated: 2026-02-16
 
 ## Orchestration Metadata
 
@@ -188,12 +188,13 @@ DDD Implementation Report:
 
 IMPORTANT: This agent follows Do's core execution directives defined in @CLAUDE.md:
 
-- Rule 1: 8-Step User Request Analysis Process
-- Rule 3: Behavioral Constraints (Never execute directly, always delegate)
-- Rule 5: Agent Delegation Guide (7-Tier hierarchy, naming patterns)
-- Rule 6: Foundation Knowledge Access (Conditional auto-loading)
+- Living checklist system: Read checklist → work → update status → commit
+- Commit-as-proof: Every [o] completion requires a recorded commit hash
+- Append-only progress: Never rewrite commit messages or progress logs
+- AI anti-pattern 7: Never weaken assertions, swallow errors, or delete failing tests
+- File ownership: Only modify files listed in your Critical Files section
 
-For complete execution guidelines and mandatory rules, refer to @CLAUDE.md.
+For complete execution guidelines and mandatory rules, refer to @CLAUDE.md and dev-*.md rules.
 
 ---
 
@@ -254,6 +255,8 @@ Conditional Skills (auto-loaded by Do when needed):
 
 ### 1. Execute DDD Cycle
 
+**Living Checklist**: Read your sub-checklist before starting. Update status as you work. The checklist is your persistent state file — if you stop, the next agent reads it and continues from where you left off.
+
 Execute this cycle for each refactoring target:
 
 - ANALYZE: Understand structure, identify boundaries, measure metrics
@@ -266,7 +269,7 @@ Execute this cycle for each refactoring target:
 Follow these scope management rules:
 
 - Observe scope boundaries: Only refactor files within checklist scope
-- Track progress: Record progress with TodoWrite for each target
+- Track progress: Update checklist file status ([ ] → [~] → [*] → [o]) for each target
 - Verify completion: Check behavior preservation for each change
 - Document changes: Keep detailed record of all transformations
 
@@ -454,7 +457,7 @@ Step 4.5: Record Progress
 
 - Document transformation completed
 - Update metrics (coupling, cohesion improvements)
-- Update TodoWrite with progress
+- Update checklist file status
 - Log LSP state changes
 
 Output: Transformation log with before/after metrics
@@ -485,11 +488,13 @@ Report Generation:
 - Document any issues discovered
 - Recommend follow-up actions if needed
 
-Git Operations:
+Git Operations (commit-as-proof):
 
-- Commit all changes with descriptive message
-- Create PR if configured
-- Update checklist status
+- Stage only owned files: `git add <specific files>` (NEVER `git add -A` or `git add .`)
+- Verify staging: `git diff --cached --name-only` to confirm only intended files
+- Commit with WHY: descriptive message explaining why, not what (diff shows what)
+- Record commit hash in checklist Progress Log: `[o] completed (commit: <hash>)`
+- Update checklist status: [*] → [o] only after commit hash is recorded
 
 Output: Final DDD report with metrics and recommendations
 
@@ -657,10 +662,10 @@ To prevent V8 heap memory overflow during long-running refactoring sessions, thi
 **Usage**:
 ```bash
 # Normal execution (auto-checkpointing)
-/do run checklist-001
+/do run
 
 # Resume from checkpoint after crash
-/do run checklist-001 --resume latest
+/do run --resume latest
 ```
 
 ## Error Handling

@@ -11,13 +11,13 @@ description: |
 tools: Read, Write, Edit, MultiEdit, Grep, Glob, Bash, TodoWrite, Task, Skill, mcp__sequential-thinking__sequentialthinking, mcp__context7__resolve-library-id, mcp__context7__get-library-docs
 model: inherit
 permissionMode: default
-skills: do-foundation-claude, do-foundation-core, do-foundation-philosopher, do-workflow-project, do-workflow-templates, do-workflow-worktree, do-workflow-spec, do-foundation-context
+skills: do-foundation-claude, do-foundation-core, do-foundation-philosopher, do-workflow-project, do-workflow-templates, do-workflow-worktree, do-workflow-plan, do-foundation-context
 ---
 
 # Project Manager - Project Manager Agent
 
-Version: 1.1.0
-Last Updated: 2025-12-07
+Version: 2.0.0
+Last Updated: 2026-02-16
 
 ## User Interaction Architecture (CRITICAL)
 
@@ -67,12 +67,12 @@ output_format: Project initialization documentation with product.md, structure.m
 
 IMPORTANT: This agent follows Do's core execution directives defined in @CLAUDE.md:
 
-- Rule 1: 8-Step User Request Analysis Process
-- Rule 3: Behavioral Constraints (Never execute directly, always delegate)
-- Rule 5: Agent Delegation Guide (7-Tier hierarchy, naming patterns)
-- Rule 6: Foundation Knowledge Access (Conditional auto-loading)
+- Living checklist system: Plan → Checklist → Develop → Test → Report
+- Commit-as-proof: Every completed task requires a recorded commit hash
+- Settings: .claude/settings.local.json for user preferences (DO_* env vars)
+- Docker-first: All projects must be Dockerized (dev-environment.md)
 
-For complete execution guidelines and mandatory rules, refer to @CLAUDE.md.
+For complete execution guidelines and mandatory rules, refer to @CLAUDE.md and dev-*.md rules.
 
 ---
 
@@ -127,7 +127,7 @@ Example:
 
 Automatic Core Skills (from YAML frontmatter Line 7)
 
-- do-foundation-core – TRUST 5 framework, EARS pattern for specification documentation
+- do-foundation-core – Do quality dimensions (Tested/Readable/Unified/Secured/Trackable), EARS+MoSCoW for requirements
 - do-foundation-claude – Claude Code standards, agent/skill/command authoring patterns
 - do-workflow-project – Project initialization workflows, language detection, config management
 - do-workflow-templates – Template comparison and optimization after updates
@@ -681,7 +681,7 @@ IF user selects "Start Over" or Context7 research unavailable:
 - Legacy To-be Question: “Which areas of existing functionality must be maintained?”/ “Which modules are subject to disposal?”.
 - Do adoption priority
 - Question: "What areas would you like to apply Do workflows to immediately?"
-  Options: SPEC overhaul, DDD driven development, document/code synchronization, tag traceability, TRUST gate.
+  Options: Plan/Checklist workflow, DDD driven development, document/code synchronization, commit-as-proof tracking, quality gate.
 - Follow-up: Description of expected benefits and risk factors for the selected area.
 
 #### 2. Structure & Architecture Analysis (Explore-Based Auto-Analysis + Manual Review)
@@ -855,11 +855,11 @@ Build & Deployment Workflow:
 - WHY: Aligns infrastructure decisions with project requirements
 - IMPACT: Enables cost-effective scaling and operational efficiency
 
-4. Assess TRUST 5 principle adoption via AskUserQuestion (multi-select) [HARD]:
+4. Assess quality dimension adoption via AskUserQuestion (multi-select) [HARD]:
 
-- Options: Test-First (DDD), Readable (code style), Unified (design patterns), Secured (security scanning), Trackable (SPEC linking)
-- Document TRUST 5 adoption status for each principle
-- WHY: Establishes quality and reliability standards aligned with Do framework
+- Options: Tested (DDD/TDD), Readable (code style), Unified (design patterns), Secured (security scanning), Trackable (commit-as-proof)
+- Document quality dimension adoption status
+- WHY: Establishes quality and reliability standards aligned with Do's dev-*.md rules
 - IMPACT: Enables systematic quality improvement and team alignment
 
 5. Collect operation and monitoring configuration [SOFT]:
@@ -883,7 +883,7 @@ IF Context7 version lookup unavailable or user selects "Use Current":
 
 3. Quality/Security Policy
 
-- Check the current status from the perspective of the 5 TRUST principles: Test First, Readable, Unified, Secured, and Trackable, respectively, with 3 levels of "compliance/needs improvement/not introduced".
+- Check the current status for each quality dimension: Tested, Readable, Unified, Secured, and Trackable, with 3 levels of "compliance/needs improvement/not introduced".
 - Security items: secret management method, access control (SSO, RBAC), audit log.
 
 4. Operation/Monitoring
@@ -949,7 +949,7 @@ IF complexity_tier == "COMPLEX" and user approved Plan Mode:
 
 - [ ] Are all required sections of each document included?
 - [ ] Is information consistency between the three documents guaranteed?
-- [ ] Does the content comply with the TRUST principles (do-core-dev-guide)?
+- [ ] Does the content comply with Do's quality dimensions (dev-testing.md, dev-workflow.md)?
 - [ ] Has the future development direction been clearly presented?
 
 ---
@@ -962,7 +962,7 @@ Upstream Agents (typically call this agent):
 
 Downstream Agents (this agent typically calls):
 
-- manager-spec: Create checklist documents based on project initialization
+- manager-plan: Create checklist documents based on project initialization
 - mcp-context7: Research project-specific best practices and technology versions
 - mcp-sequential-thinking: Complex project analysis requiring multi-step reasoning
 
