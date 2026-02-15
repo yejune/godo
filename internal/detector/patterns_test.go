@@ -341,3 +341,114 @@ func TestCompileContentPatterns_MatchExamples(t *testing.T) {
 		})
 	}
 }
+
+func TestNewDefaultRegistry_PartialSkillPatternCounts(t *testing.T) {
+	reg := NewDefaultRegistry()
+
+	if got := len(reg.PartialSkillPatterns); got != 1 {
+		t.Errorf("PartialSkillPatterns count = %d, want 1", got)
+	}
+}
+
+func TestIsPartialSkill(t *testing.T) {
+	reg := NewDefaultRegistry()
+
+	if !reg.IsPartialSkill("moai-workflow-testing") {
+		t.Error("IsPartialSkill(moai-workflow-testing) = false, want true")
+	}
+
+	negatives := []string{
+		"moai-foundation-core",
+		"moai-workflow-ddd",
+		"do-foundation-claude",
+		"unknown-skill",
+		"",
+	}
+	for _, name := range negatives {
+		if reg.IsPartialSkill(name) {
+			t.Errorf("IsPartialSkill(%q) = true, want false", name)
+		}
+	}
+}
+
+func TestIsPartialPersonaModule(t *testing.T) {
+	reg := NewDefaultRegistry()
+
+	tests := []struct {
+		name         string
+		skillName    string
+		moduleRel    string
+		wantPersona  bool
+	}{
+		{
+			name:        "ddd-context7 root module",
+			skillName:   "moai-workflow-testing",
+			moduleRel:   "modules/ddd-context7.md",
+			wantPersona: true,
+		},
+		{
+			name:        "ddd-context7 submodule",
+			skillName:   "moai-workflow-testing",
+			moduleRel:   "modules/ddd-context7/advanced-features.md",
+			wantPersona: true,
+		},
+		{
+			name:        "ddd core-classes submodule",
+			skillName:   "moai-workflow-testing",
+			moduleRel:   "modules/ddd/core-classes.md",
+			wantPersona: true,
+		},
+		{
+			name:        "core module - ai-debugging",
+			skillName:   "moai-workflow-testing",
+			moduleRel:   "modules/ai-debugging.md",
+			wantPersona: false,
+		},
+		{
+			name:        "core module - debugging subdir",
+			skillName:   "moai-workflow-testing",
+			moduleRel:   "modules/debugging/debugging-workflows.md",
+			wantPersona: false,
+		},
+		{
+			name:        "SKILL.md itself",
+			skillName:   "moai-workflow-testing",
+			moduleRel:   "SKILL.md",
+			wantPersona: false,
+		},
+		{
+			name:        "core module - performance",
+			skillName:   "moai-workflow-testing",
+			moduleRel:   "modules/performance/optimization-patterns.md",
+			wantPersona: false,
+		},
+		{
+			name:        "non-matching skill name",
+			skillName:   "some-other-skill",
+			moduleRel:   "modules/ddd/core-classes.md",
+			wantPersona: false,
+		},
+		{
+			name:        "empty module path",
+			skillName:   "moai-workflow-testing",
+			moduleRel:   "",
+			wantPersona: false,
+		},
+		{
+			name:        "scripts dir (non-module)",
+			skillName:   "moai-workflow-testing",
+			moduleRel:   "scripts/with_server.py",
+			wantPersona: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := reg.IsPartialPersonaModule(tt.skillName, tt.moduleRel)
+			if got != tt.wantPersona {
+				t.Errorf("IsPartialPersonaModule(%q, %q) = %v, want %v",
+					tt.skillName, tt.moduleRel, got, tt.wantPersona)
+			}
+		})
+	}
+}

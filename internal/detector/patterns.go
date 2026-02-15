@@ -2,6 +2,7 @@ package detector
 
 import (
 	"regexp"
+	"strings"
 )
 
 // ContentPattern matches inline text strings in document bodies.
@@ -23,13 +24,14 @@ type ContentPattern struct {
 // Patterns are matched against markdown headers, content text, and
 // frontmatter fields to identify persona-specific content.
 type PatternRegistry struct {
-	HeaderPatterns  []HeaderPattern
-	PathPatterns    []PathPattern
-	SkillPatterns   []SkillPattern
-	ContentPatterns []ContentPattern // Inline text patterns for body replacement
-	WholeFileAgents []string         // agent names that are 100% persona
-	WholeFileSkills []string         // skill names that are 100% persona
-	WholeFileRules  []string         // rule files that are 100% persona
+	HeaderPatterns       []HeaderPattern
+	PathPatterns         []PathPattern
+	SkillPatterns        []SkillPattern
+	ContentPatterns      []ContentPattern      // Inline text patterns for body replacement
+	PartialSkillPatterns []PartialSkillPattern  // Skills with module-level persona classification
+	WholeFileAgents      []string               // agent names that are 100% persona
+	WholeFileSkills      []string               // skill names that are 100% persona
+	WholeFileRules       []string               // rule files that are 100% persona
 }
 
 // HeaderPattern matches markdown section headers that indicate persona content.
@@ -52,6 +54,15 @@ type PathPattern struct {
 type SkillPattern struct {
 	SkillName string // Exact skill name to match
 	Category  string // Why it is persona-specific
+}
+
+// PartialSkillPattern identifies specific modules within a skill as persona.
+// Unlike WholeFileSkills (entire skill is persona), this allows module-level
+// granularity: some modules are persona, the rest remain core.
+type PartialSkillPattern struct {
+	SkillName      string   // Skill directory name (e.g., "moai-workflow-testing")
+	PersonaModules []string // Path prefixes relative to skill dir (e.g., "modules/ddd")
+	Category       string   // Why these modules are persona-specific
 }
 
 // NewDefaultRegistry creates a PatternRegistry pre-loaded with
@@ -124,6 +135,13 @@ func NewDefaultRegistry() *PatternRegistry {
 				Description: "TRUST 5 principles reference in output style text",
 			},
 		},
+		PartialSkillPatterns: []PartialSkillPattern{
+			{
+				SkillName:      "moai-workflow-testing",
+				PersonaModules: []string{"modules/ddd"},
+				Category:       "DDD methodology modules within testing skill",
+			},
+		},
 		WholeFileAgents: []string{
 			"manager-spec",
 			"manager-ddd",
@@ -175,6 +193,35 @@ func (r *PatternRegistry) IsWholeFilePersonaRule(filename string) bool {
 	for _, ru := range r.WholeFileRules {
 		if ru == filename {
 			return true
+		}
+	}
+	return false
+}
+
+// IsPartialSkill returns true if the given skill name has partial persona
+// module patterns defined (i.e., some modules are persona, others are core).
+func (r *PatternRegistry) IsPartialSkill(skillName string) bool {
+	for _, p := range r.PartialSkillPatterns {
+		if p.SkillName == skillName {
+			return true
+		}
+	}
+	return false
+}
+
+// IsPartialPersonaModule returns true if the given file path (relative to the
+// skill directory) matches a persona module pattern for the given skill.
+// The moduleRelPath should be relative to the skill directory, e.g.,
+// "modules/ddd-context7/advanced-features.md" or "modules/ddd/core-classes.md".
+func (r *PatternRegistry) IsPartialPersonaModule(skillName, moduleRelPath string) bool {
+	for _, p := range r.PartialSkillPatterns {
+		if p.SkillName != skillName {
+			continue
+		}
+		for _, prefix := range p.PersonaModules {
+			if strings.HasPrefix(moduleRelPath, prefix) {
+				return true
+			}
 		}
 	}
 	return false
