@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/do-focus/convert/internal/model"
@@ -220,5 +221,132 @@ func TestParseFrontmatter_EmptyYAML(t *testing.T) {
 	}
 	if fm.Raw == nil {
 		t.Error("expected non-nil Raw map even for empty YAML")
+	}
+}
+
+func TestPatchFrontmatterSkills_InlineFormat_Append(t *testing.T) {
+	rawYaml := "name: builder-agent\ndescription: Agent creation specialist\nskills: moai-foundation-claude, moai-workflow-project\nmemory: user\n"
+	newSkills := []string{"moai-foundation-claude", "moai-workflow-project", "moai-persona-custom"}
+
+	result := PatchFrontmatterSkills(rawYaml, newSkills)
+
+	expected := "name: builder-agent\ndescription: Agent creation specialist\nskills: moai-foundation-claude, moai-workflow-project, moai-persona-custom\nmemory: user\n"
+	if result != expected {
+		t.Errorf("inline append mismatch.\nexpected:\n%s\ngot:\n%s", expected, result)
+	}
+}
+
+func TestPatchFrontmatterSkills_InlineFormat_Remove(t *testing.T) {
+	rawYaml := "name: test-agent\nskills: skill-a, skill-b, skill-c\nmemory: user\n"
+	newSkills := []string{"skill-a", "skill-c"}
+
+	result := PatchFrontmatterSkills(rawYaml, newSkills)
+
+	expected := "name: test-agent\nskills: skill-a, skill-c\nmemory: user\n"
+	if result != expected {
+		t.Errorf("inline remove mismatch.\nexpected:\n%s\ngot:\n%s", expected, result)
+	}
+}
+
+func TestPatchFrontmatterSkills_ListFormat_Append(t *testing.T) {
+	rawYaml := "name: expert-backend\nskills:\n    - do-foundation\n    - do-backend\nmemory: project\n"
+	newSkills := []string{"do-foundation", "do-backend", "do-quality"}
+
+	result := PatchFrontmatterSkills(rawYaml, newSkills)
+
+	expected := "name: expert-backend\nskills:\n    - do-foundation\n    - do-backend\n    - do-quality\nmemory: project\n"
+	if result != expected {
+		t.Errorf("list append mismatch.\nexpected:\n%s\ngot:\n%s", expected, result)
+	}
+}
+
+func TestPatchFrontmatterSkills_ListFormat_Remove(t *testing.T) {
+	rawYaml := "name: expert-backend\nskills:\n    - do-foundation\n    - do-legacy\n    - do-backend\nmemory: project\n"
+	newSkills := []string{"do-foundation", "do-backend"}
+
+	result := PatchFrontmatterSkills(rawYaml, newSkills)
+
+	expected := "name: expert-backend\nskills:\n    - do-foundation\n    - do-backend\nmemory: project\n"
+	if result != expected {
+		t.Errorf("list remove mismatch.\nexpected:\n%s\ngot:\n%s", expected, result)
+	}
+}
+
+func TestPatchFrontmatterSkills_NoExistingSkills_AddNew(t *testing.T) {
+	rawYaml := "name: test-agent\ndescription: Test agent\nmemory: user\n"
+	newSkills := []string{"skill-a", "skill-b"}
+
+	result := PatchFrontmatterSkills(rawYaml, newSkills)
+
+	expected := "name: test-agent\ndescription: Test agent\nmemory: user\nskills: skill-a, skill-b\n"
+	if result != expected {
+		t.Errorf("no existing skills mismatch.\nexpected:\n%s\ngot:\n%s", expected, result)
+	}
+}
+
+func TestPatchFrontmatterSkills_RemoveAllSkills(t *testing.T) {
+	rawYaml := "name: test-agent\nskills: skill-a, skill-b\nmemory: user\n"
+	newSkills := []string{}
+
+	result := PatchFrontmatterSkills(rawYaml, newSkills)
+
+	if strings.Contains(result, "skills") {
+		t.Errorf("expected skills field removed, got:\n%s", result)
+	}
+	if !strings.Contains(result, "name: test-agent") {
+		t.Errorf("expected other fields preserved, got:\n%s", result)
+	}
+}
+
+func TestPatchFrontmatterSkills_RemoveAllSkills_ListFormat(t *testing.T) {
+	rawYaml := "name: test-agent\nskills:\n    - skill-a\n    - skill-b\nmemory: user\n"
+	newSkills := []string{}
+
+	result := PatchFrontmatterSkills(rawYaml, newSkills)
+
+	if strings.Contains(result, "skills") {
+		t.Errorf("expected skills field removed, got:\n%s", result)
+	}
+	if !strings.Contains(result, "name: test-agent") || !strings.Contains(result, "memory: user") {
+		t.Errorf("expected other fields preserved, got:\n%s", result)
+	}
+}
+
+func TestPatchFrontmatterSkills_PreservesKeyOrder(t *testing.T) {
+	rawYaml := "description: |\n  Agent creation specialist\nmemory: user\nmodel: inherit\npermissionMode: bypassPermissions\nskills: moai-foundation-claude, moai-workflow-project\n"
+	newSkills := []string{"moai-foundation-claude", "moai-workflow-project", "moai-extra"}
+
+	result := PatchFrontmatterSkills(rawYaml, newSkills)
+
+	// Verify key order is preserved: description, memory, model, permissionMode, skills
+	descIdx := strings.Index(result, "description:")
+	memIdx := strings.Index(result, "memory:")
+	modelIdx := strings.Index(result, "model:")
+	permIdx := strings.Index(result, "permissionMode:")
+	skillsIdx := strings.Index(result, "skills:")
+
+	if descIdx >= memIdx || memIdx >= modelIdx || modelIdx >= permIdx || permIdx >= skillsIdx {
+		t.Errorf("key order not preserved.\ndesc=%d, mem=%d, model=%d, perm=%d, skills=%d\nresult:\n%s",
+			descIdx, memIdx, modelIdx, permIdx, skillsIdx, result)
+	}
+}
+
+func TestPatchFrontmatterSkills_NoSkills_NoChange(t *testing.T) {
+	rawYaml := "name: test-agent\ndescription: Test\n"
+	result := PatchFrontmatterSkills(rawYaml, nil)
+	if result != rawYaml {
+		t.Errorf("expected no change when no skills and nil newSkills.\nexpected:\n%s\ngot:\n%s", rawYaml, result)
+	}
+}
+
+func TestPatchFrontmatterSkills_ListFormat_2SpaceIndent(t *testing.T) {
+	rawYaml := "name: test\nskills:\n  - skill-a\n  - skill-b\n"
+	newSkills := []string{"skill-a", "skill-b", "skill-c"}
+
+	result := PatchFrontmatterSkills(rawYaml, newSkills)
+
+	expected := "name: test\nskills:\n  - skill-a\n  - skill-b\n  - skill-c\n"
+	if result != expected {
+		t.Errorf("2-space indent mismatch.\nexpected:\n%s\ngot:\n%s", expected, result)
 	}
 }

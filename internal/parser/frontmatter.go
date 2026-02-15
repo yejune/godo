@@ -149,3 +149,104 @@ func splitAndTrim(s string, sep string) []string {
 	}
 	return result
 }
+
+// PatchFrontmatterSkills modifies the skills field in raw YAML frontmatter text
+// without re-serializing the entire document. This preserves original key order,
+// formatting, and value styles (e.g., comma-separated inline vs YAML list).
+//
+// It detects the original skills format (inline comma-separated or YAML list)
+// and writes the new skills in the same format. If skills were not present in the
+// original YAML and newSkills is non-empty, a comma-separated skills line is appended.
+// If newSkills is empty and skills existed, the skills field is removed.
+func PatchFrontmatterSkills(rawYaml string, newSkills []string) string {
+	lines := strings.Split(rawYaml, "\n")
+
+	// Find the skills field
+	skillsLineIdx := -1
+	for i, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "skills:") {
+			skillsLineIdx = i
+			break
+		}
+	}
+
+	if skillsLineIdx < 0 {
+		// No existing skills field
+		if len(newSkills) == 0 {
+			return rawYaml
+		}
+		// Append a comma-separated skills line at the end
+		trimmed := strings.TrimRight(rawYaml, "\n")
+		return trimmed + "\nskills: " + strings.Join(newSkills, ", ") + "\n"
+	}
+
+	// Determine format: inline (skills: a, b) or list (skills:\n  - a\n  - b)
+	skillsLine := lines[skillsLineIdx]
+	trimmedLine := strings.TrimSpace(skillsLine)
+
+	// Check if it's inline format: "skills: value1, value2" (value after colon on same line)
+	afterColon := strings.TrimPrefix(trimmedLine, "skills:")
+	afterColon = strings.TrimSpace(afterColon)
+	isInline := afterColon != ""
+
+	if isInline {
+		// Inline format: replace just this one line
+		if len(newSkills) == 0 {
+			// Remove the skills line
+			lines = append(lines[:skillsLineIdx], lines[skillsLineIdx+1:]...)
+		} else {
+			// Preserve leading whitespace from original line
+			leading := skillsLine[:len(skillsLine)-len(strings.TrimLeft(skillsLine, " \t"))]
+			lines[skillsLineIdx] = leading + "skills: " + strings.Join(newSkills, ", ")
+		}
+		return strings.Join(lines, "\n")
+	}
+
+	// List format: "skills:\n    - a\n    - b"
+	// Find the range of list items following the skills: line
+	listStart := skillsLineIdx + 1
+	listEnd := listStart
+	for listEnd < len(lines) {
+		trimmed := strings.TrimSpace(lines[listEnd])
+		if strings.HasPrefix(trimmed, "- ") {
+			listEnd++
+		} else if trimmed == "" {
+			// Skip blank lines within the list only if there's another list item after
+			if listEnd+1 < len(lines) && strings.HasPrefix(strings.TrimSpace(lines[listEnd+1]), "- ") {
+				listEnd++
+			} else {
+				break
+			}
+		} else {
+			break
+		}
+	}
+
+	if len(newSkills) == 0 {
+		// Remove skills: line and all list items
+		lines = append(lines[:skillsLineIdx], lines[listEnd:]...)
+		return strings.Join(lines, "\n")
+	}
+
+	// Detect indentation from first list item (if any)
+	indent := "    " // default 4-space indent
+	if listStart < listEnd {
+		firstItem := lines[listStart]
+		indent = firstItem[:len(firstItem)-len(strings.TrimLeft(firstItem, " \t"))]
+	}
+
+	// Build new list items
+	var newListLines []string
+	for _, skill := range newSkills {
+		newListLines = append(newListLines, indent+"- "+skill)
+	}
+
+	// Replace: keep skills: line, replace list items
+	result := make([]string, 0, len(lines)-listEnd+skillsLineIdx+1+len(newListLines))
+	result = append(result, lines[:skillsLineIdx+1]...)
+	result = append(result, newListLines...)
+	result = append(result, lines[listEnd:]...)
+
+	return strings.Join(result, "\n")
+}

@@ -122,6 +122,9 @@ func (m *Merger) CopyPersonaFile(relPath string) (*MergeResult, error) {
 // PatchAgent applies persona patches to a core agent file that has already been
 // copied to the output directory. Patches can append/remove skills in frontmatter
 // and append content sections to the body.
+//
+// Frontmatter is patched at the raw YAML text level (not re-serialized) to
+// preserve original key order, formatting, and value styles.
 func (m *Merger) PatchAgent(relPath string) error {
 	patch, ok := m.manifest.AgentPatches[relPath]
 	if !ok {
@@ -139,16 +142,18 @@ func (m *Merger) PatchAgent(relPath string) error {
 	}
 
 	content := string(data)
-	doc, err := parser.ParseDocumentFromString(content, relPath)
-	if err != nil {
-		return &model.ErrAssembly{
-			Phase:   "patch_agent",
-			File:    relPath,
-			Message: fmt.Sprintf("parse agent: %v", err),
-		}
-	}
 
-	if doc.Frontmatter == nil {
+	// Split into raw YAML frontmatter and body.
+	rawYaml, body, hasFM := parser.SplitFrontmatter(content)
+	if !hasFM {
+		// No frontmatter to patch; handle append-content only.
+		if patch.AppendContent != "" {
+			body, err = m.appendContentToBody(content, patch.AppendContent)
+			if err != nil {
+				return err
+			}
+			return os.WriteFile(agentPath, []byte(body), 0o644)
+		}
 		return &model.ErrAssembly{
 			Phase:   "patch_agent",
 			File:    relPath,
@@ -156,15 +161,28 @@ func (m *Merger) PatchAgent(relPath string) error {
 		}
 	}
 
-	// Append skills.
+	// Parse frontmatter to get structured skills (for dedup logic).
+	fm, err := parser.ParseFrontmatter(rawYaml)
+	if err != nil {
+		return &model.ErrAssembly{
+			Phase:   "patch_agent",
+			File:    relPath,
+			Message: fmt.Sprintf("parse frontmatter: %v", err),
+		}
+	}
+
+	// Compute new skills list using structured data.
+	skills := fm.Skills
+
+	// Append skills (with dedup).
 	if len(patch.AppendSkills) > 0 {
-		existing := make(map[string]bool, len(doc.Frontmatter.Skills))
-		for _, s := range doc.Frontmatter.Skills {
+		existing := make(map[string]bool, len(skills))
+		for _, s := range skills {
 			existing[s] = true
 		}
 		for _, s := range patch.AppendSkills {
 			if !existing[s] {
-				doc.Frontmatter.Skills = append(doc.Frontmatter.Skills, s)
+				skills = append(skills, s)
 			}
 		}
 	}
@@ -175,30 +193,17 @@ func (m *Merger) PatchAgent(relPath string) error {
 		for _, s := range patch.RemoveSkills {
 			removeSet[s] = true
 		}
-		filtered := doc.Frontmatter.Skills[:0]
-		for _, s := range doc.Frontmatter.Skills {
+		filtered := skills[:0]
+		for _, s := range skills {
 			if !removeSet[s] {
 				filtered = append(filtered, s)
 			}
 		}
-		doc.Frontmatter.Skills = filtered
+		skills = filtered
 	}
 
-	// Serialize frontmatter back.
-	fmStr, err := parser.SerializeFrontmatter(doc.Frontmatter)
-	if err != nil {
-		return &model.ErrAssembly{
-			Phase:   "patch_agent",
-			File:    relPath,
-			Message: fmt.Sprintf("serialize frontmatter: %v", err),
-		}
-	}
-
-	// Extract body (everything after frontmatter).
-	_, body, hasFM := parser.SplitFrontmatter(content)
-	if !hasFM {
-		body = content
-	}
+	// Patch raw YAML text to update skills, preserving original format.
+	patchedYaml := parser.PatchFrontmatterSkills(rawYaml, skills)
 
 	// Append content from persona file if specified.
 	if patch.AppendContent != "" {
@@ -212,20 +217,14 @@ func (m *Merger) PatchAgent(relPath string) error {
 			}
 		}
 		appendStr := string(appendData)
-		// Ensure there is a newline separator before appended content.
 		if !strings.HasSuffix(body, "\n") {
 			body += "\n"
 		}
 		body += appendStr
 	}
 
-	// Reconstruct the full file.
-	var output string
-	if hasFM {
-		output = fmStr + body
-	} else {
-		output = body
-	}
+	// Reconstruct the full file with patched frontmatter.
+	output := "---\n" + patchedYaml + "---\n" + body
 
 	if err := os.WriteFile(agentPath, []byte(output), 0o644); err != nil {
 		return &model.ErrAssembly{
@@ -236,6 +235,23 @@ func (m *Merger) PatchAgent(relPath string) error {
 	}
 
 	return nil
+}
+
+// appendContentToBody appends persona content from a file to the body text.
+func (m *Merger) appendContentToBody(body, appendRelPath string) (string, error) {
+	appendPath := filepath.Join(m.personaDir, appendRelPath)
+	appendData, err := os.ReadFile(appendPath)
+	if err != nil {
+		return "", &model.ErrAssembly{
+			Phase:   "patch_agent",
+			File:    appendRelPath,
+			Message: fmt.Sprintf("read append content: %v", err),
+		}
+	}
+	if !strings.HasSuffix(body, "\n") {
+		body += "\n"
+	}
+	return body + string(appendData), nil
 }
 
 // MergeSettings reads core settings.json, injects persona-specific hooks from

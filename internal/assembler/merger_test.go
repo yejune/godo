@@ -856,3 +856,143 @@ func TestCopyHookScripts_EmptyList(t *testing.T) {
 		t.Errorf("expected 0 files written for empty hook scripts, got %d", result.FilesWritten)
 	}
 }
+
+func TestPatchAgent_PreservesInlineSkillsFormat(t *testing.T) {
+	reg := newTestRegistry(nil)
+
+	manifest := &model.PersonaManifest{
+		AgentPatches: map[string]*model.AgentPatch{
+			"agents/moai/builder-agent.md": {
+				AppendSkills: []string{"moai-persona-custom"},
+			},
+		},
+	}
+
+	coreDir := t.TempDir()
+	outputDir := t.TempDir()
+	personaDir := t.TempDir()
+
+	// Create agent file with inline comma-separated skills and specific key order.
+	agentDir := filepath.Join(outputDir, "agents", "moai")
+	if err := os.MkdirAll(agentDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	agentContent := `---
+description: |
+  Agent creation specialist for building new MoAI agents.
+memory: user
+model: inherit
+permissionMode: bypassPermissions
+skills: moai-foundation-claude, moai-workflow-project
+---
+# Builder Agent
+
+Creates new agent definitions.`
+	agentPath := filepath.Join(agentDir, "builder-agent.md")
+	if err := os.WriteFile(agentPath, []byte(agentContent), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	m := NewMerger(coreDir, personaDir, outputDir, manifest, reg)
+	err := m.PatchAgent("agents/moai/builder-agent.md")
+	if err != nil {
+		t.Fatalf("PatchAgent error: %v", err)
+	}
+
+	data, err := os.ReadFile(agentPath)
+	if err != nil {
+		t.Fatalf("read patched agent: %v", err)
+	}
+
+	output := string(data)
+
+	// Verify skills stayed inline comma-separated (not converted to YAML list).
+	if strings.Contains(output, "    - moai-foundation-claude") {
+		t.Errorf("skills should remain inline, but got YAML list format:\n%s", output)
+	}
+	if !strings.Contains(output, "skills: moai-foundation-claude, moai-workflow-project, moai-persona-custom") {
+		t.Errorf("expected inline skills with appended skill, got:\n%s", output)
+	}
+
+	// Verify key order is preserved (description before memory before model before permissionMode before skills).
+	descIdx := strings.Index(output, "description:")
+	memIdx := strings.Index(output, "memory:")
+	modelIdx := strings.Index(output, "model:")
+	permIdx := strings.Index(output, "permissionMode:")
+	skillsIdx := strings.Index(output, "skills:")
+
+	if descIdx >= memIdx || memIdx >= modelIdx || modelIdx >= permIdx || permIdx >= skillsIdx {
+		t.Errorf("key order not preserved.\ndesc=%d, mem=%d, model=%d, perm=%d, skills=%d\noutput:\n%s",
+			descIdx, memIdx, modelIdx, permIdx, skillsIdx, output)
+	}
+
+	// Verify body is preserved.
+	if !strings.Contains(output, "# Builder Agent") {
+		t.Errorf("expected body content preserved:\n%s", output)
+	}
+}
+
+func TestPatchAgent_PreservesListSkillsFormat(t *testing.T) {
+	reg := newTestRegistry(nil)
+
+	manifest := &model.PersonaManifest{
+		AgentPatches: map[string]*model.AgentPatch{
+			"agents/expert-backend.md": {
+				AppendSkills: []string{"do-quality"},
+			},
+		},
+	}
+
+	coreDir := t.TempDir()
+	outputDir := t.TempDir()
+	personaDir := t.TempDir()
+
+	agentDir := filepath.Join(outputDir, "agents")
+	if err := os.MkdirAll(agentDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	// Use YAML list format with 4-space indent.
+	agentContent := `---
+name: expert-backend
+description: Backend development expert
+skills:
+    - do-foundation
+    - do-backend
+memory: project
+---
+# Expert Backend
+
+Implementation agent.`
+	agentPath := filepath.Join(agentDir, "expert-backend.md")
+	if err := os.WriteFile(agentPath, []byte(agentContent), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	m := NewMerger(coreDir, personaDir, outputDir, manifest, reg)
+	err := m.PatchAgent("agents/expert-backend.md")
+	if err != nil {
+		t.Fatalf("PatchAgent error: %v", err)
+	}
+
+	data, err := os.ReadFile(agentPath)
+	if err != nil {
+		t.Fatalf("read patched agent: %v", err)
+	}
+
+	output := string(data)
+
+	// Verify skills stayed in list format with same indentation.
+	if !strings.Contains(output, "skills:\n    - do-foundation\n    - do-backend\n    - do-quality") {
+		t.Errorf("expected list format with 4-space indent preserved:\n%s", output)
+	}
+
+	// Verify key order preserved.
+	nameIdx := strings.Index(output, "name:")
+	descIdx := strings.Index(output, "description:")
+	skillsIdx := strings.Index(output, "skills:")
+	memIdx := strings.Index(output, "memory:")
+
+	if nameIdx >= descIdx || descIdx >= skillsIdx || skillsIdx >= memIdx {
+		t.Errorf("key order not preserved:\n%s", output)
+	}
+}
