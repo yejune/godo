@@ -139,17 +139,18 @@ func TestE2E_ExtractFullDirectory(t *testing.T) {
 		t.Errorf("manifest.HookScripts[0] = %q, want %q", manifest.HookScripts[0], "hooks/pre-commit.sh")
 	}
 
-	// ----- Settings split: hooks -> persona, rest -> core -----
+	// ----- Settings split: persona keys -> persona, rest -> core -----
 	if manifest.Settings == nil {
 		t.Fatal("manifest.Settings is nil, want hooks key")
 	}
 	if _, ok := manifest.Settings["hooks"]; !ok {
 		t.Error("manifest.Settings missing 'hooks' key (should be persona)")
 	}
-	// Core fields (outputStyle, permissions) should NOT be in persona settings
-	if _, ok := manifest.Settings["outputStyle"]; ok {
-		t.Error("manifest.Settings should NOT contain 'outputStyle' (core field)")
+	// outputStyle is now classified as persona-specific
+	if _, ok := manifest.Settings["outputStyle"]; !ok {
+		t.Error("manifest.Settings missing 'outputStyle' (should be persona)")
 	}
+	// permissions is a core field and should NOT be in persona settings
 	if _, ok := manifest.Settings["permissions"]; ok {
 		t.Error("manifest.Settings should NOT contain 'permissions' (core field)")
 	}

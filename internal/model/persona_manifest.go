@@ -38,6 +38,10 @@ type PersonaManifest struct {
 	// Settings overrides (persona-specific settings.json fields like hooks)
 	Settings map[string]interface{} `yaml:"settings,omitempty"`
 
+	// SkillMappings maps old skill names to new ones for global replacement
+	// in agent frontmatter during assembly (e.g., "moai-foundation-quality": "do-foundation-checklist")
+	SkillMappings map[string]string `yaml:"skill_mappings,omitempty"`
+
 	// Installer configuration for the persona's CLI binary
 	Installer *InstallerConfig `yaml:"installer,omitempty"`
 

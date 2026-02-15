@@ -345,6 +345,14 @@ func mergeManifest(dst, src *model.PersonaManifest) {
 		}
 		dst.PersonaFiles[k] = v
 	}
+
+	// Merge SkillMappings
+	for k, v := range src.SkillMappings {
+		if dst.SkillMappings == nil {
+			dst.SkillMappings = make(map[string]string)
+		}
+		dst.SkillMappings[k] = v
+	}
 }
 
 // registerSlots scans a core document's sections for slot markers and adds

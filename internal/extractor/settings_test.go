@@ -12,7 +12,6 @@ func TestExtractSettings_WithHooks(t *testing.T) {
   "permissions": {
     "allow": ["Read", "Write"]
   },
-  "outputStyle": "pair",
   "hooks": {
     "PreToolUse": [
       {
@@ -33,12 +32,9 @@ func TestExtractSettings_WithHooks(t *testing.T) {
 		t.Fatalf("ExtractSettings returned error: %v", err)
 	}
 
-	// Core should have permissions and outputStyle, but not hooks
+	// Core should have permissions, but not hooks
 	if _, ok := core["permissions"]; !ok {
 		t.Error("core missing 'permissions' key")
-	}
-	if _, ok := core["outputStyle"]; !ok {
-		t.Error("core missing 'outputStyle' key")
 	}
 	if _, ok := core["hooks"]; ok {
 		t.Error("core should not contain 'hooks' key")
@@ -47,9 +43,6 @@ func TestExtractSettings_WithHooks(t *testing.T) {
 	// Persona should have hooks only
 	if _, ok := persona["hooks"]; !ok {
 		t.Error("persona missing 'hooks' key")
-	}
-	if len(persona) != 1 {
-		t.Errorf("persona should only have 'hooks', got %d keys: %v", len(persona), keys(persona))
 	}
 
 	// Verify hooks structure is preserved
@@ -69,8 +62,7 @@ func TestExtractSettings_WithoutHooks(t *testing.T) {
 	input := []byte(`{
   "permissions": {
     "allow": ["Read"]
-  },
-  "outputStyle": "direct"
+  }
 }`)
 
 	core, persona, err := ExtractSettings(input)
@@ -78,14 +70,11 @@ func TestExtractSettings_WithoutHooks(t *testing.T) {
 		t.Fatalf("ExtractSettings returned error: %v", err)
 	}
 
-	if len(core) != 2 {
-		t.Errorf("core should have 2 keys, got %d: %v", len(core), keys(core))
+	if len(core) != 1 {
+		t.Errorf("core should have 1 key (permissions), got %d: %v", len(core), keys(core))
 	}
 	if _, ok := core["permissions"]; !ok {
 		t.Error("core missing 'permissions'")
-	}
-	if _, ok := core["outputStyle"]; !ok {
-		t.Error("core missing 'outputStyle'")
 	}
 
 	if len(persona) != 0 {
@@ -109,6 +98,156 @@ func TestExtractSettings_Empty(t *testing.T) {
 	}
 }
 
+func TestExtractSettings_PersonaKeyClassification(t *testing.T) {
+	input := []byte(`{
+  "permissions": {
+    "allow": ["Read", "Write", "Bash"]
+  },
+  "outputStyle": "pair",
+  "plansDirectory": ".do/plans",
+  "attribution": {
+    "commit": "Do-Focus AI <do@example.com>"
+  },
+  "statusLine": {
+    "command": ".do/status_line.sh"
+  },
+  "hooks": {
+    "PreToolUse": [{"command": "godo hook pre-tool"}]
+  },
+  "experimental": true,
+  "cleanupPeriodDays": 30
+}`)
+
+	core, persona, err := ExtractSettings(input)
+	if err != nil {
+		t.Fatalf("ExtractSettings returned error: %v", err)
+	}
+
+	// Core should have: permissions, experimental, cleanupPeriodDays
+	expectedCore := []string{"permissions", "experimental", "cleanupPeriodDays"}
+	for _, k := range expectedCore {
+		if _, ok := core[k]; !ok {
+			t.Errorf("core missing expected key %q", k)
+		}
+	}
+
+	// Core should NOT have persona keys
+	personaKeys := []string{"outputStyle", "plansDirectory", "attribution", "statusLine", "hooks"}
+	for _, k := range personaKeys {
+		if _, ok := core[k]; ok {
+			t.Errorf("core should not contain persona key %q", k)
+		}
+	}
+
+	// Persona should have all persona keys
+	for _, k := range personaKeys {
+		if _, ok := persona[k]; !ok {
+			t.Errorf("persona missing expected key %q", k)
+		}
+	}
+
+	// Persona should NOT have core keys
+	for _, k := range expectedCore {
+		if _, ok := persona[k]; ok {
+			t.Errorf("persona should not contain core key %q", k)
+		}
+	}
+
+	// Verify persona values preserved
+	if persona["outputStyle"] != "pair" {
+		t.Errorf("expected persona outputStyle 'pair', got %v", persona["outputStyle"])
+	}
+	if persona["plansDirectory"] != ".do/plans" {
+		t.Errorf("expected persona plansDirectory '.do/plans', got %v", persona["plansDirectory"])
+	}
+}
+
+func TestExtractSettings_EnvFieldSplitting(t *testing.T) {
+	input := []byte(`{
+  "permissions": {"allow": ["Read"]},
+  "env": {
+    "DO_MODE": "focus",
+    "DO_USER_NAME": "max",
+    "MOAI_CONFIG_SOURCE": "yaml"
+  }
+}`)
+
+	core, persona, err := ExtractSettings(input)
+	if err != nil {
+		t.Fatalf("ExtractSettings returned error: %v", err)
+	}
+
+	// Core env should have DO_MODE and DO_USER_NAME
+	coreEnv, ok := core["env"].(map[string]interface{})
+	if !ok {
+		t.Fatal("core should have 'env' as map")
+	}
+	if _, ok := coreEnv["DO_MODE"]; !ok {
+		t.Error("core env missing 'DO_MODE'")
+	}
+	if _, ok := coreEnv["DO_USER_NAME"]; !ok {
+		t.Error("core env missing 'DO_USER_NAME'")
+	}
+	if _, ok := coreEnv["MOAI_CONFIG_SOURCE"]; ok {
+		t.Error("core env should not contain 'MOAI_CONFIG_SOURCE'")
+	}
+
+	// Persona env should have MOAI_CONFIG_SOURCE
+	personaEnv, ok := persona["env"].(map[string]interface{})
+	if !ok {
+		t.Fatal("persona should have 'env' as map")
+	}
+	if _, ok := personaEnv["MOAI_CONFIG_SOURCE"]; !ok {
+		t.Error("persona env missing 'MOAI_CONFIG_SOURCE'")
+	}
+	if len(personaEnv) != 1 {
+		t.Errorf("persona env should have 1 key, got %d: %v", len(personaEnv), personaEnv)
+	}
+}
+
+func TestExtractSettings_EnvAllCore(t *testing.T) {
+	input := []byte(`{
+  "env": {
+    "DO_MODE": "focus",
+    "DO_USER_NAME": "max"
+  }
+}`)
+
+	core, persona, err := ExtractSettings(input)
+	if err != nil {
+		t.Fatalf("ExtractSettings returned error: %v", err)
+	}
+
+	// All env keys are core, so persona should have no env
+	if _, ok := core["env"]; !ok {
+		t.Error("core should have 'env'")
+	}
+	if _, ok := persona["env"]; ok {
+		t.Error("persona should not have 'env' when all env keys are core")
+	}
+}
+
+func TestExtractSettings_EnvAllPersona(t *testing.T) {
+	input := []byte(`{
+  "env": {
+    "MOAI_CONFIG_SOURCE": "yaml"
+  }
+}`)
+
+	core, persona, err := ExtractSettings(input)
+	if err != nil {
+		t.Fatalf("ExtractSettings returned error: %v", err)
+	}
+
+	// All env keys are persona, so core should have no env
+	if _, ok := core["env"]; ok {
+		t.Error("core should not have 'env' when all env keys are persona")
+	}
+	if _, ok := persona["env"]; !ok {
+		t.Error("persona should have 'env'")
+	}
+}
+
 func TestExtractSettings_RoundTrip(t *testing.T) {
 	input := []byte(`{
   "permissions": {
@@ -123,7 +262,12 @@ func TestExtractSettings_RoundTrip(t *testing.T) {
       }
     ]
   },
-  "experimental": true
+  "experimental": true,
+  "plansDirectory": ".do/plans",
+  "env": {
+    "DO_MODE": "focus",
+    "MOAI_CONFIG_SOURCE": "yaml"
+  }
 }`)
 
 	core, persona, err := ExtractSettings(input)
@@ -131,27 +275,35 @@ func TestExtractSettings_RoundTrip(t *testing.T) {
 		t.Fatalf("ExtractSettings returned error: %v", err)
 	}
 
-	// Merge core + persona and verify all original keys are present
-	merged := make(map[string]interface{})
-	for k, v := range core {
-		merged[k] = v
-	}
-	for k, v := range persona {
-		merged[k] = v
-	}
-
-	// Parse original for comparison
+	// Merge core + persona env fields and top-level fields
+	// All original keys should be accounted for
 	var original map[string]interface{}
 	if err := json.Unmarshal(input, &original); err != nil {
 		t.Fatalf("failed to parse original: %v", err)
 	}
 
-	if len(merged) != len(original) {
-		t.Errorf("round-trip key count mismatch: merged=%d, original=%d", len(merged), len(original))
-	}
+	// Check all non-env top-level keys are in either core or persona
 	for k := range original {
-		if _, ok := merged[k]; !ok {
+		if k == "env" {
+			continue // env is split, checked separately
+		}
+		_, inCore := core[k]
+		_, inPersona := persona[k]
+		if !inCore && !inPersona {
 			t.Errorf("round-trip missing key: %q", k)
+		}
+	}
+
+	// Check env sub-keys are all accounted for
+	if origEnv, ok := original["env"].(map[string]interface{}); ok {
+		coreEnv, _ := core["env"].(map[string]interface{})
+		personaEnv, _ := persona["env"].(map[string]interface{})
+		for k := range origEnv {
+			_, inCore := coreEnv[k]
+			_, inPersona := personaEnv[k]
+			if !inCore && !inPersona {
+				t.Errorf("round-trip missing env key: %q", k)
+			}
 		}
 	}
 }
@@ -165,6 +317,32 @@ func TestExtractSettings_InvalidJSON(t *testing.T) {
 	}
 }
 
+func TestExtractSettings_BackwardCompat_HooksOnly(t *testing.T) {
+	// Verify backward compatibility: settings with only hooks
+	// still works the same way as the original implementation.
+	input := []byte(`{
+  "permissions": {"allow": ["Read"]},
+  "outputStyle": "pair",
+  "hooks": {"PreToolUse": [{"command": "test"}]}
+}`)
+
+	core, persona, err := ExtractSettings(input)
+	if err != nil {
+		t.Fatalf("ExtractSettings returned error: %v", err)
+	}
+
+	// With the new classification, outputStyle is now persona too
+	if _, ok := core["permissions"]; !ok {
+		t.Error("core missing 'permissions'")
+	}
+	if _, ok := persona["hooks"]; !ok {
+		t.Error("persona missing 'hooks'")
+	}
+	if _, ok := persona["outputStyle"]; !ok {
+		t.Error("persona missing 'outputStyle'")
+	}
+}
+
 func TestWriteSettingsFiles(t *testing.T) {
 	coreDir := t.TempDir()
 	personaDir := t.TempDir()
@@ -173,7 +351,6 @@ func TestWriteSettingsFiles(t *testing.T) {
 		"permissions": map[string]interface{}{
 			"allow": []interface{}{"Read", "Write"},
 		},
-		"outputStyle": "pair",
 	}
 	persona := map[string]interface{}{
 		"hooks": map[string]interface{}{
@@ -183,6 +360,7 @@ func TestWriteSettingsFiles(t *testing.T) {
 				},
 			},
 		},
+		"outputStyle": "pair",
 	}
 
 	err := WriteSettingsFiles(coreDir, personaDir, core, persona)
@@ -201,9 +379,6 @@ func TestWriteSettingsFiles(t *testing.T) {
 	}
 	if _, ok := coreRead["permissions"]; !ok {
 		t.Error("settings-core.json missing 'permissions'")
-	}
-	if _, ok := coreRead["outputStyle"]; !ok {
-		t.Error("settings-core.json missing 'outputStyle'")
 	}
 
 	// Verify persona file
@@ -225,7 +400,9 @@ func TestWriteSettingsFiles_EmptyPersona(t *testing.T) {
 	personaDir := t.TempDir()
 
 	core := map[string]interface{}{
-		"outputStyle": "direct",
+		"permissions": map[string]interface{}{
+			"allow": []interface{}{"Read"},
+		},
 	}
 	persona := map[string]interface{}{}
 
@@ -276,6 +453,17 @@ func TestWriteSettingsFiles_IndentFormat(t *testing.T) {
 	expected := "{\n  \"outputStyle\": \"pair\"\n}\n"
 	if string(data) != expected {
 		t.Errorf("settings-core.json format mismatch\ngot:  %q\nwant: %q", string(data), expected)
+	}
+}
+
+func TestSplitEnvField_NonMapValue(t *testing.T) {
+	// env value that isn't a map should return nil, nil
+	core, persona := splitEnvField("not a map")
+	if core != nil {
+		t.Errorf("expected nil core for non-map env, got %v", core)
+	}
+	if persona != nil {
+		t.Errorf("expected nil persona for non-map env, got %v", persona)
 	}
 }
 
