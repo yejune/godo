@@ -205,6 +205,15 @@ func runExtract(cmd *cobra.Command, args []string) error {
 		outputPersonaName = "default"
 	}
 
+	// Populate brand identity fields on the manifest.
+	// These are used by the assembler to deslotify core templates
+	// (replacing {{slot:BRAND}} etc. with the persona's brand values).
+	if outputPersonaName != "default" {
+		manifest.Brand = outputPersonaName
+		manifest.BrandDir = "." + outputPersonaName
+		manifest.BrandCmd = "/" + outputPersonaName
+	}
+
 	// Save persona manifest to <out>/personas/<name>/manifest.yaml
 	personaDir := filepath.Join(extractOut, "personas", outputPersonaName)
 	if err := os.MkdirAll(personaDir, 0o755); err != nil {
