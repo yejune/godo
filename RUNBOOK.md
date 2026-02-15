@@ -586,6 +586,22 @@ moai-adk의 28개 에이전트 중 **core**(22개)와 **persona**(6개)로 분�
 
 **핵심 인사이트**: moai는 "skill -> progressive disclosure"로 지식을 로드하지만, do는 "rules -> 항상 로드"로 직접 주입한다. 따라서 override skill 변환이 아니라 rules 유지가 올바른 전략이다. `agent_patches`도 비워둔다.
 
+#### dev-* 개발 규칙 (Do 페르소나 운영 백본)
+
+Do 페르소나 패키지에는 dev-* 개발 규칙 파일들이 포함된다. 이 규칙들은 Do의 체크리스트 시스템, commit-as-proof, Real DB 테스트, Docker-first 환경을 **실제로 강제하는 메커니즘**이다. 이것들 없이는 Do의 워크플로우 철학이 선언만 남고 실행이 불가능하다.
+
+| 규칙 파일 | 강제하는 Do 철학 | moai 대응 |
+|----------|----------------|----------|
+| `dev-checklist.md` | 6종 상태 전이, 커밋 해시 필수, 서브 체크리스트 템플릿, Analysis/Architecture 템플릿 | moai는 SPEC 문서 + TRUST 5로 대체 |
+| `dev-workflow.md` | 복잡도 판단, Analysis->Architecture->Plan 순서, 에이전트 위임, 커밋 규율 | moai는 SPEC workflow (Plan/Run/Sync)로 대체 |
+| `dev-testing.md` | AI 안티패턴 7종 금지, Real DB only, FIRST 원칙, 변이 테스트 사고방식 | moai는 TRUST 5 Tested 기둥으로 부분 대응 |
+| `dev-environment.md` | Docker-first, bootapp 도메인, .env 금지, 12-Factor 원칙 | 양쪽 공유 (core 규칙) |
+| `file-reading.md` | 4단계 Progressive Loading, 토큰 예산 인식 | 양쪽 공유 (core 규칙) |
+
+**Progress Log 타임스탬프**: Do의 체크리스트 Progress Log는 **초 단위 정밀도**(HH:MM:SS)를 사용한다. 에이전트 작업 속도는 인간과 달라 분 단위로는 이벤트 순서가 모호해지기 때문이다.
+
+**버전업 시 주의**: moai가 core rules(dev-environment.md, file-reading.md)를 변경하면 자동 반영되지만, Do 전용 규칙(dev-checklist.md, dev-workflow.md, dev-testing.md)은 Do 페르소나의 정체성 경계에 속하므로 수동 검토가 필요하다. 특히 `dev-checklist.md`의 상태 전이 규칙과 `dev-testing.md`의 AI 안티패턴 7종은 Do 고유 철학이므로 moai 변경에 의해 덮어씌워져서는 안 된다.
+
 ### 5.3 기타 Persona 파일 매핑
 
 #### CLAUDE.md

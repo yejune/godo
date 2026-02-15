@@ -1,6 +1,6 @@
 # Do vs MoAI 비교 분석
 
-**Version**: 2.2.0
+**Version**: 2.3.0
 **Date**: 2026-02-16
 **Purpose**: Do와 MoAI 간의 철학적 차이를 이해하기 위한 기초 참조 문서
 
@@ -941,15 +941,19 @@ EARS 요구사항 작성 (analysis.md)
 - `do-lang-*`: 16개 프로그래밍 언어
 - `do-library-*`, `do-platform-*`, `do-tool-*`, `do-framework-*` 등.
 
-### 11.3 공유 개발 규칙
+### 11.3 공유 개발 규칙 (dev-* rules)
 
-| 규칙 파일 | 범위 |
-|----------|------|
-| `dev-environment.md` | Docker-first, bootapp 도메인, .env 금지 |
-| `dev-testing.md` | Real DB only, AI 안티패턴, FIRST 원칙 |
-| `dev-workflow.md` | 복잡도 판단, Read Before Write, 에러 처리 |
-| `dev-checklist.md` | 체크리스트 시스템, 상태 기호, 서브 체크리스트 템플릿 |
-| `file-reading.md` | 4단계 파일 읽기 최적화 |
+이 규칙들은 원래 core 계층에 위치했으나, Do 페르소나 패키지의 **운영 백본(operational backbone)**으로 포함된다. dev-* 규칙 없이는 체크리스트 시스템, commit-as-proof, Real DB 테스트, Docker-first 환경이 작동하지 않는다 -- 이것들이 Do의 워크플로우를 실제로 강제하는 메커니즘이기 때문이다.
+
+| 규칙 파일 | 범위 | Do 워크플로우에서의 역할 |
+|----------|------|----------------------|
+| `dev-checklist.md` | 체크리스트 시스템, 6종 상태, 서브 체크리스트 템플릿, Analysis/Architecture 템플릿 | 체크리스트 기반 워크플로우의 핵심 -- 상태 전이, 세분화, 커밋 증명 규칙을 정의 |
+| `dev-workflow.md` | 복잡도 판단, Read Before Write, 에러 처리, 커밋 규율 | 작업 흐름 전체를 제어 -- Analysis->Architecture->Plan 순서, 에이전트 위임 규칙 |
+| `dev-testing.md` | Real DB only, AI 안티패턴 7종, FIRST 원칙, 변이 테스트 사고방식 | 테스트 철학의 실체 -- 안티패턴 금지, 테스트 데이터 관리, 병렬성 안전 규칙 |
+| `dev-environment.md` | Docker-first, bootapp 도메인, .env 금지, 12-Factor 원칙 | 개발 환경 표준 -- 컨테이너 명령 실행, 네트워크, 빌드 규칙 |
+| `file-reading.md` | 4단계 파일 읽기 최적화 (크기별 Progressive Loading) | 토큰 효율성 -- 대용량 파일 읽기 시 토큰 낭비 방지 |
+
+**Progress Log 타임스탬프 규칙**: 체크리스트 Progress Log의 타임스탬프는 **초 단위 정밀도**(HH:MM:SS)를 사용한다. 에이전트의 작업 속도는 인간과 다르다 -- 분 단위(HH:MM)로는 여러 상태 전이가 동일 타임스탬프를 가질 수 있어 순서가 모호해진다. 초 단위가 이벤트 순서를 명확히 보장한다.
 
 ### 11.4 공유 아키텍처 패턴
 
