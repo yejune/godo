@@ -190,3 +190,13 @@
 | Phase 7 (rules 갱신) | #20 | [o] |
 | Phase 8 (skills 철학 반영) | #21, #22 | [o] |
 | Phase 9 (commands 갱신) | #23, #24 | [o] #23 / [ ] #24 |
+
+- [o] #25 Phase 10a: dev-* 규칙 파일 5개를 페르소나 패키지에 복사 (5파일)
+  - 담당: expert-backend
+  - 파일: rules/dev-checklist.md, dev-workflow.md, dev-testing.md, dev-environment.md, file-reading.md
+  - 소스: do-focus .claude/rules/ (동일 복사, 변경 없음)
+
+- [o] #26 Phase 10b: 소스와 동일성 검증 (diff)
+  - 담당: expert-testing
+  - 검증: 5개 파일 전부 `diff` 결과 IDENTICAL 확인 완료
+  - depends on: #25

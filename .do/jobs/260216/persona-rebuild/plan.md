@@ -273,3 +273,34 @@ Phase 6-9는 Phase 1-5와 **완전 독립** — 다른 파일셋이므로 병렬
 **Author**: plan agent
 **Status**: Plan complete
 **Next Step**: Checklist 작성
+
+---
+
+## 변경 이력
+
+### 2026-02-16 Phase 10 추가
+- Phase 10: dev-* 개발 규칙 파일을 페르소나 패키지에 추가
+
+---
+
+### Phase 10: dev-* 규칙 파일 페르소나 패키지 추가
+
+**목적**: do-focus의 핵심 개발 규칙(dev-checklist, dev-workflow, dev-testing, dev-environment, file-reading)을 convert 페르소나 패키지에 포함 — 배포 시 사용자 프로젝트에 설치되도록
+
+**작업 내용**:
+- do-focus `.claude/rules/` 에서 5개 dev-* 규칙 파일을 `personas/do/rules/`에 동일 복사
+- 소스와 동일성 검증 (diff)
+- 파일: dev-checklist.md, dev-workflow.md, dev-testing.md, dev-environment.md, file-reading.md
+
+**변경 파일**: 5개 (신규 — 페르소나 패키지에 추가)
+**의존성**: 없음 (Phase 1-9와 독립)
+**검증**: `diff` 명령으로 소스와 동일성 확인
+
+### File Impact Summary (Phase 10)
+
+### 신규 (Phase 10 — rules)
+- `personas/do/rules/dev-checklist.md`
+- `personas/do/rules/dev-workflow.md`
+- `personas/do/rules/dev-testing.md`
+- `personas/do/rules/dev-environment.md`
+- `personas/do/rules/file-reading.md`
