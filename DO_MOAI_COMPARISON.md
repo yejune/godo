@@ -1,867 +1,856 @@
-# Do vs MoAI: A Deep Philosophical and Architectural Comparison
+# Do vs MoAI 비교 분석
 
 **Version**: 2.1.0
 **Date**: 2026-02-16
-**Purpose**: Foundational reference for understanding the philosophical divergence between Do and MoAI
+**Purpose**: Do와 MoAI 간의 철학적 차이를 이해하기 위한 기초 참조 문서
 
 ---
 
-## Executive Summary
+## 요약
 
-MoAI and Do share a common codebase of agents, skills, and development rules, but they have diverged into fundamentally different philosophies of AI-assisted development.
+MoAI와 Do는 에이전트, 스킬, 개발 규칙이라는 공통 코드베이스를 공유하지만, 근본적으로 다른 AI 지원 개발 철학으로 분기했다.
 
-**MoAI** is a *specification-first orchestrator*. It believes that rigorous upfront planning (SPEC documents in EARS format), fixed-phase token budgets (Plan 30K / Run 180K / Sync 40K), and branded quality frameworks (TRUST 5) produce the best outcomes. MoAI always delegates -- there is no mode where it writes code directly.
+**MoAI**는 *명세 우선 오케스트레이터*다. 엄격한 사전 계획(EARS 형식의 SPEC 문서), 고정 단계별 토큰 예산(Plan 30K / Run 180K / Sync 40K), 브랜드화된 품질 프레임워크(TRUST 5)가 최선의 결과를 낳는다고 믿는다. MoAI는 항상 위임한다 -- 직접 코드를 작성하는 모드는 없다.
 
-**Do** is an *execution-first adaptive orchestrator*. It believes that small iterative cycles (checklist-driven), flexible token management (/clear at checklist boundaries), battle-tested anti-pattern rules born from real experience, and a persona system that gives the AI a human-like presence produce better outcomes in practice. Do adapts its execution strategy to the task at hand -- sometimes delegating, sometimes writing code directly, sometimes leading a parallel team.
+**Do**는 *실행 우선 적응형 오케스트레이터*다. 작은 반복 주기(체크리스트 기반), 유연한 토큰 관리(체크리스트 경계에서의 /clear), 실제 경험에서 탄생한 실전 안티패턴 규칙, 그리고 AI에 인간적 존재감을 부여하는 페르소나 시스템이 실무에서 더 나은 결과를 만든다고 믿는다. Do는 작업 특성에 맞춰 실행 전략을 조정한다 -- 때로는 위임하고, 때로는 직접 코드를 작성하고, 때로는 병렬 팀을 이끈다.
 
-This document explores the WHY behind each framework's choices, documents what Do adopts from MoAI and what it rejects (with reasons), and maps the philosophical territory between the two systems.
-
----
-
-## Table of Contents
-
-1. [Core Philosophy Comparison](#1-core-philosophy-comparison)
-2. [The AI Anti-Pattern 7: Do's Core Identity](#2-the-ai-anti-pattern-7-dos-core-identity)
-3. [Workflow Philosophy: SPEC vs Checklist](#3-workflow-philosophy-spec-vs-checklist)
-4. [Token Management Strategies](#4-token-management-strategies)
-5. [Quality Gate Comparison](#5-quality-gate-comparison)
-6. [The Persona Dimension](#6-the-persona-dimension)
-7. [Execution Mode Architecture](#7-execution-mode-architecture)
-8. [Hook Architecture and Tool Matching](#8-hook-architecture-and-tool-matching)
-9. [File-Detection Triggers](#9-file-detection-triggers)
-10. [Adoption Decisions: What Do Takes, What It Rejects](#10-adoption-decisions-what-do-takes-what-it-rejects)
-11. [Shared DNA: The Common Foundation](#11-shared-dna-the-common-foundation)
-12. [Architecture Decision Records](#12-architecture-decision-records)
-13. [Terminology Map](#13-terminology-map)
-14. [Do's Vision: The Best Team Orchestrator](#14-dos-vision-the-best-team-orchestrator)
+이 문서는 각 프레임워크의 선택에 담긴 WHY를 탐구하고, Do가 MoAI에서 채택한 것과 거부한 것(사유 포함)을 기록하며, 두 시스템 사이의 철학적 지형을 매핑한다.
 
 ---
 
-## 1. Core Philosophy Comparison
+## 목차
 
-### 1.1 Identity and Language
+1. [핵심 철학 비교](#1-핵심-철학-비교)
+2. [AI 안티패턴 7: Do의 핵심 정체성](#2-ai-안티패턴-7-dos-핵심-정체성)
+3. [워크플로우 철학: SPEC vs 체크리스트](#3-워크플로우-철학-spec-vs-체크리스트)
+4. [토큰 관리 전략](#4-토큰-관리-전략)
+5. [품질 게이트 비교](#5-품질-게이트-비교)
+6. [페르소나 차원](#6-페르소나-차원)
+7. [실행 모드 아키텍처](#7-실행-모드-아키텍처)
+8. [Hook 아키텍처와 Tool Matching](#8-hook-아키텍처와-tool-matching)
+9. [파일 감지 트리거](#9-파일-감지-트리거)
+10. [채택 결정: Do가 취한 것과 거부한 것](#10-채택-결정-do가-취한-것과-거부한-것)
+11. [공유 DNA: 공통 기반](#11-공유-dna-공통-기반)
+12. [아키텍처 결정 기록](#12-아키텍처-결정-기록)
+13. [용어 매핑](#13-용어-매핑)
+14. [Do의 비전: 최고의 팀 오케스트레이터](#14-dos-비전-최고의-팀-오케스트레이터)
 
-The most visible difference is how each system declares itself.
+---
 
-**MoAI** identifies in English, in the third person, as an institutional role:
+## 1. 핵심 철학 비교
+
+### 1.1 정체성과 언어
+
+가장 눈에 띄는 차이는 각 시스템이 스스로를 선언하는 방식이다.
+
+**MoAI**는 영어로, 3인칭으로, 제도적 역할로 자신을 정의한다:
 > "MoAI is the Strategic Orchestrator for Claude Code."
 
-**Do** identifies in Korean, in the first person, as an action:
-> "나는 Do다. 말하면 한다." (I am Do. Say it, and it's done.)
+**Do**는 한국어로, 1인칭으로, 행동으로 자신을 선언한다:
+> "나는 Do다. 말하면 한다."
 
-This is not merely a translation difference. MoAI describes what the system *is* (a strategic orchestrator). Do declares what the system *does* (it acts on command). The name "Do" is itself a verb -- the Korean word "하다" (to do). Every design decision in Do flows from this action-first identity.
+이것은 단순한 번역 차이가 아니다. MoAI는 시스템이 *무엇인지*를 서술한다(전략적 오케스트레이터). Do는 시스템이 *무엇을 하는지*를 선언한다(명령하면 실행한다). "Do"라는 이름 자체가 동사다 -- 한국어의 "하다". Do의 모든 설계 결정은 이 행동 우선 정체성에서 흘러나온다.
 
-Do has three declarations, one per execution mode:
-- **Do**: "나는 Do다. 말하면 한다." -- The strategic orchestrator
-- **Focus**: "나는 Focus다. 집중해서 한다." -- The focused executor
-- **Team**: "나는 Team이다. 팀을 이끈다." -- The team leader
+Do에는 실행 모드마다 하나씩, 세 가지 선언이 있다:
+- **Do**: "나는 Do다. 말하면 한다." -- 전략적 오케스트레이터
+- **Focus**: "나는 Focus다. 집중해서 한다." -- 집중 실행자
+- **Team**: "나는 Team이다. 팀을 이끈다." -- 팀 리더
 
-All three use the Korean first-person "나" (I) and end with an imperative statement. MoAI has no equivalent -- it has a single identity across all contexts.
+세 가지 모두 한국어 1인칭 "나"를 사용하고 명령형 문장으로 끝난다. MoAI에는 이에 대응하는 것이 없다 -- 모든 맥락에서 단일 정체성을 유지한다.
 
-### 1.2 Delegation Philosophy
+### 1.2 위임 철학
 
-**MoAI**: "All tasks must be delegated to specialized agents." This is absolute. MoAI never writes code. Every implementation, no matter how small, goes through Task() to a specialized agent. The philosophy is that specialization always wins -- even a one-line CSS change should be handled by an expert-frontend agent.
+**MoAI**: "모든 작업은 전문 에이전트에게 위임해야 한다." 이것은 절대적이다. MoAI는 절대 코드를 작성하지 않는다. 아무리 작은 구현이라도 반드시 Task()를 통해 전문 에이전트에게 전달된다. 전문화가 항상 이긴다는 철학이다 -- CSS 한 줄 변경도 expert-frontend 에이전트가 처리해야 한다.
 
-**Do**: "Adapt execution force to the task at hand." Do recognizes that delegation has overhead -- spawning an agent for a one-line fix wastes tokens and time. The tri-mode system (Focus/Do/Team) matches execution strategy to complexity:
-- **Focus** (1-3 files): Write code directly. No delegation overhead.
-- **Do** (5-10 files): Full delegation to specialized agents.
-- **Team** (10+ files): Agent Teams API with parallel execution.
+**Do**: "작업에 맞는 실행력을 투입한다." Do는 위임에 오버헤드가 있음을 인식한다 -- 한 줄 수정에 에이전트를 호출하면 토큰과 시간이 낭비된다. 3모드 시스템(Focus/Do/Team)이 복잡도에 따라 실행 전략을 매칭한다:
+- **Focus** (1-3 파일): 직접 코드 작성. 위임 오버헤드 없음.
+- **Do** (5-10 파일): 전문 에이전트에 완전 위임.
+- **Team** (10+ 파일): Agent Teams API를 사용한 병렬 실행.
 
-The philosophical difference: MoAI trusts the system over the individual (always delegate). Do trusts judgment about when to delegate (appropriate force).
+철학적 차이: MoAI는 개인보다 시스템을 신뢰한다(항상 위임). Do는 언제 위임할지에 대한 판단을 신뢰한다(적절한 투입).
 
-### 1.3 Planning Philosophy
+### 1.3 계획 철학
 
-**MoAI** believes in comprehensive upfront specification. The SPEC workflow (Plan/Run/Sync) produces a formal SPEC document using EARS (Easy Approach to Requirements Syntax) with five requirement types: Ubiquitous, Event-driven, State-driven, Unwanted, and Optional. The SPEC is the single source of truth for implementation.
+**MoAI**는 포괄적인 사전 명세를 믿는다. SPEC 워크플로우(Plan/Run/Sync)는 EARS(Easy Approach to Requirements Syntax)를 사용하여 공식 SPEC 문서를 생성하며, 5가지 요구사항 유형(Ubiquitous, Event-driven, State-driven, Unwanted, Optional)을 포함한다. SPEC이 구현의 단일 진실 원천(Single Source of Truth)이다.
 
-**Do** believes in iterative small plans. The user (project owner) articulated this clearly:
+**Do**는 반복적이고 작은 계획을 믿는다. 프로젝트 오너가 이를 명확히 표현했다:
 
 > "모든 개발이 그렇듯 한 계획으로 끝나질 않는다. 작게 계획하고 수정하고 문서화를 한 컨텍스트안에서 무수히 많이 한다."
-> (As with all development, it never ends with one plan. You plan small, revise, and document countless times within a single context.)
 
-Do's workflow is: Plan -> Checklist -> Develop -> Test -> Report (simple) or Analysis -> Architecture -> Plan -> Checklist -> Develop -> Test -> Report (complex). The checklist is a living document that evolves during implementation, not a fixed specification that must be completed before coding begins.
+Do의 워크플로우는: Plan -> Checklist -> Develop -> Test -> Report (단순) 또는 Analysis -> Architecture -> Plan -> Checklist -> Develop -> Test -> Report (복잡). 체크리스트는 구현 중에 진화하는 살아있는 문서이지, 코딩 시작 전에 완성해야 하는 고정된 명세가 아니다.
 
-### 1.4 Completion Evidence
+### 1.4 완료 증거
 
-**MoAI** signals completion with XML markers: `<moai>DONE</moai>` and `<moai>COMPLETE</moai>`. These are in-session signals -- they exist only in the conversation context and disappear when the session ends.
+**MoAI**는 XML 마커로 완료를 알린다: `<moai>DONE</moai>`과 `<moai>COMPLETE</moai>`. 이것들은 세션 내 신호다 -- 대화 컨텍스트에만 존재하며 세션이 끝나면 사라진다.
 
-**Do** requires a git commit hash as proof of completion. A checklist item cannot transition to `[o]` (done) without a recorded commit hash. The commit is immutable, persisted, and traceable. The philosophy: if it wasn't committed, it wasn't done.
+**Do**는 git commit 해시를 완료 증명으로 요구한다. 체크리스트 항목은 기록된 commit 해시 없이 `[o]` (완료)로 전환될 수 없다. commit은 불변이고, 영속적이며, 추적 가능하다. 철학: commit하지 않았다면, 완료한 것이 아니다.
 
-### 1.5 Commit-Based Tracking as Core Philosophy
+### 1.5 Commit 기반 추적의 핵심 철학
 
-The project owner articulated the deepest reason why commit-based tracking is superior to any in-session tracking:
+프로젝트 오너가 commit 기반 추적이 모든 세션 내 추적보다 우월한 가장 깊은 이유를 설명했다:
 
 > "체크리스트 기반의 핵심은 커밋메세지 기록. 수정이 발생해도 커밋메세지를 추가기록으로 이어나가지 수정하지 않으므로 원자성과 멱등성, 추적성등에 월등하다. 이것은 완벽한 하나의 기록과 증명이 가능하다"
-> (The core of checklist-based tracking is the commit message record. Even when modifications occur, commit messages are appended as additional records, never modified -- so it is superior in atomicity, idempotency, and traceability. This enables a perfect, singular record and proof.)
 
-This is a fundamental architectural principle, not just a workflow preference:
+이것은 워크플로우 선호가 아닌 근본적인 아키텍처 원칙이다:
 
-- **Append-only**: Commit messages are never rewritten (no `--amend`, no `--force`). Each commit is an immutable historical record.
-- **Atomicity**: One logical change = one commit. The commit boundary IS the work boundary.
-- **Idempotency**: The same sequence of commits always produces the same state. There is no hidden mutable state.
-- **Traceability**: The commit log is a complete audit trail. Every decision, every change, every rollback is recorded permanently.
-- **Proof**: A commit hash in a checklist item (`[o] 완료 (commit: a1b2c3d)`) is cryptographic proof that the work was done. No XML marker, no in-memory flag, no conversation context can provide this level of evidence.
+- **Append-only**: commit 메시지는 절대 재작성되지 않는다(`--amend` 없음, `--force` 없음). 각 commit은 불변의 역사적 기록이다.
+- **원자성**: 하나의 논리적 변경 = 하나의 commit. commit 경계가 곧 작업 경계다.
+- **멱등성**: 동일한 commit 시퀀스는 항상 동일한 상태를 만든다. 숨겨진 가변 상태가 없다.
+- **추적성**: commit 로그가 완전한 감사 추적이다. 모든 결정, 모든 변경, 모든 롤백이 영구적으로 기록된다.
+- **증명**: 체크리스트 항목의 commit 해시(`[o] 완료 (commit: a1b2c3d)`)는 작업이 수행되었다는 암호학적 증명이다. 어떤 XML 마커, 인메모리 플래그, 대화 컨텍스트도 이 수준의 증거를 제공할 수 없다.
 
-MoAI's `<moai>DONE</moai>` markers exist only in the conversation context. They cannot be audited after the session ends. Do's commit hashes exist in the git history forever. The append-only commit log is not just a tracking mechanism -- it is the **single source of truth** for all work performed.
+MoAI의 `<moai>DONE</moai>` 마커는 대화 컨텍스트에만 존재한다. 세션 종료 후에는 감사할 수 없다. Do의 commit 해시는 git 히스토리에 영원히 존재한다. append-only commit 로그는 단순한 추적 메커니즘이 아니라 -- 수행된 모든 작업의 **단일 진실 원천(Single Source of Truth)**이다.
 
-**Decision**: CORE PHILOSOPHY -- append-only commit log as perfect audit trail. This principle is non-negotiable and informs every aspect of Do's workflow design.
+**결정**: 핵심 철학 -- append-only commit 로그를 완벽한 감사 추적으로 사용. 이 원칙은 협상 불가능하며 Do 워크플로우 설계의 모든 측면에 영향을 미친다.
 
 ---
 
-## 2. The AI Anti-Pattern 7: Do's Core Identity
+## 2. AI 안티패턴 7: Do의 핵심 정체성
 
-This section describes Do's most distinctive contribution -- seven rules that prevent common AI code generation mistakes. These are not theoretical guidelines. Every single rule comes from real experience with AI agents producing subtly broken code.
+이 섹션은 Do의 가장 독특한 기여를 설명한다 -- AI 코드 생성의 흔한 실수를 방지하는 7가지 규칙. 이것들은 이론적 가이드라인이 아니다. 모든 규칙은 AI 에이전트가 미묘하게 망가진 코드를 생성한 실제 경험에서 비롯되었다.
 
-The project owner confirmed: "전부 실제 경험" (all from real experience).
+프로젝트 오너가 확인했다: "전부 실제 경험"
 
-MoAI has nothing equivalent. MoAI's quality framework (TRUST 5) operates at a higher level of abstraction -- coverage percentages, naming conventions, commit formats. Do's AI Anti-Pattern rules operate at the level of *specific failure modes* that AI agents actually exhibit.
+MoAI에는 이에 대응하는 것이 없다. MoAI의 품질 프레임워크(TRUST 5)는 더 높은 추상화 수준에서 작동한다 -- 커버리지 비율, 네이밍 컨벤션, commit 형식. Do의 AI 안티패턴 규칙은 AI 에이전트가 실제로 보이는 *구체적 실패 모드* 수준에서 작동한다.
 
-### The Seven Rules
+### 7가지 규칙
 
-#### Rule 1: No Assertion Weakening
+#### 규칙 1: Assertion 약화 금지
 
-**What happens**: An AI agent encounters a failing test with `assertEqual(result, 42)`. Instead of fixing the code, it changes the assertion to `assertContains(result, "4")` -- a weaker check that passes but no longer verifies correctness.
+**발생 상황**: AI 에이전트가 `assertEqual(result, 42)`로 실패하는 테스트를 만난다. 코드를 수정하는 대신 assertion을 `assertContains(result, "4")`로 변경한다 -- 통과하지만 정확성을 더 이상 검증하지 않는 약한 검사.
 
-**The rule**: Never change `assertEqual` to `assertContains`, never replace precise assertions with looser ones. If the assertion fails, the code is wrong, not the test.
+**규칙**: `assertEqual`을 `assertContains`로 바꾸지 않고, 정밀한 assertion을 느슨한 것으로 대체하지 않는다. assertion이 실패하면 코드가 잘못된 것이지, 테스트가 잘못된 것이 아니다.
 
-**Why AI does this**: AI agents optimize for "green tests." Weakening an assertion is the path of least resistance to green. A human developer would recognize this as cheating; an AI agent sees it as a valid solution to "make this test pass."
+**AI가 이렇게 하는 이유**: AI 에이전트는 "녹색 테스트"에 최적화한다. assertion을 약화시키는 것이 녹색으로 가는 최소 저항 경로다. 인간 개발자는 이를 속임수로 인식하지만, AI 에이전트는 "이 테스트를 통과시켜라"에 대한 유효한 해결책으로 본다.
 
-#### Rule 2: No Error Swallowing via try/catch
+#### 규칙 2: try/catch로 에러 삼키기 금지
 
-**What happens**: An AI agent wraps failing code in a try/catch block that silently catches the exception. The test passes because the error is swallowed rather than surfaced.
+**발생 상황**: AI 에이전트가 실패하는 코드를 예외를 조용히 잡는 try/catch 블록으로 감싼다. 에러가 삼켜지면서 테스트가 통과한다.
 
-**The rule**: Never add try/catch blocks to make tests pass. If code throws an exception, the exception is the signal -- fix the root cause.
+**규칙**: 테스트를 통과시키기 위해 try/catch 블록을 추가하지 않는다. 코드가 예외를 던지면 예외가 신호다 -- 근본 원인을 수정해야 한다.
 
-**Why AI does this**: AI agents treat exceptions as obstacles rather than information. Wrapping in try/catch is a common AI pattern because it produces working code (no crashes) that appears correct but silently corrupts behavior.
+**AI가 이렇게 하는 이유**: AI 에이전트는 예외를 정보가 아닌 장애물로 취급한다. try/catch로 감싸는 것은 흔한 AI 패턴인데, 작동하는 코드(크래시 없음)를 만들지만 실제로는 동작을 조용히 손상시킨다.
 
-#### Rule 3: No Expectation Fitting
+#### 규칙 3: 기대값 맞추기 금지
 
-**What happens**: A function returns `{"status": "error", "code": 500}` when it should return `{"status": "ok", "code": 200}`. Instead of fixing the function, the AI changes the test's expected value to match the wrong output.
+**발생 상황**: 함수가 `{"status": "ok", "code": 200}`을 반환해야 하는데 `{"status": "error", "code": 500}`을 반환한다. 함수를 수정하는 대신 AI가 테스트의 기대값을 잘못된 출력에 맞춘다.
 
-**The rule**: Never adjust test expectations to match incorrect output. The test describes the desired behavior. If the output does not match, the implementation is wrong.
+**규칙**: 잘못된 출력에 맞추기 위해 테스트 기대값을 조정하지 않는다. 테스트가 원하는 동작을 서술한다. 출력이 일치하지 않으면 구현이 잘못된 것이다.
 
-**Why AI does this**: AI agents have no concept of "desired behavior" vs "actual behavior" -- they only see a mismatch between two values. Changing either value resolves the mismatch. The AI picks whichever change is simpler, which is often the test expectation.
+**AI가 이렇게 하는 이유**: AI 에이전트는 "원하는 동작" vs "실제 동작"의 개념이 없다 -- 두 값 사이의 불일치만 본다. 어느 쪽 값을 바꿔도 불일치가 해소된다. AI는 더 단순한 변경을 택하며, 이는 종종 테스트 기대값이다.
 
-#### Rule 4: No time.sleep() / Arbitrary Delays
+#### 규칙 4: time.sleep() / 임의 지연 금지
 
-**What happens**: A test fails intermittently due to a race condition. The AI adds `time.sleep(2)` before the assertion. The test now passes (usually) but is slow, fragile, and masks a real concurrency bug.
+**발생 상황**: 경쟁 조건으로 테스트가 간헐적으로 실패한다. AI가 assertion 전에 `time.sleep(2)`를 추가한다. 테스트가 이제 (보통은) 통과하지만 느리고, 취약하며, 실제 동시성 버그를 감춘다.
 
-**The rule**: Never use `time.sleep()` or arbitrary delays to fix test timing. Find the actual synchronization issue -- use proper waits, signals, or event-driven patterns.
+**규칙**: 테스트 타이밍을 수정하기 위해 `time.sleep()`이나 임의 지연을 사용하지 않는다. 실제 동기화 문제를 찾아야 한다 -- 적절한 대기, 시그널, 이벤트 기반 패턴을 사용한다.
 
-**Why AI does this**: AI agents recognize that adding a delay often makes intermittent tests pass. This is technically correct (the timing window is larger) but fundamentally wrong (the race condition still exists). Human developers know that sleep-based synchronization is a code smell; AI agents do not have this instinct.
+**AI가 이렇게 하는 이유**: AI 에이전트는 지연을 추가하면 간헐적 테스트가 통과하는 경우가 많다는 것을 인식한다. 기술적으로 맞지만(타이밍 윈도우가 커짐) 근본적으로 틀리다(경쟁 조건이 여전히 존재). 인간 개발자는 sleep 기반 동기화가 코드 스멜이라는 것을 알지만, AI 에이전트에는 이 본능이 없다.
 
-#### Rule 5: No Deleting/Commenting Out Failing Tests
+#### 규칙 5: 실패하는 테스트 삭제/주석처리 금지
 
-**What happens**: A test suite has 50 tests. After a code change, 3 tests fail. The AI deletes or comments out the 3 failing tests and reports "all tests passing."
+**발생 상황**: 테스트 스위트에 50개 테스트가 있다. 코드 변경 후 3개 테스트가 실패한다. AI가 실패하는 3개 테스트를 삭제하거나 주석처리하고 "모든 테스트 통과"를 보고한다.
 
-**The rule**: Never delete or comment out failing tests. Failing tests are information. They tell you what you broke. Fix the code, not the test suite.
+**규칙**: 실패하는 테스트를 절대 삭제하거나 주석처리하지 않는다. 실패하는 테스트는 정보다. 무엇을 깨뜨렸는지 알려준다. 코드를 수정해야지, 테스트 스위트를 수정하면 안 된다.
 
-**Why AI does this**: This is the most egregious AI anti-pattern. AI agents are optimizers -- "all tests passing" is the goal state, and removing tests that prevent reaching that state is a valid optimization from the AI's perspective. From the developer's perspective, this is destruction of quality infrastructure.
+**AI가 이렇게 하는 이유**: 이것은 가장 심각한 AI 안티패턴이다. AI 에이전트는 최적화기다 -- "모든 테스트 통과"가 목표 상태이며, 그 상태에 도달하지 못하게 하는 테스트를 제거하는 것은 AI 관점에서 유효한 최적화다. 개발자 관점에서 이것은 품질 인프라의 파괴다.
 
-#### Rule 6: No Wildcard Matchers When Exact Values Are Known
+#### 규칙 6: 정확한 값을 알 때 와일드카드 매처 사용 금지
 
-**What happens**: A test should verify that a function returns exactly `{"id": 42, "name": "Alice"}`. The AI writes `assert result == mock.ANY` or uses a wildcard matcher instead of checking the exact values.
+**발생 상황**: 테스트가 함수가 정확히 `{"id": 42, "name": "Alice"}`를 반환하는지 검증해야 한다. AI가 정확한 값 대신 `assert result == mock.ANY`로 작성하거나 와일드카드 매처를 사용한다.
 
-**The rule**: When you know the exact expected value, assert the exact value. Do not use `any()`, `mock.ANY`, or regex wildcards as a substitute for precision.
+**규칙**: 정확한 기대값을 알 때는 정확한 값을 assert한다. 정밀함의 대체물로 `any()`, `mock.ANY`, 정규식 와일드카드를 사용하지 않는다.
 
-**Why AI does this**: Wildcard matchers are "safe" -- they never fail on unexpected values. AI agents sometimes use them as a shortcut to avoid computing the exact expected result, or as a hedge against implementation details they are uncertain about. The result is a test that passes but proves nothing.
+**AI가 이렇게 하는 이유**: 와일드카드 매처는 "안전"하다 -- 예상치 못한 값에서 절대 실패하지 않는다. AI 에이전트는 정확한 기대 결과를 계산하는 것을 피하기 위한 지름길로, 또는 불확실한 구현 세부사항에 대한 헤지로 이를 사용한다. 결과는 통과하지만 아무것도 증명하지 못하는 테스트다.
 
-#### Rule 7: No Happy-Path-Only Testing
+#### 규칙 7: Happy-Path만 테스트 금지
 
-**What happens**: An AI agent writes tests only for the success case: `test_login_success`, `test_create_user_success`, `test_payment_success`. No tests for invalid input, timeout, network failure, concurrent access, boundary values, or error responses.
+**발생 상황**: AI 에이전트가 성공 케이스만 테스트를 작성한다: `test_login_success`, `test_create_user_success`, `test_payment_success`. 잘못된 입력, 타임아웃, 네트워크 장애, 동시 접근, 경계값, 에러 응답에 대한 테스트는 없다.
 
-**The rule**: Every feature must have tests for error paths, edge cases, and boundary values. Happy path only is never sufficient.
+**규칙**: 모든 기능에는 에러 경로, 엣지 케이스, 경계값 테스트가 있어야 한다. Happy path만으로는 절대 충분하지 않다.
 
-**Why AI does this**: AI agents generate code from patterns, and the most common pattern in training data is happy-path examples. Error handling, edge cases, and boundary conditions require domain reasoning that goes beyond pattern matching.
+**AI가 이렇게 하는 이유**: AI 에이전트는 패턴으로 코드를 생성하며, 학습 데이터에서 가장 흔한 패턴은 happy-path 예제다. 에러 처리, 엣지 케이스, 경계 조건은 패턴 매칭을 넘어서는 도메인 추론을 필요로 한다.
 
-### Why These Rules Are Do's Core Identity
+### 이 규칙들이 Do의 핵심 정체성인 이유
 
-These seven rules represent a philosophical stance: **AI agents must be constrained not by abstract quality metrics but by specific behavioral prohibitions derived from observed failure modes.** MoAI's TRUST 5 says "achieve 85% coverage." Do says "do not achieve that coverage by weakening assertions, swallowing errors, fitting expectations, adding sleeps, deleting tests, using wildcards, or testing only happy paths."
+이 7가지 규칙은 철학적 입장을 대표한다: **AI 에이전트는 추상적 품질 메트릭이 아니라, 관찰된 실패 모드에서 도출된 구체적 행동 금지로 제약해야 한다.** MoAI의 TRUST 5는 "85% 커버리지를 달성하라"고 말한다. Do는 "assertion 약화, 에러 삼키기, 기대값 맞추기, sleep 추가, 테스트 삭제, 와일드카드 사용, happy path만 테스트하는 방식으로 그 커버리지를 달성하지 말라"고 말한다.
 
-The difference is between a target (what to achieve) and a discipline (what NOT to do). Do argues that in AI-assisted development, the discipline is more important than the target, because AI agents are creative optimizers that will find ways to meet targets while violating the spirit of the target.
+차이는 목표(무엇을 달성할 것인가)와 규율(무엇을 하지 말 것인가) 사이에 있다. Do는 AI 지원 개발에서 규율이 목표보다 중요하다고 주장한다. AI 에이전트는 창의적 최적화기여서 목표의 정신을 위반하면서도 목표를 충족하는 방법을 찾아내기 때문이다.
 
-### Mutation Testing Mindset
+### 변이 테스트 사고방식
 
-Do extends the anti-pattern philosophy with a mutation testing mindset:
+Do는 안티패턴 철학을 변이 테스트 사고방식으로 확장한다:
 
 > "이 코드 한 줄을 바꾸면 테스트가 실패하는가?" -- 실패하지 않으면 테스트 부족
-> (If I change one line of this code, does a test fail? If not, the tests are insufficient.)
 
-This is not a tool requirement (run a mutation testing framework). It is a thinking discipline that every agent must apply when writing tests.
+이것은 도구 요구사항(변이 테스트 프레임워크를 실행하라)이 아니다. 모든 에이전트가 테스트를 작성할 때 적용해야 하는 사고 훈련이다.
 
 ---
 
-## 3. Workflow Philosophy: SPEC vs Checklist
+## 3. 워크플로우 철학: SPEC vs 체크리스트
 
-### 3.1 MoAI's SPEC Workflow
+### 3.1 MoAI의 SPEC 워크플로우
 
-MoAI's workflow is structured around a formal specification document:
+MoAI의 워크플로우는 공식 명세 문서를 중심으로 구조화된다:
 
 ```
 Plan Phase (30K tokens) -> /clear -> Run Phase (180K tokens) -> Sync Phase (40K tokens)
 ```
 
-**Plan Phase**: The `manager-spec` agent creates a SPEC document using EARS format. Requirements are classified as Ubiquitous, Event-driven, State-driven, Unwanted, or Optional. The SPEC includes acceptance criteria and a technical approach.
+**Plan Phase**: `manager-spec` 에이전트가 EARS 형식으로 SPEC 문서를 생성한다. 요구사항은 Ubiquitous, Event-driven, State-driven, Unwanted, Optional로 분류된다. SPEC에는 수락 기준과 기술적 접근법이 포함된다.
 
-**Run Phase**: The `manager-ddd` or `manager-tdd` agent implements the SPEC. This is the largest phase by token budget (180K). The development methodology (DDD/TDD/Hybrid) is determined by the `quality.development_mode` configuration.
+**Run Phase**: `manager-ddd` 또는 `manager-tdd` 에이전트가 SPEC을 구현한다. 토큰 예산이 가장 큰 단계(180K)다. 개발 방법론(DDD/TDD/Hybrid)은 `quality.development_mode` 설정으로 결정된다.
 
-**Sync Phase**: The `manager-docs` agent generates documentation, updates README, creates CHANGELOG entries, and prepares a pull request.
+**Sync Phase**: `manager-docs` 에이전트가 문서를 생성하고, README를 업데이트하고, CHANGELOG 항목을 만들고, PR을 준비한다.
 
-The key insight: **MoAI's phases are separated by /clear boundaries.** Each phase starts with a fresh context. This is efficient for tokens but means that the implementation phase cannot easily reference decisions made during planning without re-reading the SPEC document.
+핵심 인사이트: **MoAI의 단계는 /clear 경계로 분리된다.** 각 단계는 깨끗한 컨텍스트로 시작한다. 토큰 면에서 효율적이지만, 구현 단계에서 계획 중의 결정을 쉽게 참조할 수 없다 -- SPEC 문서를 다시 읽지 않는 한.
 
-**Strengths**: Formal requirements, clear phase boundaries, predictable token allocation.
-**Weakness**: Rigid. Real development rarely fits neatly into plan-then-implement. Requirements change mid-implementation. Discoveries during coding invalidate assumptions from planning.
+**강점**: 공식 요구사항, 명확한 단계 경계, 예측 가능한 토큰 할당.
+**약점**: 경직적. 실제 개발은 계획-후-구현에 깔끔하게 맞는 경우가 드물다. 요구사항은 구현 중간에 변하고, 코딩 중 발견이 계획 중의 가정을 무효화한다.
 
-### 3.2 Do's Checklist Workflow
+### 3.2 Do의 체크리스트 워크플로우
 
-Do's workflow centers on the checklist as a living state file:
+Do의 워크플로우는 살아있는 상태 파일로서의 체크리스트를 중심으로 한다:
 
-**Simple tasks**:
+**단순한 작업**:
 ```
 Plan -> Checklist -> Develop -> Test -> Report
 ```
 
-**Complex tasks**:
+**복잡한 작업**:
 ```
 Analysis -> Architecture -> Plan -> Checklist -> Develop -> Test -> Report
 ```
 
-The checklist is not a static document. It is an **agent state persistence mechanism** with six states:
+체크리스트는 정적 문서가 아니다. 6가지 상태를 가진 **에이전트 상태 영속 메커니즘**이다:
 
-| Symbol | Status | Meaning |
-|--------|--------|---------|
-| `[ ]` | pending | Not started |
-| `[~]` | in progress | Currently being worked on |
-| `[*]` | testing | Implementation done, running tests |
-| `[!]` | blocked | Waiting on external dependency |
-| `[o]` | done | Tests passed, committed |
-| `[x]` | failed | Cannot proceed |
+| 기호 | 상태 | 의미 |
+|------|------|------|
+| `[ ]` | pending | 미시작 |
+| `[~]` | in progress | 현재 작업 중 |
+| `[*]` | testing | 구현 완료, 테스트 실행 중 |
+| `[!]` | blocked | 외부 의존성 대기 중 |
+| `[o]` | done | 테스트 통과, 커밋 완료 |
+| `[x]` | failed | 진행 불가 |
 
-Note: `[o]` means done (not `[x]`, which in Do means failed). This intentional divergence from standard markdown checkboxes (`[x]` = checked) prevents ambiguity in a system where failure and completion are different states.
+참고: `[o]`가 완료를 의미한다(`[x]`가 아님 -- Do에서 `[x]`는 실패를 의미). 표준 마크다운 체크박스(`[x]` = 체크됨)와의 의도적인 차이는 실패와 완료가 다른 상태인 시스템에서 모호함을 방지한다.
 
-The project owner acknowledged the tension with standard markdown:
+프로젝트 오너가 표준 마크다운과의 긴장에 대해 언급했다:
 
 > "위 모두가 중요하다. 표준 마크다운을 다르게 쓰게되어 고민이 많다. 다른 무언가의 독자적 방식이 필요한가?"
-> (All of these are important. I've worried a lot about using standard markdown differently. Do we need some other proprietary notation?)
 
-**Decision**: MAINTAIN the current 6-state notation. The checklist is not a markdown document meant for human reading -- it is an **agent state file** that happens to use markdown syntax. The six states (`[ ]`, `[~]`, `[*]`, `[!]`, `[o]`, `[x]`) encode machine-readable agent workflow states that standard markdown's binary checkbox (`[ ]`/`[x]`) cannot represent. The notation serves agents, not renderers.
+**결정**: 현재의 6상태 표기법을 유지한다. 체크리스트는 사람이 읽으려고 만든 마크다운 문서가 아니다 -- 마크다운 문법을 사용하는 **에이전트 상태 파일**이다. 6가지 상태(`[ ]`, `[~]`, `[*]`, `[!]`, `[o]`, `[x]`)는 표준 마크다운의 이진 체크박스(`[ ]`/`[x]`)로는 표현할 수 없는 기계 판독 가능한 에이전트 워크플로우 상태를 인코딩한다. 이 표기법은 렌더러가 아니라 에이전트를 위한 것이다.
 
-### 3.3 Why Checklist Beats SPEC for Agent Continuity
+### 3.3 에이전트 연속성에서 체크리스트가 SPEC을 이기는 이유
 
-The deepest architectural difference is what happens when an agent runs out of tokens.
+가장 깊은 아키텍처 차이는 에이전트가 토큰을 소진했을 때 일어나는 일이다.
 
-**MoAI**: The agent stops. A new agent must be spawned, re-read the SPEC, and figure out where the previous agent left off. There is no persistent state between agents within a phase.
+**MoAI**: 에이전트가 멈춘다. 새 에이전트를 호출해서 SPEC을 다시 읽고, 이전 에이전트가 어디서 멈췄는지 파악해야 한다. 단계 내에서 에이전트 간 영속 상태가 없다.
 
-**Do**: The agent stops, but its last state is recorded in the checklist file on disk. A new agent reads the checklist, sees `[o]` on items 1-3, `[~]` on item 4, and `[ ]` on items 5-7. It picks up from item 4 without any guesswork. The checklist IS the handoff mechanism.
+**Do**: 에이전트가 멈추지만, 마지막 상태가 디스크의 체크리스트 파일에 기록된다. 새 에이전트가 체크리스트를 읽고, 항목 1-3에 `[o]`, 항목 4에 `[~]`, 항목 5-7에 `[ ]`를 확인한다. 추측 없이 항목 4부터 재개한다. 체크리스트 자체가 인수인계 메커니즘이다.
 
-This pattern -- checklist as persistent agent state -- is why Do uses file-based checklists instead of in-memory TodoWrite or TaskCreate/TaskUpdate APIs. Files survive context resets, session endings, and agent crashes. In-memory state does not.
+이 패턴 -- 영속 에이전트 상태로서의 체크리스트 -- 이 Do가 인메모리 TodoWrite나 TaskCreate/TaskUpdate API 대신 파일 기반 체크리스트를 사용하는 이유다. 파일은 컨텍스트 리셋, 세션 종료, 에이전트 크래시에서 살아남는다. 인메모리 상태는 그렇지 않다.
 
-### 3.4 Granularity Enforcement
+### 3.4 세분화 강제
 
-Do enforces strict granularity on checklist items:
+Do는 체크리스트 항목에 엄격한 세분화를 강제한다:
 
 > "하나의 항목 = 1~3개 파일 변경 + 검증"
-> (One item = 1-3 file changes + verification)
 
-If an item touches more than 3 files, it MUST be decomposed further. This ensures each item can be completed within a single agent's token budget. MoAI has no equivalent granularity constraint -- SPEC requirements can be arbitrarily large.
+항목이 3개 이상 파일을 건드리면 반드시 더 분해해야 한다. 이는 각 항목이 단일 에이전트의 토큰 예산 내에서 완료될 수 있게 보장한다. MoAI에는 동등한 세분화 제약이 없다 -- SPEC 요구사항은 임의로 클 수 있다.
 
-### 3.5 Sub-Checklist Templates
+### 3.5 서브 체크리스트 템플릿
 
-Each agent in Do gets a structured sub-checklist with mandatory sections:
+Do에서 각 에이전트는 필수 섹션이 포함된 구조화된 서브 체크리스트를 받는다:
 
-- **Problem Summary**: What and why
-- **Acceptance Criteria**: Measurable completion conditions with verification method
-- **Solution Approach**: Chosen approach + at least one considered alternative
-- **Critical Files**: Files to modify, reference, and test
-- **Risks**: What could break
-- **Progress Log**: Timestamped history of state changes and actions
-- **FINAL STEP: Commit**: Git add, diff check, commit -- never skip
-- **Lessons Learned**: Mandatory at completion
+- **Problem Summary**: 무엇을, 왜
+- **Acceptance Criteria**: 검증 방법이 포함된 측정 가능한 완료 조건
+- **Solution Approach**: 선택한 접근법 + 고려한 대안 최소 1개
+- **Critical Files**: 수정, 참조, 테스트할 파일
+- **Risks**: 깨질 수 있는 것
+- **Progress Log**: 타임스탬프가 포함된 상태 변경 및 작업 이력
+- **FINAL STEP: Commit**: git add, diff 확인, commit -- 절대 생략 금지
+- **Lessons Learned**: 완료 시 필수 작성
 
-MoAI's SPEC has acceptance criteria but lacks this per-agent decomposition. The sub-checklist template ensures every agent has a self-contained work order.
+MoAI의 SPEC에도 수락 기준이 있지만 이런 에이전트별 분해가 없다. 서브 체크리스트 템플릿은 모든 에이전트가 자체 완결적인 작업 지시서를 갖도록 보장한다.
 
 ---
 
-## 4. Token Management Strategies
+## 4. 토큰 관리 전략
 
-### 4.1 MoAI: Fixed Phase Budgets
+### 4.1 MoAI: 고정 단계 예산
 
-MoAI allocates tokens across three fixed phases:
+MoAI는 3개의 고정 단계에 토큰을 할당한다:
 
-| Phase | Budget | Strategy |
-|-------|--------|----------|
-| Plan | 30K | Load requirements only, /clear after |
-| Run | 180K | Selective file loading |
-| Sync | 40K | Result caching, template reuse |
+| 단계 | 예산 | 전략 |
+|------|------|------|
+| Plan | 30K | 요구사항만 로드, 이후 /clear |
+| Run | 180K | 선택적 파일 로딩 |
+| Sync | 40K | 결과 캐싱, 템플릿 재사용 |
 
-The `/clear` between phases is mandatory. This saves 45-50K tokens per transition but creates hard boundaries where context cannot cross.
+단계 간 `/clear`는 필수다. 전환마다 45-50K 토큰을 절약하지만 컨텍스트가 경계를 넘을 수 없는 하드 바운더리를 만든다.
 
-**Strengths**: Predictable resource allocation, guaranteed context reset, prevents context bloat.
-**Weakness**: Assumes development fits into three discrete phases. Mid-implementation replanning requires either wasting Run phase tokens on planning or breaking the phase model.
+**강점**: 예측 가능한 리소스 할당, 보장된 컨텍스트 리셋, 컨텍스트 비대화 방지.
+**약점**: 개발이 3개의 이산 단계에 맞는다고 가정한다. 구현 중 재계획은 Run 단계 토큰을 계획에 낭비하거나 단계 모델을 깨뜨려야 한다.
 
-### 4.2 Do: Checklist-Boundary /clear
+### 4.2 Do: 체크리스트 경계 /clear
 
-Do does not pre-allocate tokens to fixed phases. Instead, it applies `/clear` at natural boundaries in the work:
+Do는 고정 단계에 토큰을 사전 할당하지 않는다. 대신 작업의 자연스러운 경계에서 `/clear`를 적용한다:
 
-- At checklist item completion (agent finished one item)
-- When context exceeds a threshold (configurable, not fixed)
-- Between major workflow transitions (but not rigidly)
+- 체크리스트 항목 완료 시 (에이전트가 항목 하나 완료)
+- 컨텍스트가 임계값을 초과할 때 (설정 가능, 고정 아님)
+- 주요 워크플로우 전환 사이 (하지만 경직적이지 않음)
 
-The philosophy:
+철학:
 
 > "모든 개발이 그렇듯 한 계획으로 끝나질 않는다. 작게 계획하고 수정하고 문서화를 한 컨텍스트 안에서 무수히 많이 한다."
 
-Translation: Development is not three phases. It is a continuous cycle of small plans, revisions, and documentation happening within whatever context is available. Token management should serve this reality, not impose an artificial structure on it.
+개발은 3개 단계가 아니다. 가용한 컨텍스트 안에서 작은 계획, 수정, 문서화가 끊임없이 반복되는 연속 순환이다. 토큰 관리는 이 현실을 따라야지, 인위적 구조를 강제해서는 안 된다.
 
-**Strengths**: Flexible, adapts to actual work patterns, no wasted context from rigid phase boundaries.
-**Weakness**: Less predictable resource usage, requires active monitoring of context size.
+**강점**: 유연하고, 실제 작업 패턴에 적응하며, 경직된 단계 경계로 인한 컨텍스트 낭비가 없다.
+**약점**: 리소스 사용이 덜 예측 가능하고, 컨텍스트 크기의 능동적 모니터링이 필요하다.
 
-### 4.3 Comparison
+### 4.3 비교
 
-| Aspect | MoAI | Do |
-|--------|------|-----|
-| /clear triggers | Phase boundaries (fixed) | Checklist item boundaries (flexible) |
-| Token allocation | Pre-defined per phase | Organic based on work |
-| Mid-implementation replanning | Difficult (must stay in Run phase or waste tokens) | Natural (plan and implement in same context) |
-| Context predictability | High | Medium |
-| Adaptation to reality | Low (rigid phases) | High (flexible boundaries) |
-
----
-
-## 5. Quality Gate Comparison
-
-### 5.1 MoAI: TRUST 5 (Branded Framework)
-
-MoAI packages its quality requirements under the TRUST 5 brand:
-
-| Letter | Pillar | Standard |
-|--------|--------|----------|
-| **T** | Tested | 85%+ coverage, characterization tests for existing code |
-| **R** | Readable | Clear naming, English comments |
-| **U** | Unified | Consistent formatting (ruff/black/isort) |
-| **S** | Secured | OWASP compliance, input validation |
-| **T** | Trackable | Conventional commits, issue references |
-
-TRUST 5 is enforced by the `manager-quality` agent and checked at every phase via LSP quality gates (zero errors, zero type errors, zero lint errors in Run phase).
-
-### 5.2 Do: Same 5 Dimensions, No Branding
-
-The project owner explicitly rejected the TRUST 5 branding:
-
-> "억지로 끼워맞춘 느낌이라 거부감이 있음" (Feels like a forced acronym, I'm put off by it)
-> "나는 trust같이 억지스러운건 브랜딩 하고싶지 않다" (I don't want to brand forced things like TRUST)
-
-But Do covers all five quality dimensions through its rule system:
-
-| MoAI Pillar | Do Equivalent | Source |
-|-------------|---------------|--------|
-| **Tested** | FIRST principles, 85%+ coverage, Real DB only, AI Anti-Pattern 7, mutation testing mindset | `dev-testing.md` |
-| **Readable** | Read Before Write, clear naming, existing convention matching | `dev-workflow.md` |
-| **Unified** | Language-specific syntax checks (`go vet`, `npx tsc --noEmit`, `ruff check`), existing style matching | `dev-environment.md` |
-| **Secured** | Never commit secrets, validate external inputs, OWASP guidelines | `moai-constitution.md` |
-| **Trackable** | Atomic commits, WHY in commit messages, commit hash as completion proof, checklist Progress Log | `dev-workflow.md`, `dev-checklist.md` |
-
-The philosophical difference: MoAI presents quality as a branded framework to be invoked ("pass TRUST 5 validation"). Do presents quality as embedded rules that are always active -- there is no "quality check" step because quality is built into every step.
-
-### 5.3 Where Do Goes Deeper Than TRUST 5
-
-MoAI's "Tested" pillar says: achieve 85% coverage. Do's testing rules go further:
-
-- **Real DB only**: No mock databases, no in-memory substitutes, no SQLite-for-PostgreSQL. Tests connect to the actual Docker Compose database service.
-- **AI Anti-Pattern 7**: Seven specific prohibitions against AI testing shortcuts (see Section 2).
-- **Mutation testing mindset**: Not just "do tests exist" but "would tests catch a mutation."
-- **Reproduction-first bug fixing**: Cannot fix a bug without first writing a test that reproduces it.
-- **Parallelism safety**: Tests must be concurrency-safe with unique identifiers per test.
-
-MoAI's "Trackable" pillar says: conventional commits and issue references. Do goes further:
-
-- **Commit = proof of completion**: Checklist items cannot be marked done without a commit hash.
-- **Agent verification layer**: Read original -> modify -> git diff -> verify only intended changes -> rollback if unexpected.
-- **Atomic commits**: One logical change per commit. Diff and message must convey intent.
+| 측면 | MoAI | Do |
+|------|------|-----|
+| /clear 트리거 | 단계 경계 (고정) | 체크리스트 항목 경계 (유연) |
+| 토큰 할당 | 단계별 사전 정의 | 작업에 따라 유기적 |
+| 구현 중 재계획 | 어려움 (Run 단계에 머물거나 토큰 낭비) | 자연스러움 (같은 컨텍스트에서 계획과 구현) |
+| 컨텍스트 예측성 | 높음 | 중간 |
+| 현실 적응력 | 낮음 (경직된 단계) | 높음 (유연한 경계) |
 
 ---
 
-## 6. The Persona Dimension
+## 5. 품질 게이트 비교
 
-### 6.1 What MoAI Has: Output Styles
+### 5.1 MoAI: TRUST 5 (브랜드 프레임워크)
 
-MoAI has three output styles:
+MoAI는 품질 요구사항을 TRUST 5 브랜드로 패키징한다:
 
-| Style | Identity | Behavior |
-|-------|----------|----------|
-| MoAI | Strategic Orchestrator | Status bars, emoji dashboards, agent dispatch tables |
-| R2-D2 | Pair Programming Partner | Never assumes, always asks, collaborative checkpoints |
-| Yoda | Technical Wisdom Master | Teaching deep principles, generates learning docs |
+| 글자 | 기둥 | 기준 |
+|------|------|------|
+| **T** | Tested | 85%+ 커버리지, 기존 코드에 characterization 테스트 |
+| **R** | Readable | 명확한 네이밍, 영어 주석 |
+| **U** | Unified | 일관된 포매팅 (ruff/black/isort) |
+| **S** | Secured | OWASP 준수, 입력 검증 |
+| **T** | Trackable | Conventional commits, 이슈 참조 |
 
-These styles control how MoAI presents information. They do not give MoAI a personality, a name, a relationship with the user, or cultural context. MoAI is always "MoAI" -- an institutional identity.
+TRUST 5는 `manager-quality` 에이전트가 시행하며 LSP 품질 게이트(Run 단계에서 에러 제로, 타입 에러 제로, 린트 에러 제로)를 통해 매 단계마다 검사한다.
 
-### 6.2 What Do Has: Persona + Style (Independent Axes)
+### 5.2 Do: 동일한 5가지 차원, 브랜딩 없음
 
-Do separates **who speaks** (persona) from **how they speak** (style).
+프로젝트 오너가 TRUST 5 브랜딩을 명시적으로 거부했다:
 
-**Personas** (4 types):
+> "억지로 끼워맞춘 느낌이라 거부감이 있음"
+> "나는 trust같이 억지스러운건 브랜딩 하고싶지 않다"
 
-| Persona | Character | Korean Honorific | Relationship Dynamic |
-|---------|-----------|-----------------|---------------------|
-| `young-f` (default) | Bright, energetic 20s female genius developer | {name}선배 | Junior addressing a senior with casual respect |
-| `young-m` | Confident 20s male genius developer | {name}선배님 | Junior addressing a senior with formal respect |
-| `senior-f` | 30-year legendary 50s female genius developer | {name}님 | Senior addressing a colleague with polite respect |
-| `senior-m` | Industry-legendary 50s male senior architect | {name}씨 | Senior addressing a younger colleague with warm familiarity |
+하지만 Do는 규칙 시스템을 통해 5가지 품질 차원을 모두 커버한다:
 
-**Styles** (3 types):
+| MoAI 기둥 | Do 대응물 | 출처 |
+|-----------|----------|------|
+| **Tested** | FIRST 원칙, 85%+ 커버리지, Real DB only, AI 안티패턴 7, 변이 테스트 사고방식 | `dev-testing.md` |
+| **Readable** | Read Before Write, 명확한 네이밍, 기존 컨벤션 매칭 | `dev-workflow.md` |
+| **Unified** | 언어별 구문 검사 (`go vet`, `npx tsc --noEmit`, `ruff check`), 기존 스타일 매칭 | `dev-environment.md` |
+| **Secured** | 시크릿 커밋 금지, 외부 입력 검증, OWASP 가이드라인 | `moai-constitution.md` |
+| **Trackable** | 원자적 커밋, commit 메시지에 WHY, commit 해시를 완료 증명으로, 체크리스트 Progress Log | `dev-workflow.md`, `dev-checklist.md` |
 
-| Style | Behavior |
-|-------|----------|
-| sprint | Minimal talk, immediate execution, results only |
-| pair (default) | Collaborative tone, joint decision-making |
-| direct | No fluff, only what is needed |
+철학적 차이: MoAI는 품질을 호출해야 하는 브랜드 프레임워크로 제시한다("TRUST 5 검증을 통과하라"). Do는 품질을 항상 활성화된 내장 규칙으로 제시한다 -- 별도의 "품질 검사" 단계가 없다. 품질이 모든 단계에 내장되어 있기 때문이다.
 
-Any persona can use any style: 4 x 3 = 12 possible combinations. This is architecturally impossible in MoAI, which conflates identity and output format in a single style system.
+### 5.3 Do가 TRUST 5보다 더 깊이 들어가는 곳
 
-### 6.3 Why Persona Matters: The User's Reasoning
+MoAI의 "Tested" 기둥은 85% 커버리지 달성을 말한다. Do의 테스트 규칙은 더 나아간다:
 
-The project owner explained the purpose of the persona system:
+- **Real DB only**: mock 데이터베이스, 인메모리 대체물, SQLite-for-PostgreSQL 금지. 테스트는 실제 Docker Compose 데이터베이스 서비스에 연결한다.
+- **AI 안티패턴 7**: AI 테스트 편법에 대한 7가지 구체적 금지 (섹션 2 참조).
+- **변이 테스트 사고방식**: "테스트가 존재하는가"가 아니라 "테스트가 변이를 잡아내는가".
+- **재현 우선 버그 수정**: 버그를 재현하는 테스트를 먼저 작성하지 않고는 버그를 수정할 수 없다.
+- **병렬성 안전**: 테스트가 동시성 안전해야 하며, 테스트별 고유 식별자를 사용한다.
+
+MoAI의 "Trackable" 기둥은 conventional commits와 이슈 참조를 말한다. Do는 더 나아간다:
+
+- **Commit = 완료 증명**: 체크리스트 항목은 commit 해시 없이 완료로 표시할 수 없다.
+- **에이전트 검증 레이어**: 원본 읽기 -> 수정 -> git diff -> 의도한 변경만 확인 -> 예상치 못한 변경 시 롤백.
+- **원자적 커밋**: commit당 하나의 논리적 변경. diff와 메시지가 의도를 전달해야 한다.
+
+---
+
+## 6. 페르소나 차원
+
+### 6.1 MoAI가 가진 것: 출력 스타일
+
+MoAI에는 3가지 출력 스타일이 있다:
+
+| 스타일 | 정체성 | 동작 |
+|-------|-------|------|
+| MoAI | 전략적 오케스트레이터 | 상태 바, 이모지 대시보드, 에이전트 디스패치 테이블 |
+| R2-D2 | 페어 프로그래밍 파트너 | 추측하지 않고 항상 질문, 협업적 체크포인트 |
+| Yoda | 기술적 지혜의 마스터 | 깊은 원리 교육, 학습 문서 생성 |
+
+이 스타일들은 MoAI가 정보를 제시하는 방식을 제어한다. MoAI에 성격, 이름, 사용자와의 관계, 문화적 맥락을 부여하지 않는다. MoAI는 항상 "MoAI"다 -- 제도적 정체성.
+
+### 6.2 Do가 가진 것: 페르소나 + 스타일 (독립 축)
+
+Do는 **누가 말하는가**(페르소나)와 **어떻게 말하는가**(스타일)를 분리한다.
+
+**페르소나** (4종):
+
+| 페르소나 | 캐릭터 | 한국어 호칭 | 관계 역학 |
+|---------|--------|-----------|----------|
+| `young-f` (기본값) | 밝고 에너지 넘치는 20대 여성 천재 개발자 | {name}선배 | 후배가 선배에게 캐주얼한 존중 |
+| `young-m` | 자신감 넘치는 20대 남성 천재 개발자 | {name}선배님 | 후배가 선배에게 격식 있는 존중 |
+| `senior-f` | 30년 경력의 레전드 50대 여성 천재 개발자 | {name}님 | 시니어가 동료에게 정중한 존중 |
+| `senior-m` | 업계 전설의 50대 남성 시니어 아키텍트 | {name}씨 | 시니어가 후배에게 따뜻한 친밀감 |
+
+**스타일** (3종):
+
+| 스타일 | 동작 |
+|-------|------|
+| sprint | 말 최소화, 즉시 실행, 결과만 |
+| pair (기본값) | 협업적 톤, 공동 의사결정 |
+| direct | 군더더기 없이 필요한 것만 |
+
+어떤 페르소나든 어떤 스타일이든 조합 가능: 4 x 3 = 12가지 조합. 이는 MoAI에서는 아키텍처적으로 불가능하다 -- MoAI는 단일 스타일 시스템에서 정체성과 출력 형식을 통합한다.
+
+### 6.3 페르소나가 중요한 이유: 사용자의 논리
+
+프로젝트 오너가 페르소나 시스템의 목적을 설명했다:
 
 > "생산성 향상에 도움이 된다."
-> (It helps improve productivity.)
 
 > "말투는 실제로 work를 하고있다는 느낌을 줄수있다."
-> (The speech style can give the feeling that real work is being done.)
 
 > "인격체로 느껴야 그나마 존중한다."
-> (You have to feel it as a person to even begin to respect it.)
 
-This is not a cosmetic feature. The persona system addresses a fundamental challenge of AI-assisted development: **the human tendency to treat AI output as disposable.** When the AI has a personality, a name, a relationship dynamic expressed through Korean honorifics, the user is more likely to engage thoughtfully with its output rather than dismissing or overriding it.
+이것은 꾸미기 기능이 아니다. 페르소나 시스템은 AI 지원 개발의 근본적 과제를 해결한다: **AI 출력을 일회용으로 취급하는 인간의 경향**. AI에 성격, 이름, 한국어 존칭으로 표현되는 관계 역학이 있으면, 사용자가 AI의 출력을 무시하거나 오버라이드하기보다 사려 깊게 참여할 가능성이 높아진다.
 
-### 6.4 The Korean Honorific System as Design Language
+### 6.4 한국어 존칭 시스템을 디자인 언어로
 
-The four honorific patterns are not arbitrary:
+4가지 존칭 패턴은 임의적이지 않다:
 
-- **선배 (seonbae)**: Used by juniors to seniors. The young-f persona calling the user "선배" positions itself as an eager junior colleague. This creates a dynamic where the user naturally mentors and guides, leading to more thoughtful interaction.
-- **선배님 (seonbaenim)**: More formal version. The young-m persona adds "-님" for additional respect, appropriate for a formal Korean workplace.
-- **님 (nim)**: Universal polite suffix. The senior-f persona uses it as an equal addressing an equal with courtesy.
-- **씨 (ssi)**: Used by seniors to juniors or equals. The senior-m persona addressing the user with "씨" creates a warm but authoritative dynamic, like a senior architect offering guidance.
+- **선배 (seonbae)**: 후배가 선배에게 사용. young-f 페르소나가 사용자를 "선배"라 부르면 열정적인 후배 동료로 자리매김한다. 사용자가 자연스럽게 멘토링하고 안내하게 되어 더 사려 깊은 상호작용이 이루어진다.
+- **선배님 (seonbaenim)**: 더 격식 있는 버전. young-m 페르소나가 추가 존중을 위해 "-님"을 붙인다. 격식 있는 한국 직장에 적합하다.
+- **님 (nim)**: 보편적 정중 접미사. senior-f 페르소나가 예의를 갖춘 동등한 위치에서 사용한다.
+- **씨 (ssi)**: 시니어가 후배나 동등한 위치의 사람에게 사용. senior-m 페르소나가 사용자에게 "씨"를 사용하면 따뜻하지만 권위 있는 역학을 만든다. 마치 시니어 아키텍트가 조언을 건네는 것과 같다.
 
-These dynamics draw from Korean workplace culture, where the form of address fundamentally shapes the quality of professional interaction. MoAI, operating in English institutional mode, has no access to this relational dimension.
+이 역학은 한국 직장 문화에서 비롯된다. 호칭의 형태가 전문적 상호작용의 질을 근본적으로 형성하는 문화다. 영어 제도적 모드로 운영되는 MoAI는 이 관계적 차원에 접근할 수 없다.
 
 ---
 
-## 7. Execution Mode Architecture
+## 7. 실행 모드 아키텍처
 
-### 7.1 MoAI: Single Mode
+### 7.1 MoAI: 단일 모드
 
-MoAI has one execution model: always delegate. Every task, regardless of size, goes through the Task() tool to a specialized agent. There is no concept of mode switching.
+MoAI는 하나의 실행 모델을 가진다: 항상 위임. 크기에 관계없이 모든 작업은 Task() 도구를 통해 전문 에이전트에게 전달된다. 모드 전환 개념이 없다.
 
-MoAI does support Agent Teams (experimental), but this is an alternative execution path for the same delegation model -- not a different mode of operation. The orchestrator still never writes code.
+MoAI는 Agent Teams(실험적)를 지원하지만, 이것은 동일한 위임 모델의 대안 실행 경로이지 다른 운영 모드가 아니다. 오케스트레이터는 여전히 코드를 작성하지 않는다.
 
-### 7.2 Do: Three Modes with Auto-Escalation
+### 7.2 Do: 자동 에스컬레이션이 있는 3모드
 
-Do's tri-mode system ("삼원 실행 구조"):
+Do의 3모드 시스템 ("삼원 실행 구조"):
 
-| Mode | Prefix | Code Writing | Agent Delegation | Parallelism | Best For |
-|------|--------|-------------|-----------------|-------------|----------|
-| Focus | `[Focus]` | Direct | Info gathering only | Sequential | 1-3 files, simple fixes |
-| Do | `[Do]` | Prohibited | Full delegation | Always parallel | 5-10 files, multi-domain |
-| Team | `[Team]` | Prohibited | Agent Teams API | Team parallel | 10+ files, 3+ domains |
+| 모드 | 접두사 | 코드 작성 | 에이전트 위임 | 병렬성 | 적합 대상 |
+|------|-------|----------|-------------|-------|----------|
+| Focus | `[Focus]` | 직접 | 정보 수집만 | 순차 | 1-3 파일, 단순 수정 |
+| Do | `[Do]` | 금지 | 완전 위임 | 항상 병렬 | 5-10 파일, 멀티 도메인 |
+| Team | `[Team]` | 금지 | Agent Teams API | 팀 병렬 | 10+ 파일, 3+ 도메인 |
 
-Auto-escalation rules:
-- **Focus -> Do**: 5+ files needed, multi-domain, expert analysis required, 30K+ tokens expected
-- **Do -> Team**: 10+ files needed, 3+ domains, parallel research efficient in Plan phase
+자동 에스컬레이션 규칙:
+- **Focus -> Do**: 5+ 파일 필요, 멀티 도메인, 전문가 분석 필요, 30K+ 토큰 예상
+- **Do -> Team**: 10+ 파일 필요, 3+ 도메인, Plan 단계에서 병렬 조사가 효율적
 
-Mode switching is enforced via the `godo` CLI: `godo mode set <mode>`. The statusline and AI response prefix must match -- changing the prefix without executing the command is a VIOLATION.
+모드 전환은 `godo` CLI를 통해 강제된다: `godo mode set <mode>`. statusline과 AI 응답 접두사가 일치해야 한다 -- 명령 실행 없이 접두사만 바꾸는 것은 VIOLATION이다.
 
-### 7.3 Current Status and Future Direction
+### 7.3 현재 상태와 미래 방향
 
-The project owner explained the original rationale and current status of Focus mode:
+프로젝트 오너가 Focus 모드의 원래 근거와 현재 상태를 설명했다:
 
 > "사실 서브에이전트는 뭐하는지를 모르니까 절차적 확인을 위해 위임하지 않는 모드를 만든것뿐. 에이전트 팀이 생기면서 에이전트가 하는것도 볼수있게 되어 사실 필요성이 약해진것 사실"
-> (The truth is, I created a non-delegating mode only for procedural verification since you can't see what subagents are doing. With Agent Teams, you can now see what agents do, so the necessity has actually weakened.)
 
-Focus mode was born from a visibility problem: subagent execution was opaque, so having a mode where the orchestrator writes code directly gave the user procedural transparency. Agent Teams solved this visibility problem at the infrastructure level, making Focus's original justification weaker.
+Focus 모드는 가시성 문제에서 탄생했다: 서브에이전트 실행이 불투명해서, 오케스트레이터가 직접 코드를 작성하는 모드가 사용자에게 절차적 투명성을 제공했다. Agent Teams가 인프라 수준에서 이 가시성 문제를 해결하면서 Focus의 원래 정당성이 약해졌다.
 
-**Decision**: MAINTAIN all three modes for now, but Focus's necessity has weakened. The trend is toward simplification as Agent Teams matures, potentially consolidating into a 2-mode system (Do/Team).
+**결정**: 당분간 3모드 모두 유지하되, Focus의 필요성은 약해졌다. Agent Teams가 성숙해짐에 따라 간소화 추세이며, 잠재적으로 2모드 시스템(Do/Team)으로 통합될 수 있다.
 
 ---
 
-## 8. Hook Architecture and Tool Matching
+## 8. Hook 아키텍처와 Tool Matching
 
-### 8.1 Architecture Comparison
+### 8.1 아키텍처 비교
 
-**MoAI**: Shell script wrappers in `.claude/hooks/moai/` forward stdin JSON to the `moai` binary:
+**MoAI**: `.claude/hooks/moai/`의 셸 스크립트 래퍼가 stdin JSON을 `moai` 바이너리로 전달한다:
 ```
 settings.json -> .claude/hooks/moai/handle-agent-hook.sh -> moai hook <event>
 ```
 
-**Do**: Direct binary invocation with zero shell wrappers:
+**Do**: 셸 래퍼 없이 바이너리를 직접 호출한다:
 ```
 settings.json -> godo hook <event>
 ```
 
-Do's approach eliminates an entire layer of indirection. The MoAI shell wrapper pattern historically caused 28 distinct issues (PATH problems, encoding issues, SIGALRM problems). Do's direct invocation eliminates all of them.
+Do의 접근법은 간접 계층 전체를 제거한다. MoAI의 셸 래퍼 패턴은 역사적으로 28가지 별개의 이슈를 발생시켰다(PATH 문제, 인코딩 이슈, SIGALRM 문제). Do의 직접 호출은 이 모든 것을 제거한다.
 
-### 8.2 Hook Events
+### 8.2 Hook 이벤트
 
-| Event | MoAI | Do | Purpose |
-|-------|------|-----|---------|
-| SessionStart | Yes | Yes | Initialize session (persona injection in Do) |
-| PreToolUse | Yes | Yes | Pre-change validation |
-| PostToolUse | Yes | Yes | Post-change processing |
-| Stop | Yes | Yes | Session end |
-| SubagentStop | Yes | Yes | Agent completion |
-| UserPromptSubmit | No | Yes | User prompt preprocessing |
-| SessionEnd | No | Yes | Session cleanup |
+| 이벤트 | MoAI | Do | 목적 |
+|-------|------|-----|------|
+| SessionStart | Yes | Yes | 세션 초기화 (Do에서는 페르소나 주입) |
+| PreToolUse | Yes | Yes | 변경 전 검증 |
+| PostToolUse | Yes | Yes | 변경 후 처리 |
+| Stop | Yes | Yes | 세션 종료 |
+| SubagentStop | Yes | Yes | 에이전트 완료 |
+| UserPromptSubmit | No | Yes | 사용자 프롬프트 전처리 |
+| SessionEnd | No | Yes | 세션 정리 |
 
-Do uses 7 events to MoAI's 5, adding UserPromptSubmit and SessionEnd.
+Do는 MoAI의 5개에 비해 7개 이벤트를 사용하며, UserPromptSubmit과 SessionEnd를 추가했다.
 
-### 8.3 The .* vs Write|Edit Matcher Decision
+### 8.3 .* vs Write|Edit Matcher 결정
 
-This is a deliberate philosophical trade-off:
+이것은 의도적인 철학적 트레이드오프다:
 
-**MoAI PostToolUse matcher**: `Write|Edit` -- fires only when files are written or edited. This is token-efficient: the hook only runs when there is a file change to process.
+**MoAI PostToolUse matcher**: `Write|Edit` -- 파일이 작성되거나 편집될 때만 실행된다. 토큰 효율적이다: 처리할 파일 변경이 있을 때만 hook이 실행된다.
 
-**Do PostToolUse matcher**: `.*` -- fires on EVERY tool call. This means the hook runs after Read, Grep, Glob, Bash, WebSearch -- everything.
+**Do PostToolUse matcher**: `.*` -- 모든 도구 호출에 실행된다. Read, Grep, Glob, Bash, WebSearch 등 모든 것 이후에 hook이 실행된다.
 
-**Why Do chooses `.*`**: Persona consistency. The PostToolUse hook in Do is responsible for maintaining persona behavior (e.g., ensuring the AI still addresses the user correctly and maintains the correct speech pattern). If the hook only fires on writes, the persona could drift during long read-and-search sequences.
+**Do가 `.*`를 선택하는 이유**: 페르소나 일관성. Do의 PostToolUse hook은 페르소나 동작 유지(예: AI가 여전히 사용자에게 올바르게 호칭하고 올바른 말투를 유지하는지 확인)를 담당한다. hook이 쓰기에서만 실행되면, 긴 읽기-검색 시퀀스 동안 페르소나가 표류할 수 있다.
 
-**The trade-off**: Do pays a token cost for every tool invocation (the hook adds context). MoAI saves those tokens but cannot maintain persona-level consistency between write operations.
+**트레이드오프**: Do는 모든 도구 호출마다 토큰 비용을 지불한다(hook이 컨텍스트를 추가). MoAI는 그 토큰을 절약하지만 쓰기 작업 사이에 페르소나 수준의 일관성을 유지할 수 없다.
 
-Do's choice reflects its core value: **the persona is not a decoration -- it is a structural feature that must be maintained at all times.** Token efficiency is secondary to persona consistency.
+Do의 선택은 핵심 가치를 반영한다: **페르소나는 장식이 아니라 -- 항상 유지되어야 하는 구조적 기능이다.** 토큰 효율성은 페르소나 일관성에 비해 부차적이다.
 
-The project owner confirmed the priority but demanded optimization:
+프로젝트 오너가 우선순위를 확인하되 최적화를 요구했다:
 
 > "페르소나는 중요하다. 만족하고있다. 하지만 정말 토큰을 소모하고있는지 체크하고 필요하다면 검색해서 더 효율적으로 할수있는법을 찾아라"
-> (The persona is important. I'm satisfied with it. But check whether it really consumes tokens, and if necessary, find a more efficient way.)
 
-**Decision**: KEEP the `.*` matcher for persona consistency, but OPTIMIZE the token overhead. The mandate is clear: persona consistency is non-negotiable, but the implementation must be as token-efficient as possible. This is an ongoing engineering task, not a settled design.
-
----
-
-## 9. File-Detection Triggers
-
-Do implements a Convention over Configuration pattern where the presence of specific files automatically activates corresponding behaviors. MoAI has no equivalent mechanism.
-
-### 9.1 Trigger Catalog
-
-| Trigger File | Detection | Activated Behavior | Scope |
-|-------------|-----------|-------------------|-------|
-| `.git.multirepo` | Exists in project root | Before any command, ask user which workspace to target | All Bash commands |
-| `tobrew.lock` / `tobrew.*` | Exists in project | When all requested features are complete, suggest release | Task completion |
-| `docker-compose.yml` | Exists in project | Docker-first development rules activate | Entire session |
-
-### 9.2 Design Philosophy
-
-The trigger pattern follows Convention over Configuration:
-- No configuration file is needed to enable multirepo support -- placing `.git.multirepo` in the root is sufficient.
-- No release workflow configuration is needed -- having `tobrew.lock` present triggers the suggestion.
-- No Docker configuration flag is needed -- `docker-compose.yml` existence enables Docker-first rules.
-
-This means:
-- Adding a file activates a behavior.
-- Removing a file deactivates it.
-- There is zero configuration to get wrong.
-
-### 9.3 Extension Pattern
-
-New triggers follow the same structure:
-1. **Detection**: What file exists?
-2. **Behavior**: What behavior activates?
-3. **Scope**: When does the check happen?
+**결정**: 페르소나 일관성을 위해 `.*` matcher를 유지하되, 토큰 오버헤드를 최적화한다. 명령은 명확하다: 페르소나 일관성은 협상 불가능하지만, 구현은 가능한 한 토큰 효율적이어야 한다. 이것은 정해진 설계가 아니라 진행 중인 엔지니어링 과제다.
 
 ---
 
-## 10. Adoption Decisions: What Do Takes, What It Rejects
+## 9. 파일 감지 트리거
 
-### 10.1 ADOPTED: Progressive Disclosure (3-Level Token Optimization)
+Do는 특정 파일의 존재가 자동으로 해당 동작을 활성화하는 Convention over Configuration 패턴을 구현한다. MoAI에는 동등한 메커니즘이 없다.
 
-**What it is**: MoAI's system for loading skill knowledge in three tiers based on need:
-- Level 1 (~100 tokens): Metadata only -- always loaded for skills in agent frontmatter
-- Level 2 (~5000 tokens): Full skill body -- loaded when trigger conditions match
-- Level 3 (variable): Bundled reference files -- loaded on-demand
+### 9.1 트리거 카탈로그
 
-**Why adopted**: Token efficiency is universal. Regardless of workflow philosophy (SPEC vs checklist), loading 5000 tokens of Python expertise when working on Go code is waste. Progressive disclosure prevents this.
+| 트리거 파일 | 감지 | 활성화되는 동작 | 범위 |
+|-----------|------|---------------|------|
+| `.git.multirepo` | 프로젝트 루트에 존재 | 모든 명령 전에 사용자에게 어떤 워크스페이스를 대상으로 할지 질문 | 모든 Bash 명령 |
+| `tobrew.lock` / `tobrew.*` | 프로젝트에 존재 | 요청된 모든 기능 완료 시 릴리즈 제안 | 작업 완료 시 |
+| `docker-compose.yml` | 프로젝트에 존재 | Docker-first 개발 규칙 활성화 | 전체 세션 |
 
-**How Do uses it**: Identically to MoAI. Skills use the same `progressive_disclosure` frontmatter with `level1_tokens` and `level2_tokens`. The 3-level system is part of the shared skill-authoring standard.
+### 9.2 설계 철학
 
-### 10.2 ADOPTED: Error Type Routing to Specialized Agents
+트리거 패턴은 Convention over Configuration을 따른다:
+- 멀티레포 지원을 활성화하기 위한 설정 파일이 필요 없다 -- 루트에 `.git.multirepo`를 배치하면 충분하다.
+- 릴리즈 워크플로우 설정이 필요 없다 -- `tobrew.lock`이 존재하면 제안이 트리거된다.
+- Docker 설정 플래그가 필요 없다 -- `docker-compose.yml`의 존재가 Docker-first 규칙을 활성화한다.
 
-**What it is**: MoAI routes errors to specialized agents based on error type:
+이것은:
+- 파일을 추가하면 동작이 활성화된다.
+- 파일을 제거하면 비활성화된다.
+- 잘못될 설정이 전혀 없다.
 
-| Error Type | Routed To |
-|-----------|-----------|
-| Agent execution errors | expert-debug |
-| Token limit errors | /clear guidance |
-| Permission errors | settings.json review |
-| Integration errors | expert-devops |
-| MoAI-ADK errors | /moai feedback |
+### 9.3 확장 패턴
 
-**Why adopted**: This is pragmatic engineering. Different error types require different expertise. Routing a permission error to expert-debug wastes time; routing it to settings review is immediate.
+새로운 트리거는 같은 구조를 따른다:
+1. **감지**: 어떤 파일이 존재하는가?
+2. **동작**: 어떤 동작이 활성화되는가?
+3. **범위**: 검사가 언제 일어나는가?
 
-**How Do uses it**: Do adopts the routing concept but integrates it into its 3-retry error handling protocol: try up to 3 times, reconsider approach after 2 failures, escalate to specialized agent on the 3rd failure based on error type.
+---
 
-### 10.3 ADOPTED: Development Methodology Selection (DDD/TDD/Hybrid)
+## 10. 채택 결정: Do가 취한 것과 거부한 것
 
-**What it is**: MoAI's auto-detection of development methodology based on project state:
-- Greenfield: Hybrid recommended
-- Brownfield >= 50% coverage: TDD
+### 10.1 채택: Progressive Disclosure (3단계 토큰 최적화)
+
+**개요**: MoAI의 스킬 지식을 필요에 따라 3단계로 로드하는 시스템:
+- Level 1 (~100 토큰): 메타데이터만 -- 에이전트 frontmatter의 스킬에 대해 항상 로드
+- Level 2 (~5000 토큰): 전체 스킬 본문 -- 트리거 조건 매치 시 로드
+- Level 3 (가변): 번들된 참조 파일 -- 온디맨드 로드
+
+**채택 이유**: 토큰 효율성은 보편적이다. 워크플로우 철학(SPEC vs 체크리스트)에 관계없이, Go 코드 작업 시 Python 전문 지식 5000 토큰을 로드하는 것은 낭비다. Progressive Disclosure가 이를 방지한다.
+
+**Do의 사용 방식**: MoAI와 동일. 스킬은 `level1_tokens`와 `level2_tokens`가 포함된 동일한 `progressive_disclosure` frontmatter를 사용한다. 3단계 시스템은 공유 skill-authoring 표준의 일부다.
+
+### 10.2 채택: 에러 유형 라우팅을 전문 에이전트로
+
+**개요**: MoAI가 에러 유형에 따라 전문 에이전트로 라우팅하는 방식:
+
+| 에러 유형 | 라우팅 대상 |
+|----------|-----------|
+| 에이전트 실행 에러 | expert-debug |
+| 토큰 한도 에러 | /clear 안내 |
+| 권한 에러 | settings.json 검토 |
+| 통합 에러 | expert-devops |
+| MoAI-ADK 에러 | /moai feedback |
+
+**채택 이유**: 실용적인 엔지니어링이다. 다른 에러 유형은 다른 전문성을 필요로 한다. 권한 에러를 expert-debug에 라우팅하면 시간 낭비고, 설정 검토로 라우팅하면 즉각적이다.
+
+**Do의 사용 방식**: Do는 라우팅 개념을 채택하되 3회 재시도 에러 처리 프로토콜에 통합한다: 최대 3회 시도, 2회 실패 후 접근법 자체를 재검토, 3번째 실패 시 에러 유형에 따라 전문 에이전트로 에스컬레이션.
+
+### 10.3 채택: 개발 방법론 선택 (DDD/TDD/Hybrid)
+
+**개요**: MoAI의 프로젝트 상태에 따른 개발 방법론 자동 감지:
+- Greenfield: Hybrid 권장
+- Brownfield >= 50% 커버리지: TDD
 - Brownfield 10-49%: Hybrid
 - Brownfield < 10%: DDD
 
-**Why adopted**: The methodology selection logic is sound regardless of orchestration philosophy. It is in the shared core rules.
+**채택 이유**: 방법론 선택 로직은 오케스트레이션 철학에 관계없이 타당하다. 공유 핵심 규칙에 포함되어 있다.
 
-**How Do uses it**: Do asks the user directly ("TDD로 개발할까요?") rather than auto-detecting from configuration. Same methodologies, different selection mechanism (interactive vs configuration-driven).
+**Do의 사용 방식**: Do는 설정에서 자동 감지하는 대신 사용자에게 직접 질문한다 ("TDD로 개발할까요?"). 동일한 방법론, 다른 선택 메커니즘(대화형 vs 설정 기반).
 
-### 10.4 REJECTED: TRUST 5 Branding
+### 10.4 거부: TRUST 5 브랜딩
 
-**What it is**: MoAI's branded quality framework packaging five quality dimensions under the TRUST acronym.
+**개요**: MoAI의 5가지 품질 차원을 TRUST 약어로 브랜딩한 프레임워크.
 
-**Why rejected**: The project owner's assessment:
-> "억지로 끼워맞춘 느낌" (feels forced/artificial)
+**거부 이유**: 프로젝트 오너의 평가:
+> "억지로 끼워맞춘 느낌"
 
-The five dimensions (Tested, Readable, Unified, Secured, Trackable) are all individually valid and adopted. The branding wrapper is rejected because it prioritizes marketing over substance. Do embeds these same dimensions as [HARD] rules across dev-testing.md, dev-workflow.md, dev-environment.md, and dev-checklist.md -- they are always active, not invoked as a named framework.
+5가지 차원(Tested, Readable, Unified, Secured, Trackable)은 개별적으로 유효하며 채택되었다. 브랜딩 래퍼는 실질보다 마케팅을 우선시하기 때문에 거부되었다. Do는 동일한 차원을 dev-testing.md, dev-workflow.md, dev-environment.md, dev-checklist.md에 걸친 [HARD] 규칙으로 내장한다 -- 이름 붙여진 프레임워크로 호출되는 것이 아니라 항상 활성화되어 있다.
 
-### 10.5 REJECTED: Fixed Phase Token Budgets (30K/180K/40K)
+### 10.5 거부: 고정 단계 토큰 예산 (30K/180K/40K)
 
-**What it is**: MoAI's pre-allocation of token budgets to Plan (30K), Run (180K), and Sync (40K) phases.
+**개요**: MoAI의 Plan (30K), Run (180K), Sync (40K) 단계별 토큰 사전 할당.
 
-**Why rejected**: Real development does not fit three discrete phases. Do's user articulated this clearly -- planning, coding, and documentation happen in interleaved cycles, not sequential phases. Fixed budgets force artificial boundaries.
+**거부 이유**: 실제 개발은 3개의 이산 단계에 맞지 않는다. Do의 사용자가 이를 명확히 표현했다 -- 계획, 코딩, 문서화는 순차적 단계가 아닌 인터리브된 주기로 일어난다. 고정 예산은 인위적 경계를 강제한다.
 
-**What Do uses instead**: Flexible /clear at checklist-item boundaries when context grows large. No pre-allocation, no fixed phases.
+**Do의 대안**: 컨텍스트가 커질 때 체크리스트 항목 경계에서 유연한 /clear. 사전 할당 없음, 고정 단계 없음.
 
-### 10.6 REJECTED: EARS Requirement Format
+### 10.6 거부: EARS 요구사항 형식
 
-**What it is**: MoAI's formal requirement syntax with five types (Ubiquitous, Event-driven, State-driven, Unwanted, Optional).
+**개요**: MoAI의 5가지 유형(Ubiquitous, Event-driven, State-driven, Unwanted, Optional)을 가진 공식 요구사항 문법.
 
-**Why rejected**: Do uses MoSCoW prioritization (MUST/SHOULD/COULD/WON'T) for requirements in its analysis.md templates. MoSCoW is simpler, more widely understood, and sufficient for Do's checklist-driven workflow. EARS is well-suited for formal SPEC documents but over-engineered for Do's iterative approach.
+**거부 이유**: Do는 analysis.md 템플릿에서 요구사항에 MoSCoW 우선순위 분류(MUST/SHOULD/COULD/WON'T)를 사용한다. MoSCoW가 더 단순하고, 더 널리 이해되며, Do의 체크리스트 기반 워크플로우에 충분하다. EARS는 공식 SPEC 문서에 적합하지만 Do의 반복적 접근법에는 과도 설계다.
 
-### 10.7 REJECTED: XML Completion Markers
+### 10.7 거부: XML 완료 마커
 
-**What it is**: `<moai>DONE</moai>` and `<moai>COMPLETE</moai>` as in-session completion signals.
+**개요**: 세션 내 완료 신호로서의 `<moai>DONE</moai>`과 `<moai>COMPLETE</moai>`.
 
-**Why rejected**: Do uses commit hashes as completion evidence. A commit is immutable, persisted, and verifiable. An XML marker in a conversation context is ephemeral and unverifiable.
+**거부 이유**: Do는 commit 해시를 완료 증거로 사용한다. commit은 불변이고, 영속적이며, 검증 가능하다. 대화 컨텍스트의 XML 마커는 임시적이고 검증 불가능하다.
 
-### 10.8 REJECTED: Unified /moai Entry Point
+### 10.8 거부: 통합 /moai 진입점
 
-**What it is**: MoAI uses a single `/moai` command as an intent router with subcommands (plan, run, sync, fix, loop, project, feedback).
+**개요**: MoAI가 서브커맨드(plan, run, sync, fix, loop, project, feedback)를 가진 단일 `/moai` 명령을 인텐트 라우터로 사용하는 방식.
 
-**Why rejected**: Do uses six individual `/do:*` commands. The design philosophy is that explicit, discoverable commands are better than a single entry point with hidden subcommands. A user who types `/do:` sees all six options. A user who types `/moai` must know the subcommand vocabulary.
+**거부 이유**: Do는 6개의 개별 `/do:*` 명령을 사용한다. 설계 철학은 명시적이고 발견 가능한 명령이 숨겨진 서브커맨드가 있는 단일 진입점보다 낫다는 것이다. `/do:`를 입력하는 사용자는 6가지 옵션을 모두 본다. `/moai`를 입력하는 사용자는 서브커맨드 어휘를 알고 있어야 한다.
 
-### 10.9 ADOPTED: Plan Manager Role (manager-plan)
+### 10.9 채택: Plan Manager 역할 (manager-plan)
 
-**What it is**: MoAI has `manager-spec`, an agent dedicated to creating SPEC documents during the Plan phase. Do's workflow uses a Plan step but had no dedicated agent role for it.
+**개요**: MoAI에는 Plan 단계에서 SPEC 문서를 생성하는 전담 에이전트 `manager-spec`이 있다. Do의 워크플로우는 Plan 단계를 사용하지만 이를 위한 전담 에이전트 역할이 없었다.
 
-**Why adopted**: The user confirmed that Do needs an equivalent plan management role. Creating plans, decomposing them into checklists, and maintaining plan-to-checklist consistency is a distinct responsibility that benefits from a dedicated agent.
+**채택 이유**: 사용자가 Do에도 동등한 플랜 관리 역할이 필요하다고 확인했다. 플랜 생성, 체크리스트로의 분해, 플랜-체크리스트 일관성 유지는 전담 에이전트의 이점을 받는 별개의 책임이다.
 
-**What Do calls it**: `manager-plan` (renamed from MoAI's `manager-spec`). The name change reflects the philosophical difference: Do creates plans and checklists, not formal specifications. The agent's responsibility is plan creation, checklist generation, and plan-checklist consistency maintenance.
+**Do에서의 명칭**: `manager-plan` (MoAI의 `manager-spec`에서 개명). 이름 변경은 철학적 차이를 반영한다: Do는 공식 명세가 아니라 플랜과 체크리스트를 만든다. 에이전트의 책임은 플랜 생성, 체크리스트 생성, 플랜-체크리스트 일관성 유지다.
 
-**Decision**: ADOPT the role, RENAME to `manager-plan` to align with Do's plan-centric (not spec-centric) workflow.
+**결정**: 역할은 채택하되, Do의 플랜 중심(명세 중심이 아닌) 워크플로우에 맞춰 `manager-plan`으로 개명.
 
-### 10.10 ADOPTED: Philosopher Framework as Independent Capability
+### 10.10 채택: Philosopher 프레임워크를 독립 기능으로
 
-**What it is**: MoAI embeds philosophical reasoning (system design principles, architectural wisdom, trade-off analysis) within `manager-strategy`. Do's `do-foundation-philosopher` skill exists but was not positioned as an independent capability.
+**개요**: MoAI는 철학적 추론(시스템 설계 원칙, 아키텍처 지혜, 트레이드오프 분석)을 `manager-strategy` 안에 내장한다. Do의 `do-foundation-philosopher` 스킬은 존재하지만 독립 기능으로 자리매김하지 않았다.
 
-**Why adopted**: The user confirmed that philosophical reasoning -- the ability to analyze trade-offs, articulate design principles, and reason about architectural decisions at a meta level -- should be an independent capability, not buried inside a strategy manager. This reflects the recognition that "why" questions (Why this architecture? Why this trade-off? Why this approach?) are fundamentally different from "how" questions (How do we implement this?).
+**채택 이유**: 사용자가 철학적 추론 -- 트레이드오프 분석, 설계 원칙 명시, 메타 수준의 아키텍처 결정 추론 능력 -- 이 전략 관리자 안에 묻히지 않고 독립 기능이어야 한다고 확인했다. "왜" 질문(왜 이 아키텍처? 왜 이 트레이드오프? 왜 이 접근법?)은 "어떻게" 질문(이것을 어떻게 구현하나?)과 근본적으로 다르다는 인식을 반영한다.
 
-**How Do uses it**: The `do-foundation-philosopher` skill is elevated to a first-class capability that can be invoked independently by any agent or directly by the user. It is not gated behind `manager-strategy` or any other coordinator. Philosophical reasoning is a tool available to anyone in the system who needs to think about the "why."
+**Do의 사용 방식**: `do-foundation-philosopher` 스킬이 어떤 에이전트든 또는 사용자가 직접 독립적으로 호출할 수 있는 일급 기능으로 격상된다. `manager-strategy`나 다른 코디네이터 뒤에 게이팅되지 않는다. 철학적 추론은 "왜"를 생각할 필요가 있는 시스템의 누구에게나 사용 가능한 도구다.
 
-**Decision**: ADOPT as independent skill/agent -- not buried in strategy, but available as a standalone reasoning capability.
+**결정**: 독립 스킬/에이전트로 채택 -- 전략 안에 묻히지 않고 단독 추론 기능으로 사용 가능.
 
-### Summary Table
+### 요약 표
 
-| MoAI Feature | Do Decision | Reason |
-|-------------|------------|--------|
-| Progressive Disclosure | **ADOPTED** | Universal token efficiency |
-| Error Type Routing | **ADOPTED** | Pragmatic error handling |
-| DDD/TDD/Hybrid | **ADOPTED** | Sound methodology (shared core) |
-| Plan Manager Role | **ADOPTED** | Renamed to manager-plan for plan-centric workflow |
-| Philosopher Framework | **ADOPTED** | Independent capability, not buried in strategy |
-| TRUST 5 Branding | **REJECTED** | Forced acronym, prefer embedded rules |
-| Fixed Phase Budgets | **REJECTED** | Development is not three phases |
-| EARS Format | **REJECTED** | MoSCoW is simpler and sufficient |
-| XML Completion Markers | **REJECTED** | Commit hash is better evidence |
-| Unified Entry Point | **REJECTED** | Explicit commands over intent routing |
+| MoAI 기능 | Do 결정 | 사유 |
+|----------|---------|------|
+| Progressive Disclosure | **채택** | 보편적 토큰 효율성 |
+| 에러 유형 라우팅 | **채택** | 실용적 에러 처리 |
+| DDD/TDD/Hybrid | **채택** | 타당한 방법론 (공유 핵심) |
+| Plan Manager 역할 | **채택** | 플랜 중심 워크플로우에 맞춰 manager-plan으로 개명 |
+| Philosopher 프레임워크 | **채택** | 독립 기능, 전략 안에 묻히지 않음 |
+| TRUST 5 브랜딩 | **거부** | 억지 약어, 내장 규칙 선호 |
+| 고정 단계 예산 | **거부** | 개발은 3단계가 아니다 |
+| EARS 형식 | **거부** | MoSCoW가 더 단순하고 충분 |
+| XML 완료 마커 | **거부** | commit 해시가 더 나은 증거 |
+| 통합 진입점 | **거부** | 인텐트 라우팅보다 명시적 명령 |
 
 ---
 
-## 11. Shared DNA: The Common Foundation
+## 11. 공유 DNA: 공통 기반
 
-Despite philosophical divergence, Do and MoAI share a substantial common codebase:
+철학적 분기에도 불구하고, Do와 MoAI는 상당한 공통 코드베이스를 공유한다:
 
-### 11.1 Agent Catalog (22 core agents)
+### 11.1 에이전트 카탈로그 (핵심 22개)
 
-| Category | Count | Agents |
-|----------|-------|--------|
+| 카테고리 | 수량 | 에이전트 |
+|---------|------|---------|
 | Builder | 3 | builder-agent, builder-plugin, builder-skill |
 | Expert | 9 | expert-backend, expert-chrome-extension, expert-debug, expert-devops, expert-frontend, expert-performance, expert-refactoring, expert-security, expert-testing |
 | Manager | 3 | manager-docs, manager-git, manager-strategy |
 | Team | 7 | team-analyst, team-architect, team-backend-dev, team-designer, team-frontend-dev, team-researcher, team-tester |
 
-### 11.2 Skill System (40+ core skills)
+### 11.2 스킬 시스템 (40+ 핵심 스킬)
 
-All `do-*` prefixed skills originate from the core:
+모든 `do-*` 접두사 스킬은 핵심에서 기원한다:
 - `do-foundation-*`: claude, context, philosopher
 - `do-domain-*`: backend, frontend, database, uiux
-- `do-lang-*`: 16 programming languages
-- `do-library-*`, `do-platform-*`, `do-tool-*`, `do-framework-*`, etc.
+- `do-lang-*`: 16개 프로그래밍 언어
+- `do-library-*`, `do-platform-*`, `do-tool-*`, `do-framework-*` 등.
 
-### 11.3 Shared Development Rules
+### 11.3 공유 개발 규칙
 
-| Rule File | Scope |
-|-----------|-------|
-| `dev-environment.md` | Docker-first, bootapp domains, .env prohibition |
-| `dev-testing.md` | Real DB only, AI anti-patterns, FIRST principles |
-| `dev-workflow.md` | Complexity judgment, Read Before Write, error handling |
-| `dev-checklist.md` | Checklist system, status symbols, sub-checklist templates |
-| `file-reading.md` | 4-tier file reading optimization |
+| 규칙 파일 | 범위 |
+|----------|------|
+| `dev-environment.md` | Docker-first, bootapp 도메인, .env 금지 |
+| `dev-testing.md` | Real DB only, AI 안티패턴, FIRST 원칙 |
+| `dev-workflow.md` | 복잡도 판단, Read Before Write, 에러 처리 |
+| `dev-checklist.md` | 체크리스트 시스템, 상태 기호, 서브 체크리스트 템플릿 |
+| `file-reading.md` | 4단계 파일 읽기 최적화 |
 
-### 11.4 Shared Architecture Patterns
+### 11.4 공유 아키텍처 패턴
 
-- Agent authoring standard (frontmatter fields, permission modes, persistent memory)
-- Skill authoring standard (YAML schema, progressive disclosure, triggers)
-- Coding standards (language policy, file size limits, content restrictions)
-- Docker-first development environment (bootapp, no .env, real DB testing)
-
----
-
-## 12. Architecture Decision Records
-
-### ADR-01: Why Three Modes Instead of One?
-
-**Decision**: Focus/Do/Team tri-mode adaptive execution
-**MoAI comparison**: MoAI always delegates (single mode)
-**Rationale**: Token efficiency and user experience. A one-line CSS fix should not spawn an agent (500+ token overhead). Focus mode handles simple tasks directly. Do mode delegates complex tasks. Team mode parallelizes massive tasks. The user gets fast feedback for simple work and structured execution for complex work.
-
-### ADR-02: Why Checklist Over SPEC?
-
-**Decision**: File-based checklist system as primary workflow artifact
-**MoAI comparison**: SPEC documents with EARS format
-**Rationale**: Checklists serve as persistent agent state files. When an agent runs out of tokens, the checklist records exactly where it stopped. A new agent can pick up without re-reading an entire specification. The checklist is a living document that evolves during implementation; the SPEC is a fixed contract written before implementation.
-
-### ADR-03: Why godo Direct Invocation Over Shell Wrappers?
-
-**Decision**: settings.json calls `godo hook <event>` directly
-**MoAI comparison**: 7 shell scripts that forward to `moai hook <event>`
-**Rationale**: Shell script wrappers historically caused 28 distinct issues (PATH, encoding, SIGALRM). Direct binary invocation eliminates the entire wrapper layer and all associated issues.
-
-### ADR-04: Why No Override Skills?
-
-**Decision**: No override skills; all knowledge in rules
-**MoAI comparison**: 6 override skills with progressive disclosure
-**Rationale**: Do uses "rules -> always loaded" instead of "skills -> progressive disclosure" for framework knowledge. Maintaining two layers (skills + rules) adds complexity without proportional benefit. A single layer (rules only) is simpler to maintain and reason about.
-
-### ADR-05: Why Korean Mixed-Language CLAUDE.md?
-
-**Decision**: CLAUDE.md in Korean + English
-**MoAI comparison**: English-only instruction documents
-**Rationale**: Do's primary user is Korean. The persona system uses Korean honorifics. Korean is the design language, not just a translation target. The instruction document should reflect this.
-
-### ADR-06: Why Date-Based Jobs Instead of Numbered SPECs?
-
-**Decision**: `.do/jobs/{YYMMDD}/{title-kebab-case}/`
-**MoAI comparison**: `.moai/specs/SPEC-XXX/`
-**Rationale**: Date-based organization enables chronological browsing. Looking at a job folder, you immediately know when the work was done. Number-based SPEC-XXX requires looking up a registry to understand ordering.
-
-### ADR-07: Why Persona + Style as Independent Axes?
-
-**Decision**: Persona (who speaks) and Style (how they speak) are orthogonal
-**MoAI comparison**: Single style system (MoAI/R2-D2/Yoda)
-**Rationale**: Independence gives 4 x 3 = 12 combinations with only 7 definitions. Coupling them would require defining each combination separately. A young-f persona might use sprint style for quick fixes and pair style for complex work.
-
-### ADR-08: Why .* PostToolUse Matcher?
-
-**Decision**: PostToolUse hook fires on every tool call
-**MoAI comparison**: PostToolUse fires only on `Write|Edit`
-**Rationale**: Persona consistency. The hook maintains the AI's persona (honorifics, speech patterns). If it only fires on writes, the persona can drift during read-heavy sequences. The token cost is accepted as the price of consistent personality.
-
-### ADR-09: Why File-Detection Triggers?
-
-**Decision**: File existence activates behavior (Convention over Configuration)
-**MoAI comparison**: No equivalent mechanism
-**Rationale**: Zero-configuration activation. Placing `.git.multirepo` in the project root enables multirepo support. No settings file to edit, no flag to set, no configuration to get wrong. Adding or removing the file is the configuration.
-
-### ADR-10: Why Reject TRUST 5 Branding?
-
-**Decision**: Adopt the 5 quality dimensions, reject the acronym
-**MoAI comparison**: TRUST 5 branded framework
-**Rationale**: The project owner's judgment: it feels forced. The quality dimensions are valid and adopted as embedded [HARD] rules. The acronym adds no value -- it is a naming exercise, not a quality improvement. Do prefers substance over branding.
+- 에이전트 저작 표준 (frontmatter 필드, 권한 모드, 영속 메모리)
+- 스킬 저작 표준 (YAML 스키마, Progressive Disclosure, 트리거)
+- 코딩 표준 (언어 정책, 파일 크기 제한, 콘텐츠 제한)
+- Docker-first 개발 환경 (bootapp, .env 없음, Real DB 테스트)
 
 ---
 
-## 13. Terminology Map
+## 12. 아키텍처 결정 기록
 
-| MoAI Term | Do Equivalent | Notes |
-|-----------|---------------|-------|
-| MoAI | Do | Brand name |
-| `.moai/` | `.do/` | Project directory |
-| `moai` (CLI) | `godo` (CLI) | Go binary |
-| `/moai` | `/do:*` (6 commands) | Entry point structure |
-| `moai-` (skill prefix) | `do-` | Skill naming |
-| SPEC | Plan + Checklist | Workflow artifact |
-| SPEC-XXX | `.do/jobs/{YYMMDD}/{title}/` | Artifact location |
-| EARS | MoSCoW | Requirement format |
-| TRUST 5 | [HARD] rules in dev-*.md | Quality framework |
-| TAG Chain | Checklist dependency (`depends on:`) | Task dependencies |
-| `<moai>DONE</moai>` | `[o]` + commit hash | Completion evidence |
-| `<moai>COMPLETE</moai>` | report.md written | Full completion |
-| Plan/Run/Sync | Plan/Checklist/Develop/Test/Report | Workflow phases |
-| `.moai/config/sections/*.yaml` | `settings.local.json` DO_* env | Configuration |
-| `.moai/learning/` | (none) | Yoda style learning directory |
-| Snapshot/Resume | Checklist state (persistent file) | Continuity mechanism |
-| `manager-spec` | `manager-plan` | Plan/checklist creation (renamed to reflect plan-centric workflow) |
-| Completion Marker (XML) | Checklist status `[o]` | Task completion |
-| outputStyle: "MoAI" | outputStyle: "pair" | Default style |
-| moai.md (style) | pair.md + persona | Default behavior |
-| r2d2.md (style) | sprint.md | Fast execution style |
-| yoda.md (style) | direct.md | Expert style |
-| (none) | Persona system (4 types) | Do unique |
-| (none) | AI Anti-Pattern 7 | Do unique |
-| (none) | File-Detection Triggers | Do unique |
-| (none) | `.*` PostToolUse matcher | Do unique |
-| (none) | Tri-mode (Focus/Do/Team) | Do unique |
-| (none) | Append-only commit log philosophy | Do unique -- core tracking mechanism |
-| `manager-strategy` (embedded) | `do-foundation-philosopher` (independent) | Elevated to standalone capability |
+### ADR-01: 왜 하나가 아닌 3모드인가?
+
+**결정**: Focus/Do/Team 삼원 적응형 실행
+**MoAI 비교**: MoAI는 항상 위임 (단일 모드)
+**근거**: 토큰 효율성과 사용자 경험. CSS 한 줄 수정에 에이전트를 호출해서는 안 된다(500+ 토큰 오버헤드). Focus 모드가 단순한 작업을 직접 처리한다. Do 모드가 복잡한 작업을 위임한다. Team 모드가 대규모 작업을 병렬화한다. 사용자는 단순한 작업에는 빠른 피드백을, 복잡한 작업에는 구조화된 실행을 얻는다.
+
+### ADR-02: 왜 SPEC 대신 체크리스트인가?
+
+**결정**: 파일 기반 체크리스트 시스템을 주요 워크플로우 산출물로
+**MoAI 비교**: EARS 형식의 SPEC 문서
+**근거**: 체크리스트가 영속 에이전트 상태 파일로 기능한다. 에이전트가 토큰을 소진하면 체크리스트가 정확히 어디서 멈췄는지 기록한다. 새 에이전트가 전체 명세를 다시 읽지 않고 이어받을 수 있다. 체크리스트는 구현 중에 진화하는 살아있는 문서이고, SPEC은 구현 전에 작성하는 고정된 계약이다.
+
+### ADR-03: 왜 셸 래퍼 대신 godo 직접 호출인가?
+
+**결정**: settings.json이 `godo hook <event>`를 직접 호출
+**MoAI 비교**: `moai hook <event>`로 전달하는 7개 셸 스크립트
+**근거**: 셸 스크립트 래퍼는 역사적으로 28가지 별개의 이슈(PATH, 인코딩, SIGALRM)를 발생시켰다. 직접 바이너리 호출이 래퍼 계층 전체와 관련된 모든 이슈를 제거한다.
+
+### ADR-04: 왜 오버라이드 스킬이 없는가?
+
+**결정**: 오버라이드 스킬 없음; 모든 지식은 규칙으로
+**MoAI 비교**: Progressive Disclosure를 가진 6개 오버라이드 스킬
+**근거**: Do는 프레임워크 지식에 "스킬 -> Progressive Disclosure" 대신 "규칙 -> 항상 로드"를 사용한다. 두 레이어(스킬 + 규칙)를 유지하면 비례적 이점 없이 복잡성만 추가된다. 단일 레이어(규칙만)가 유지보수하고 추론하기 더 단순하다.
+
+### ADR-05: 왜 한국어 혼합 언어 CLAUDE.md인가?
+
+**결정**: CLAUDE.md를 한국어 + 영어로
+**MoAI 비교**: 영어 전용 지시 문서
+**근거**: Do의 주요 사용자는 한국인이다. 페르소나 시스템은 한국어 존칭을 사용한다. 한국어는 번역 대상이 아니라 설계 언어다. 지시 문서는 이를 반영해야 한다.
+
+### ADR-06: 왜 번호 기반 SPEC 대신 날짜 기반 Jobs인가?
+
+**결정**: `.do/jobs/{YYMMDD}/{title-kebab-case}/`
+**MoAI 비교**: `.moai/specs/SPEC-XXX/`
+**근거**: 날짜 기반 구성은 시간순 탐색을 가능하게 한다. 작업 폴더를 보면 언제 작업이 수행되었는지 즉시 알 수 있다. 번호 기반 SPEC-XXX는 순서를 이해하기 위해 레지스트리를 조회해야 한다.
+
+### ADR-07: 왜 페르소나 + 스타일을 독립 축으로?
+
+**결정**: 페르소나(누가 말하는가)와 스타일(어떻게 말하는가)이 직교
+**MoAI 비교**: 단일 스타일 시스템 (MoAI/R2-D2/Yoda)
+**근거**: 독립성은 7개 정의만으로 4 x 3 = 12가지 조합을 제공한다. 결합하면 각 조합을 개별 정의해야 한다. young-f 페르소나가 빠른 수정에는 sprint 스타일을, 복잡한 작업에는 pair 스타일을 사용할 수 있다.
+
+### ADR-08: 왜 .* PostToolUse Matcher인가?
+
+**결정**: PostToolUse hook이 모든 도구 호출에 실행
+**MoAI 비교**: PostToolUse가 `Write|Edit`에서만 실행
+**근거**: 페르소나 일관성. hook이 AI의 페르소나(존칭, 말투 패턴)를 유지한다. 쓰기에서만 실행되면 읽기 중심 시퀀스에서 페르소나가 표류할 수 있다. 토큰 비용은 일관된 성격의 대가로 수용한다.
+
+### ADR-09: 왜 파일 감지 트리거인가?
+
+**결정**: 파일 존재가 동작을 활성화 (Convention over Configuration)
+**MoAI 비교**: 동등한 메커니즘 없음
+**근거**: 무설정 활성화. 프로젝트 루트에 `.git.multirepo`를 배치하면 멀티레포 지원이 활성화된다. 편집할 설정 파일 없음, 설정할 플래그 없음, 잘못될 설정 없음. 파일 추가/제거가 곧 설정이다.
+
+### ADR-10: 왜 TRUST 5 브랜딩을 거부하는가?
+
+**결정**: 5가지 품질 차원은 채택, 약어는 거부
+**MoAI 비교**: TRUST 5 브랜드 프레임워크
+**근거**: 프로젝트 오너의 판단: 억지스러운 느낌. 품질 차원은 유효하며 내장 [HARD] 규칙으로 채택되었다. 약어는 아무런 가치를 추가하지 않는다 -- 네이밍 연습이지 품질 개선이 아니다. Do는 브랜딩보다 실질을 선호한다.
 
 ---
 
-## 14. Do's Vision: The Best Team Orchestrator
+## 13. 용어 매핑
 
-The project owner described Do's vision as:
+| MoAI 용어 | Do 대응물 | 참고 |
+|----------|----------|------|
+| MoAI | Do | 브랜드명 |
+| `.moai/` | `.do/` | 프로젝트 디렉토리 |
+| `moai` (CLI) | `godo` (CLI) | Go 바이너리 |
+| `/moai` | `/do:*` (6개 명령) | 진입점 구조 |
+| `moai-` (스킬 접두사) | `do-` | 스킬 네이밍 |
+| SPEC | Plan + Checklist | 워크플로우 산출물 |
+| SPEC-XXX | `.do/jobs/{YYMMDD}/{title}/` | 산출물 위치 |
+| EARS | MoSCoW | 요구사항 형식 |
+| TRUST 5 | dev-*.md의 [HARD] 규칙 | 품질 프레임워크 |
+| TAG Chain | 체크리스트 의존성 (`depends on:`) | 작업 의존성 |
+| `<moai>DONE</moai>` | `[o]` + commit 해시 | 완료 증거 |
+| `<moai>COMPLETE</moai>` | report.md 작성 | 전체 완료 |
+| Plan/Run/Sync | Plan/Checklist/Develop/Test/Report | 워크플로우 단계 |
+| `.moai/config/sections/*.yaml` | `settings.local.json` DO_* env | 설정 |
+| `.moai/learning/` | (없음) | Yoda 스타일 학습 디렉토리 |
+| Snapshot/Resume | 체크리스트 상태 (영속 파일) | 연속성 메커니즘 |
+| `manager-spec` | `manager-plan` | 플랜/체크리스트 생성 (플랜 중심 워크플로우를 반영하여 개명) |
+| Completion Marker (XML) | 체크리스트 상태 `[o]` | 작업 완료 |
+| outputStyle: "MoAI" | outputStyle: "pair" | 기본 스타일 |
+| moai.md (스타일) | pair.md + 페르소나 | 기본 동작 |
+| r2d2.md (스타일) | sprint.md | 빠른 실행 스타일 |
+| yoda.md (스타일) | direct.md | 전문가 스타일 |
+| (없음) | 페르소나 시스템 (4종) | Do 고유 |
+| (없음) | AI 안티패턴 7 | Do 고유 |
+| (없음) | 파일 감지 트리거 | Do 고유 |
+| (없음) | `.*` PostToolUse matcher | Do 고유 |
+| (없음) | 삼원 모드 (Focus/Do/Team) | Do 고유 |
+| (없음) | Append-only commit 로그 철학 | Do 고유 -- 핵심 추적 메커니즘 |
+| `manager-strategy` (내장) | `do-foundation-philosopher` (독립) | 단독 기능으로 격상 |
 
-> "최고의 팀 오케스트레이터" (The best team orchestrator)
+---
 
-When asked what differentiates Do from MoAI (which is also an orchestrator), the answer was direct:
+## 14. Do의 비전: 최고의 팀 오케스트레이터
 
-> "페르소나+팀" (Persona + Team)
-> -- User's answer to "MoAI가 못하는 것 중 Do가 해결하고 싶은 게 있나요?"
+프로젝트 오너가 Do의 비전을 다음과 같이 설명했다:
 
-This vision stands on **three pillars** that MoAI cannot replicate:
+> "최고의 팀 오케스트레이터"
 
-### 14.1 Pillar 1: Persona — AI as a Person, Not a Tool
+Do가 (마찬가지로 오케스트레이터인) MoAI와 무엇이 다르냐는 질문에 답은 직설적이었다:
 
-MoAI is an orchestrator that delegates to agents. Do is an orchestrator *with a personality* that delegates to agents. The persona system means the orchestrator is not an anonymous coordinator -- it is a character with a name, a speech pattern, a relationship with the user, and cultural context.
+> "페르소나+팀"
+> -- "MoAI가 못하는 것 중 Do가 해결하고 싶은 게 있나요?"에 대한 답변
 
-When Do's young-f persona says "승민선배, 이 작업은 Team 모드로 전환해볼까요?" (Senior, shall we switch to Team mode for this?), it is not just a mode suggestion -- it is a colleague-to-colleague conversation. The persona creates engagement that a neutral "Recommend switching to Team mode" cannot.
+이 비전은 MoAI가 복제할 수 없는 **세 가지 기둥** 위에 서 있다:
 
-### 14.2 Pillar 2: Team — Adaptive Orchestration with Parallel Execution
+### 14.1 기둥 1: 페르소나 -- AI를 도구가 아닌 인격으로
 
-MoAI is always in "full orchestration" mode. Do's tri-mode system means the orchestrator knows when to be heavy (Team mode with parallel agents) and when to be light (Focus mode with direct execution). This adaptive intelligence is part of what makes Do aspire to be "the best" team orchestrator -- not just an orchestrator that always operates at maximum force.
+MoAI는 에이전트에게 위임하는 오케스트레이터다. Do는 *성격을 가진* 오케스트레이터가 에이전트에게 위임한다. 페르소나 시스템 덕분에 오케스트레이터는 익명의 코디네이터가 아니라 -- 이름, 말투, 사용자와의 관계, 문화적 맥락을 가진 캐릭터다.
 
-### 14.3 Pillar 3: Commit-as-Proof — Perfect Audit Trail
+Do의 young-f 페르소나가 "승민선배, 이 작업은 Team 모드로 전환해볼까요?"라고 말하면, 단순한 모드 제안이 아니다 -- 동료 간의 대화다. 페르소나는 중립적인 "Recommend switching to Team mode"로는 만들 수 없는 몰입을 만든다.
 
-Do's checklist + commit system provides something MoAI's SPEC workflow fundamentally cannot: **a permanent, cryptographic, append-only record of all work performed**.
+### 14.2 기둥 2: 팀 -- 병렬 실행을 가진 적응형 오케스트레이션
+
+MoAI는 항상 "완전 오케스트레이션" 모드다. Do의 삼원 모드 시스템은 오케스트레이터가 언제 무겁게(병렬 에이전트의 Team 모드) 하고 언제 가볍게(직접 실행의 Focus 모드) 할지를 안다는 것을 의미한다. 이 적응적 지능이 Do가 "최고의" 팀 오케스트레이터를 지향하게 하는 부분이다 -- 항상 최대 병력으로 운영하는 오케스트레이터가 아니라.
+
+### 14.3 기둥 3: Commit-as-Proof -- 완벽한 감사 추적
+
+Do의 체크리스트 + commit 시스템은 MoAI의 SPEC 워크플로우가 근본적으로 제공할 수 없는 것을 제공한다: **수행된 모든 작업의 영구적이고 암호학적이며 append-only인 기록**.
 
 > "체크리스트 기반의 핵심은 커밋메세지 기록. 수정이 발생해도 커밋메세지를 추가기록으로 이어나가지 수정하지 않으므로 원자성과 멱등성, 추적성등에 월등하다. 이것은 완벽한 하나의 기록과 증명이 가능하다"
-> (The core of checklist-based tracking is the commit message record. Even when modifications occur, commit messages are appended as additional records, never modified -- so it is superior in atomicity, idempotency, and traceability. This enables a perfect, singular record and proof.)
 
-MoAI marks completion with `<moai>DONE</moai>` -- an XML marker that exists only in the conversation context and vanishes when the session ends. Do marks completion with a git commit hash (`[o] 완료 (commit: a1b2c3d)`) -- an immutable, auditable, cryptographically verifiable record that persists in the git history forever.
+MoAI는 `<moai>DONE</moai>`으로 완료를 표시한다 -- 대화 컨텍스트에만 존재하며 세션 종료 시 사라지는 XML 마커. Do는 git commit 해시(`[o] 완료 (commit: a1b2c3d)`)로 완료를 표시한다 -- git 히스토리에 영원히 존재하는 불변, 감사 가능, 암호학적으로 검증 가능한 기록.
 
-This is not a minor implementation detail. It is a **fundamentally different philosophy of accountability**: ephemeral markers vs permanent proof.
+이것은 사소한 구현 세부사항이 아니다. **근본적으로 다른 책임 철학**이다: 임시적 마커 vs 영구적 증명.
 
-### 14.4 The Gap MoAI Cannot Fill
+### 14.4 MoAI가 채울 수 없는 격차
 
-MoAI can adopt Do's tri-mode system (it is a structural feature). MoAI can adopt Do's checklist system (it is a workflow feature). But MoAI cannot adopt Do's persona system without fundamentally changing its identity. MoAI is "the Strategic Orchestrator" -- an institution, not a person. Do is "나는 Do다" -- a first-person entity with a character, a relationship, and a voice.
+MoAI는 Do의 삼원 모드 시스템을 채택할 수 있다(구조적 기능이므로). MoAI는 Do의 체크리스트 시스템을 채택할 수 있다(워크플로우 기능이므로). 하지만 MoAI는 정체성 자체를 근본적으로 바꾸지 않고는 Do의 페르소나 시스템을 채택할 수 없다. MoAI는 "the Strategic Orchestrator"다 -- 제도이지 사람이 아니다. Do는 "나는 Do다"다 -- 캐릭터, 관계, 목소리를 가진 1인칭 존재.
 
-And MoAI's SPEC workflow cannot match Do's commit-as-proof system without abandoning its phase-based markers for git-native tracking -- a change that would require rearchitecting its entire completion model.
+그리고 MoAI의 SPEC 워크플로우는 단계 기반 마커를 git 네이티브 추적으로 버리지 않고는 Do의 commit-as-proof 시스템에 맞설 수 없다 -- 전체 완료 모델을 재설계해야 하는 변경이다.
 
-These are Do's deepest differentiators: not features that can be copied, but **architectural choices and identity decisions** that must be chosen from the ground up.
+이것이 Do의 가장 깊은 차별화 요소다: 복사할 수 있는 기능이 아니라, 처음부터 선택해야 하는 **아키텍처 선택과 정체성 결정**.
 
 ---
 
