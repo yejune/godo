@@ -173,20 +173,59 @@ cat ./extracted-moai-v3.0.0/core/registry.yaml
 
 ### 3.4 do 페르소나 생성
 
-moai persona를 참조하여 do persona를 작성한다. 아키텍처 설계(`architecture.md`)에 따라 진행.
+moai persona가 클린 템플릿이다. moai persona를 통째로 복제한 뒤 do 브랜드로 치환하고 do 방법론으로 내용을 수정한다. do-focus에서 복사하는 것이 아니다.
 
-**핵심 파일 생성 순서**:
+**3단계 프로세스**:
 
-1. `manifest.yaml` -- 전체 구조 선언
-2. `CLAUDE.md` -- lean orchestrator (~200줄)
-3. `settings.json` -- godo hooks 직접 호출
-4. `skills/do/SKILL.md` -- Intent Router + Execution Directive
-5. `skills/do/workflows/*.md` -- 워크플로우 5개
-6. `skills/do/references/reference.md` -- 공통 참조
-7. `output-styles/do/*.md` -- 스타일 3종
-8. `commands/do/*.md` -- 커맨드 6개
-9. `rules/do/workflow/*.md` -- persona 규칙 2개
-10. `agents/do/*.md` -- persona 에이전트 5~6개
+```
+1. Extract moai-adk → core/ + personas/moai/    (3.2에서 완료)
+2. Copy personas/moai/ → personas/do/            (moai persona를 통째로 복제)
+3. Modify personas/do/                           (moai→do 브랜드 치환 + do 방법론으로 내용 수정)
+```
+
+**Step 2: moai persona 복제**
+
+```bash
+# moai persona를 do persona로 통째로 복사
+cp -r ./extracted-moai-v3.0.0/personas/moai ./personas/do
+
+# 디렉토리 구조 내 moai/ 서브폴더를 do/로 리네임
+mv ./personas/do/agents/moai ./personas/do/agents/do
+mv ./personas/do/skills/moai ./personas/do/skills/do
+mv ./personas/do/commands/moai ./personas/do/commands/do
+mv ./personas/do/hooks/moai ./personas/do/hooks/do         # 이후 삭제 대상
+mv ./personas/do/output-styles/moai ./personas/do/output-styles/do
+mv ./personas/do/rules/moai ./personas/do/rules/do
+```
+
+**Step 3: moai→do 변환**
+
+변환 치환표에 따라 파일 내용을 수정한다.
+
+| moai 패턴 | do 치환 | 비고 |
+|-----------|--------|------|
+| `agents/moai/` | `agents/do/` | 경로 |
+| `.claude/hooks/moai/*.sh` | godo hook 직접 호출 | 구조 변경 (shell wrapper 제거) |
+| `.moai/` | `.do/` | 디렉토리 |
+| `/moai` | `/do` | 커맨드 접두사 |
+| `moai-` (skill prefix) | `do-` | 스킬명 |
+| `MoAI` | `Do` | 브랜드명 |
+| `SPEC-XXX` | checklist 기반 | 워크플로우 |
+| `YYMMDD` | `YY/MM/DD` | 날짜 형식 |
+
+파일별 변환 내용:
+
+1. `manifest.yaml` -- 브랜드, 경로 치환 + hook_scripts를 빈 배열로
+2. `CLAUDE.md` -- 브랜드 치환 + do 3모드(Do/Focus/Team) 방법론 반영
+3. `settings.json` -- godo hook 직접 호출로 변환, outputStyle 변경
+4. `skills/do/SKILL.md` -- Intent Router/Mode Router를 do 방식으로 재작성
+5. `skills/do/workflows/*.md` -- moai SPEC 워크플로우를 do 체크리스트 워크플로우로 변환
+6. `skills/do/references/reference.md` -- 브랜드 치환
+7. `output-styles/do/*.md` -- 스타일명 매핑 (moai→pair, r2d2→sprint, yoda→direct)
+8. `commands/do/*.md` -- do 고유 커맨드로 교체 (moai 2개 → do 6개)
+9. `rules/do/workflow/*.md` -- 브랜드 치환 + 워크플로우 단계명 변경
+10. `agents/do/*.md` -- hooks 경로를 godo hook으로, memory/skills 참조 치환
+11. `hooks/do/` -- 삭제 (godo binary가 직접 처리하므로 shell wrapper 불필요)
 
 ### 3.5 Assemble 검증
 
