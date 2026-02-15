@@ -68,7 +68,7 @@ func TestFillContent_InlineSlot(t *testing.T) {
 
 	filler := NewSlotFiller(reg, manifest, "")
 
-	input := "Read specs from {{SPEC_PATH}} directory."
+	input := "Read specs from {{slot:SPEC_PATH}} directory."
 	filled, resolved, warnings := filler.FillContent(input)
 
 	if len(resolved) != 1 || resolved[0] != "SPEC_PATH" {
@@ -121,7 +121,7 @@ func TestFillContent_UndefinedSlotPreservedAsIs(t *testing.T) {
 	}
 
 	// Inline slot: not in slot_content, must be preserved as-is.
-	inlineInput := "Read from {{SPEC_PATH}} now."
+	inlineInput := "Read from {{slot:SPEC_PATH}} now."
 	filled2, resolved2, warnings2 := filler.FillContent(inlineInput)
 
 	if len(resolved2) != 0 {
@@ -158,7 +158,7 @@ func TestFillContent_MixedDefinedAndUndefinedSlots(t *testing.T) {
 
 	filler := NewSlotFiller(reg, manifest, "")
 
-	input := "Use {{TOOL_NAME}} for {{PRIMARY_USERS}} users."
+	input := "Use {{slot:TOOL_NAME}} for {{PRIMARY_USERS}} users."
 	filled, resolved, warnings := filler.FillContent(input)
 
 	if len(resolved) != 1 || resolved[0] != "TOOL_NAME" {
@@ -204,13 +204,13 @@ func TestFillContent_MixedSlots(t *testing.T) {
 	filler := NewSlotFiller(reg, manifest, "")
 
 	input := `# Config
-Use {{TOOL_NAME}} to manage specs at {{SPEC_PATH}} path.
+Use {{slot:TOOL_NAME}} to manage specs at {{slot:SPEC_PATH}} path.
 
 <!-- BEGIN_SLOT:QUALITY_FRAMEWORK -->
 old quality content
 <!-- END_SLOT:QUALITY_FRAMEWORK -->
 
-Run {{TOOL_NAME}} now.`
+Run {{slot:TOOL_NAME}} now.`
 
 	filled, resolved, warnings := filler.FillContent(input)
 
@@ -299,7 +299,7 @@ func TestFillFile(t *testing.T) {
 	// Create temp file with slot markers.
 	tmpDir := t.TempDir()
 	tmpFile := filepath.Join(tmpDir, "test.md")
-	if err := os.WriteFile(tmpFile, []byte("Run {{TOOL_NAME}} now."), 0o644); err != nil {
+	if err := os.WriteFile(tmpFile, []byte("Run {{slot:TOOL_NAME}} now."), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -320,5 +320,76 @@ func TestFillFile(t *testing.T) {
 	}
 	if string(data) != "Run godo now." {
 		t.Errorf("file content mismatch: got %q", string(data))
+	}
+}
+
+func TestFillContent_NamespacePreventsCollisionWithProjectVars(t *testing.T) {
+	reg := newTestRegistry(map[string]*template.SlotEntry{
+		"QUALITY_GATE_TEXT": {
+			Category:   "quality_framework",
+			MarkerType: "inline",
+			Default:    "quality gates",
+		},
+	})
+
+	manifest := &model.PersonaManifest{
+		SlotContent: map[string]string{
+			"QUALITY_GATE_TEXT": "TRUST 5 quality gates",
+		},
+	}
+
+	filler := NewSlotFiller(reg, manifest, "")
+
+	// Content has both {{slot:QUALITY_GATE_TEXT}} (persona slot) and
+	// {{PRIMARY_USERS}} (project template variable). Only the namespaced
+	// slot should be replaced; the plain {{VAR}} must be left untouched.
+	input := "Follow {{slot:QUALITY_GATE_TEXT}} for {{PRIMARY_USERS}} users."
+	filled, resolved, warnings := filler.FillContent(input)
+
+	if len(resolved) != 1 || resolved[0] != "QUALITY_GATE_TEXT" {
+		t.Errorf("expected resolved=[QUALITY_GATE_TEXT], got %v", resolved)
+	}
+	if len(warnings) != 0 {
+		t.Errorf("expected no warnings, got %v", warnings)
+	}
+
+	expected := "Follow TRUST 5 quality gates for {{PRIMARY_USERS}} users."
+	if filled != expected {
+		t.Errorf("namespace collision test failed.\nexpected: %s\ngot: %s", expected, filled)
+	}
+}
+
+func TestFillContent_PlainVarNeverReplacedEvenIfInSlotContent(t *testing.T) {
+	reg := newTestRegistry(map[string]*template.SlotEntry{
+		"PRIMARY_USERS": {
+			Category:   "path_pattern",
+			MarkerType: "inline",
+			Default:    "all users",
+		},
+	})
+
+	// Even if PRIMARY_USERS is in slot_content, the plain {{PRIMARY_USERS}}
+	// syntax (without slot: prefix) must NEVER be matched or replaced.
+	manifest := &model.PersonaManifest{
+		SlotContent: map[string]string{
+			"PRIMARY_USERS": "enterprise developers",
+		},
+	}
+
+	filler := NewSlotFiller(reg, manifest, "")
+
+	input := "This tool is for {{PRIMARY_USERS}} only."
+	filled, resolved, warnings := filler.FillContent(input)
+
+	if len(resolved) != 0 {
+		t.Errorf("expected no resolved slots for plain {{VAR}}, got %v", resolved)
+	}
+	if len(warnings) != 0 {
+		t.Errorf("expected no warnings, got %v", warnings)
+	}
+
+	// Content must be completely unchanged — plain {{VAR}} is invisible to assembler.
+	if filled != input {
+		t.Errorf("plain {{PRIMARY_USERS}} should never be replaced.\nexpected: %s\ngot: %s", input, filled)
 	}
 }

@@ -13,15 +13,17 @@ type Slot struct {
 //
 // Inline example:
 //
-//	Read specification files from {{SPEC_PATH_PATTERN}}
+//	Read specification files from {{slot:SPEC_PATH_PATTERN}}
 //
 // Section example:
 //
 //	<!-- BEGIN_SLOT:QUALITY_FRAMEWORK -->
 //	<!-- END_SLOT:QUALITY_FRAMEWORK -->
 const (
-	// InlineSlotPattern matches {{SLOT_ID}} placeholders in content.
-	InlineSlotPattern = `\{\{([A-Z][A-Z0-9_]*)\}\}`
+	// InlineSlotPattern matches {{slot:SLOT_ID}} placeholders in content.
+	// The "slot:" namespace prefix prevents collision with project template
+	// variables like {{PRIMARY_USERS}} that use plain {{VAR}} syntax.
+	InlineSlotPattern = `\{\{slot:([A-Z][A-Z0-9_]*)\}\}`
 
 	// SectionSlotBegin is the format string for section slot begin markers.
 	SectionSlotBegin = "<!-- BEGIN_SLOT:%s -->"

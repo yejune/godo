@@ -13,7 +13,7 @@ import (
 // persona-specific regardless of their directory location.
 //
 // For non-whole-file rules, inline content patterns are detected and replaced
-// with {{SLOT_ID}} markers so persona-specific text (like quality framework
+// with {{slot:SLOT_ID}} markers so persona-specific text (like quality framework
 // references) can be swapped during assembly.
 type RuleExtractor struct {
 	registry *detector.PatternRegistry
@@ -37,7 +37,7 @@ func NewRuleExtractor(reg *detector.PatternRegistry, det *detector.PersonaDetect
 //     Returns (nil, manifest, nil) where manifest.Rules contains the file path.
 //   - Core rules with inline content patterns:
 //     Returns (doc, manifest, nil) where doc has inline text replaced with
-//     {{SLOT_ID}} markers and manifest.SlotContent has original text.
+//     {{slot:SLOT_ID}} markers and manifest.SlotContent has original text.
 //   - Core rules (all others):
 //     Returns (doc, emptyManifest, nil) as a passthrough.
 func (e *RuleExtractor) Extract(doc *model.Document) (*model.Document, *model.PersonaManifest, error) {
@@ -63,7 +63,7 @@ func (e *RuleExtractor) Extract(doc *model.Document) (*model.Document, *model.Pe
 }
 
 // slotContentPatterns replaces inline content pattern matches in a section's
-// content with {{SLOT_ID}} markers and stores original text in manifest.
+// content with {{slot:SLOT_ID}} markers and stores original text in manifest.
 func (e *RuleExtractor) slotContentPatterns(sec *model.Section, manifest *model.PersonaManifest) {
 	matches := e.detector.DetectContentPatterns(sec.Content)
 	if len(matches) > 0 {
@@ -72,7 +72,7 @@ func (e *RuleExtractor) slotContentPatterns(sec *model.Section, manifest *model.
 		for i := len(matches) - 1; i >= 0; i-- {
 			m := matches[i]
 			manifest.SlotContent[m.SlotID] = m.Original
-			replacement := "{{" + m.SlotID + "}}"
+			replacement := "{{slot:" + m.SlotID + "}}"
 			content = content[:m.Start] + replacement + content[m.End:]
 		}
 		sec.Content = content

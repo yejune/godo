@@ -96,8 +96,8 @@ func TestRuleExtractor_InlineContentPatternSlotting(t *testing.T) {
 	}
 
 	// Check that the content now has the inline slot marker
-	if !strings.Contains(coreDoc.Sections[0].Content, "{{QUALITY_GATE_TEXT}}") {
-		t.Errorf("Expected {{QUALITY_GATE_TEXT}} in content, got:\n%s", coreDoc.Sections[0].Content)
+	if !strings.Contains(coreDoc.Sections[0].Content, "{{slot:QUALITY_GATE_TEXT}}") {
+		t.Errorf("Expected {{slot:QUALITY_GATE_TEXT}} in content, got:\n%s", coreDoc.Sections[0].Content)
 	}
 
 	// Check that original text is stored in manifest
@@ -144,11 +144,11 @@ func TestRuleExtractor_MultipleContentPatterns(t *testing.T) {
 		t.Fatal("Expected non-nil coreDoc")
 	}
 
-	if !strings.Contains(coreDoc.Sections[0].Content, "{{QUALITY_GATE_TEXT}}") {
-		t.Error("Expected {{QUALITY_GATE_TEXT}} in content")
+	if !strings.Contains(coreDoc.Sections[0].Content, "{{slot:QUALITY_GATE_TEXT}}") {
+		t.Error("Expected {{slot:QUALITY_GATE_TEXT}} in content")
 	}
-	if !strings.Contains(coreDoc.Sections[0].Content, "{{QUALITY_PRINCIPLES_TEXT}}") {
-		t.Error("Expected {{QUALITY_PRINCIPLES_TEXT}} in content")
+	if !strings.Contains(coreDoc.Sections[0].Content, "{{slot:QUALITY_PRINCIPLES_TEXT}}") {
+		t.Error("Expected {{slot:QUALITY_PRINCIPLES_TEXT}} in content")
 	}
 
 	if _, ok := manifest.SlotContent["QUALITY_GATE_TEXT"]; !ok {
@@ -192,8 +192,8 @@ func TestRuleExtractor_NestedChildrenSlotting(t *testing.T) {
 	}
 
 	// The child section should have been slotted
-	if !strings.Contains(child.Content, "{{QUALITY_GATE_TEXT}}") {
-		t.Errorf("Expected {{QUALITY_GATE_TEXT}} in child content, got:\n%s", child.Content)
+	if !strings.Contains(child.Content, "{{slot:QUALITY_GATE_TEXT}}") {
+		t.Errorf("Expected {{slot:QUALITY_GATE_TEXT}} in child content, got:\n%s", child.Content)
 	}
 
 	if _, ok := manifest.SlotContent["QUALITY_GATE_TEXT"]; !ok {
@@ -227,7 +227,7 @@ func TestRuleExtractor_NilDetector_NoSlotting(t *testing.T) {
 	}
 
 	// With nil detector, no slotting should happen
-	if strings.Contains(coreDoc.Sections[0].Content, "{{QUALITY_GATE_TEXT}}") {
+	if strings.Contains(coreDoc.Sections[0].Content, "{{slot:QUALITY_GATE_TEXT}}") {
 		t.Error("Expected no slotting with nil detector")
 	}
 

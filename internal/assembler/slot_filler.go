@@ -16,7 +16,7 @@ var sectionSlotRe = regexp.MustCompile(
 	`(?s)<!-- BEGIN_SLOT:([A-Z][A-Z0-9_]*) -->\n?(.*?)\n?<!-- END_SLOT:([A-Z][A-Z0-9_]*) -->`,
 )
 
-// inlineSlotRe matches {{SLOT_ID}} inline markers.
+// inlineSlotRe matches {{slot:SLOT_ID}} inline markers.
 var inlineSlotRe = regexp.MustCompile(model.InlineSlotPattern)
 
 
@@ -41,7 +41,7 @@ func NewSlotFiller(registry *template.Registry, manifest *model.PersonaManifest,
 // Section slots (<!-- BEGIN_SLOT:ID -->...<!-- END_SLOT:ID -->) have their
 // content replaced with persona content looked up via the registry.
 //
-// Inline slots ({{ID}}) are replaced with persona values.
+// Inline slots ({{slot:ID}}) are replaced with persona values.
 //
 // Returns the filled content, a sorted list of resolved slot IDs, and a list
 // of warnings for slots that fell back to registry defaults.

@@ -8,14 +8,14 @@ import (
 // ContentPattern matches inline text strings in document bodies.
 // Unlike HeaderPattern (which matches section headers for section-level slotting),
 // ContentPattern matches arbitrary text within body content for inline replacement
-// with {{SLOT_ID}} markers.
+// with {{slot:SLOT_ID}} markers.
 //
 // Use case: "Follow TRUST 5 quality gates" in language rule files should become
-// "Follow {{QUALITY_GATE_TEXT}}" so a different persona can inject
+// "Follow {{slot:QUALITY_GATE_TEXT}}" so a different persona can inject
 // its own quality framework name.
 type ContentPattern struct {
 	Pattern     string // Regex pattern to match in body text
-	SlotID      string // Inline slot ID to replace with: {{SLOT_ID}}
+	SlotID      string // Inline slot ID to replace with: {{slot:SLOT_ID}}
 	Category    string // "quality_framework", "methodology", etc.
 	Description string // Human-readable description
 }
@@ -47,7 +47,7 @@ type HeaderPattern struct {
 type PathPattern struct {
 	Pattern     string // Regex for the path pattern
 	SlotID      string // Template slot for replacement
-	Replacement string // Template replacement: "{{SLOT_ID}}"
+	Replacement string // Template replacement: "{{slot:SLOT_ID}}"
 }
 
 // SkillPattern identifies persona-specific skills in frontmatter.
@@ -99,17 +99,17 @@ func NewDefaultRegistry() *PatternRegistry {
 			{
 				Pattern:     `\.moai/specs/SPEC-\{?[A-Z0-9_]*\}?/?[a-z._]*`,
 				SlotID:      "SPEC_PATH_PATTERN",
-				Replacement: "{{SPEC_PATH_PATTERN}}",
+				Replacement: "{{slot:SPEC_PATH_PATTERN}}",
 			},
 			{
 				Pattern:     `\.moai/config/sections/quality\.yaml`,
 				SlotID:      "QUALITY_CONFIG_PATH",
-				Replacement: "{{QUALITY_CONFIG_PATH}}",
+				Replacement: "{{slot:QUALITY_CONFIG_PATH}}",
 			},
 			{
 				Pattern:     `\.moai/docs/`,
 				SlotID:      "DOCS_PATH_PATTERN",
-				Replacement: "{{DOCS_PATH_PATTERN}}",
+				Replacement: "{{slot:DOCS_PATH_PATTERN}}",
 			},
 		},
 		SkillPatterns: []SkillPattern{

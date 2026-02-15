@@ -99,13 +99,13 @@ func TestMergeFile_MultipleSlots(t *testing.T) {
 		t.Fatal(err)
 	}
 	coreContent := `# Expert Agent
-Use {{TOOL_NAME}} to read specs at {{SPEC_PATH}} path.
+Use {{slot:TOOL_NAME}} to read specs at {{slot:SPEC_PATH}} path.
 
 <!-- BEGIN_SLOT:QUALITY_FRAMEWORK -->
 old quality
 <!-- END_SLOT:QUALITY_FRAMEWORK -->
 
-Run {{TOOL_NAME}} now.`
+Run {{slot:TOOL_NAME}} now.`
 	if err := os.WriteFile(coreFile, []byte(coreContent), 0o644); err != nil {
 		t.Fatal(err)
 	}

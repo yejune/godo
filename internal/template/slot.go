@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	// inlineSlotRe matches {{SLOT_ID}} markers in content.
+	// inlineSlotRe matches {{slot:SLOT_ID}} markers in content.
 	inlineSlotRe = regexp.MustCompile(model.InlineSlotPattern)
 
 	// sectionBeginRe matches <!-- BEGIN_SLOT:ID --> markers.
@@ -28,9 +28,9 @@ func InsertSectionSlot(slotID string, content string) string {
 	return begin + "\n" + content + "\n" + end
 }
 
-// InsertInlineSlot returns the inline slot marker: "{{SLOT_ID}}"
+// InsertInlineSlot returns the inline slot marker: "{{slot:SLOT_ID}}"
 func InsertInlineSlot(slotID string) string {
-	return "{{" + slotID + "}}"
+	return "{{slot:" + slotID + "}}"
 }
 
 // ExtractSectionSlot finds content between BEGIN_SLOT and END_SLOT markers
@@ -58,12 +58,12 @@ func ExtractSectionSlot(content string, slotID string) (string, bool) {
 	return extracted, true
 }
 
-// ReplaceInlineSlots replaces all {{SLOT_ID}} markers with values from the map.
+// ReplaceInlineSlots replaces all {{slot:SLOT_ID}} markers with values from the map.
 // Returns the modified content and list of slot IDs that were replaced.
 func ReplaceInlineSlots(content string, values map[string]string) (string, []string) {
 	replacedSet := map[string]bool{}
 	result := inlineSlotRe.ReplaceAllStringFunc(content, func(match string) string {
-		// Extract slot ID from {{SLOT_ID}}
+		// Extract slot ID from {{slot:SLOT_ID}}
 		sub := inlineSlotRe.FindStringSubmatch(match)
 		if len(sub) < 2 {
 			return match
@@ -89,7 +89,7 @@ func ReplaceInlineSlots(content string, values map[string]string) (string, []str
 func FindAllSlotMarkers(content string) []string {
 	seen := map[string]bool{}
 
-	// Find inline slots: {{SLOT_ID}}
+	// Find inline slots: {{slot:SLOT_ID}}
 	for _, match := range inlineSlotRe.FindAllStringSubmatch(content, -1) {
 		if len(match) >= 2 {
 			seen[match[1]] = true

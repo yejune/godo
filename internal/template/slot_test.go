@@ -22,7 +22,7 @@ func TestInsertSectionSlotEmpty(t *testing.T) {
 
 func TestInsertInlineSlot(t *testing.T) {
 	result := InsertInlineSlot("SPEC_PATH_PATTERN")
-	expected := "{{SPEC_PATH_PATTERN}}"
+	expected := "{{slot:SPEC_PATH_PATTERN}}"
 	if result != expected {
 		t.Errorf("InsertInlineSlot mismatch\ngot:  %q\nwant: %q", result, expected)
 	}
@@ -61,7 +61,7 @@ func TestExtractSectionSlotNotFound(t *testing.T) {
 }
 
 func TestReplaceInlineSlots(t *testing.T) {
-	content := "Read specs from {{SPEC_PATH_PATTERN}} and config from {{QUALITY_CONFIG_PATH}}."
+	content := "Read specs from {{slot:SPEC_PATH_PATTERN}} and config from {{slot:QUALITY_CONFIG_PATH}}."
 	values := map[string]string{
 		"SPEC_PATH_PATTERN":  ".moai/specs/SPEC-{ID}",
 		"QUALITY_CONFIG_PATH": ".moai/config/sections/quality.yaml",
@@ -78,13 +78,13 @@ func TestReplaceInlineSlots(t *testing.T) {
 }
 
 func TestReplaceInlineSlotsPartial(t *testing.T) {
-	content := "{{KNOWN}} stays but {{UNKNOWN}} is left"
+	content := "{{slot:KNOWN}} stays but {{slot:UNKNOWN}} is left"
 	values := map[string]string{
 		"KNOWN": "resolved",
 	}
 	result, replaced := ReplaceInlineSlots(content, values)
 
-	expected := "resolved stays but {{UNKNOWN}} is left"
+	expected := "resolved stays but {{slot:UNKNOWN}} is left"
 	if result != expected {
 		t.Errorf("ReplaceInlineSlots partial mismatch\ngot:  %q\nwant: %q", result, expected)
 	}
@@ -105,11 +105,11 @@ func TestReplaceInlineSlotsNoMatch(t *testing.T) {
 }
 
 func TestFindAllSlotMarkers(t *testing.T) {
-	content := `Some text with {{INLINE_A}} and {{INLINE_B}}.
+	content := `Some text with {{slot:INLINE_A}} and {{slot:INLINE_B}}.
 <!-- BEGIN_SLOT:SECTION_C -->
 section content
 <!-- END_SLOT:SECTION_C -->
-Also {{INLINE_A}} appears again.`
+Also {{slot:INLINE_A}} appears again.`
 
 	ids := FindAllSlotMarkers(content)
 	expected := []string{"INLINE_A", "INLINE_B", "SECTION_C"}

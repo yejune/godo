@@ -32,7 +32,7 @@ type PathMatch struct {
 }
 
 // ContentMatch describes an inline content pattern match in document body text.
-// Used during extraction to identify text that should be replaced with {{SLOT_ID}}
+// Used during extraction to identify text that should be replaced with {{slot:SLOT_ID}}
 // inline markers.
 type ContentMatch struct {
 	Original string `yaml:"original"` // Matched text (e.g., "TRUST 5 quality gates")

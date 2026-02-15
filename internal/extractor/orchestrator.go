@@ -392,7 +392,7 @@ func walkAndRegister(reg *template.Registry, sections []*model.Section, docPath 
 				})
 			}
 		}
-		// Register inline {{SLOT_ID}} markers from content pattern extraction
+		// Register inline {{slot:SLOT_ID}} markers from content pattern extraction
 		registerInlineSlots(reg, sec, docPath)
 
 		if len(sec.Children) > 0 {
@@ -401,10 +401,10 @@ func walkAndRegister(reg *template.Registry, sections []*model.Section, docPath 
 	}
 }
 
-// inlineSlotPattern matches {{SLOT_ID}} in section content.
-var inlineSlotExtractRe = regexp.MustCompile(`\{\{([A-Z][A-Z0-9_]*)\}\}`)
+// inlineSlotPattern matches {{slot:SLOT_ID}} in section content.
+var inlineSlotExtractRe = regexp.MustCompile(`\{\{slot:([A-Z][A-Z0-9_]*)\}\}`)
 
-// registerInlineSlots finds {{SLOT_ID}} inline markers in section content
+// registerInlineSlots finds {{slot:SLOT_ID}} inline markers in section content
 // and adds them to the template registry.
 func registerInlineSlots(reg *template.Registry, sec *model.Section, docPath string) {
 	matches := inlineSlotExtractRe.FindAllStringSubmatch(sec.Content, -1)

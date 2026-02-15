@@ -391,7 +391,7 @@ skills:
 ---
 # Expert Backend
 
-Use {{TOOL_NAME}} for development.`
+Use {{slot:TOOL_NAME}} for development.`
 	if err := os.WriteFile(filepath.Join(agentsDir, "expert-backend.md"), []byte(coreAgent), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -474,7 +474,7 @@ Use {{TOOL_NAME}} for development.`
 	if !strings.Contains(output, "godo") {
 		t.Errorf("expected TOOL_NAME filled with 'godo', got:\n%s", output)
 	}
-	if strings.Contains(output, "{{TOOL_NAME}}") {
+	if strings.Contains(output, "{{slot:TOOL_NAME}}") {
 		t.Errorf("expected TOOL_NAME slot replaced, but marker still present:\n%s", output)
 	}
 	// Verify patch applied.
