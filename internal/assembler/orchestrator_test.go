@@ -1,6 +1,7 @@
 package assembler
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"sort"
@@ -497,5 +498,222 @@ Use {{TOOL_NAME}} for development.`
 	}
 	if string(data) != "# My Persona" {
 		t.Errorf("expected CLAUDE.md content, got:\n%s", string(data))
+	}
+}
+
+func TestAssemble_SkillMappingsApplied(t *testing.T) {
+	coreDir := t.TempDir()
+	personaDir := t.TempDir()
+	outputDir := t.TempDir()
+
+	// Create core agent files.
+	agentsDir := filepath.Join(coreDir, "agents")
+	if err := os.MkdirAll(agentsDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	agent1 := `---
+name: expert-backend
+description: Backend expert
+skills:
+    - moai-foundation-quality
+    - do-domain-backend
+---
+# Expert Backend`
+	if err := os.WriteFile(filepath.Join(agentsDir, "expert-backend.md"), []byte(agent1), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	agent2 := `---
+name: expert-frontend
+description: Frontend expert
+skills:
+    - moai-foundation-quality
+    - do-domain-frontend
+---
+# Expert Frontend`
+	if err := os.WriteFile(filepath.Join(agentsDir, "expert-frontend.md"), []byte(agent2), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	reg := newTestRegistry(nil)
+	manifest := &model.PersonaManifest{
+		Name: "test-persona",
+		SkillMappings: map[string]string{
+			"moai-foundation-quality": "do-foundation-checklist",
+		},
+	}
+
+	orch := NewAssembler(coreDir, personaDir, outputDir, manifest, reg)
+	result, err := orch.Assemble()
+	if err != nil {
+		t.Fatalf("Assemble error: %v", err)
+	}
+
+	if result.SkillsMapped != 2 {
+		t.Errorf("expected 2 agents with skill mappings applied, got %d", result.SkillsMapped)
+	}
+
+	// Verify both agents have the replaced skill.
+	data1, err := os.ReadFile(filepath.Join(outputDir, "agents", "expert-backend.md"))
+	if err != nil {
+		t.Fatalf("read backend agent: %v", err)
+	}
+	if strings.Contains(string(data1), "moai-foundation-quality") {
+		t.Error("backend agent should have moai-foundation-quality replaced")
+	}
+	if !strings.Contains(string(data1), "do-foundation-checklist") {
+		t.Error("backend agent should have do-foundation-checklist after mapping")
+	}
+
+	data2, err := os.ReadFile(filepath.Join(outputDir, "agents", "expert-frontend.md"))
+	if err != nil {
+		t.Fatalf("read frontend agent: %v", err)
+	}
+	if strings.Contains(string(data2), "moai-foundation-quality") {
+		t.Error("frontend agent should have moai-foundation-quality replaced")
+	}
+	if !strings.Contains(string(data2), "do-foundation-checklist") {
+		t.Error("frontend agent should have do-foundation-checklist after mapping")
+	}
+}
+
+func TestAssemble_SettingsMergeWithManifestSettings(t *testing.T) {
+	coreDir := t.TempDir()
+	personaDir := t.TempDir()
+	outputDir := t.TempDir()
+
+	// Core settings.json.
+	coreSettings := map[string]interface{}{
+		"outputStyle": "pair",
+		"permissions": map[string]interface{}{
+			"allow": []interface{}{"Read"},
+		},
+		"env": map[string]interface{}{
+			"DO_MODE":     "do",
+			"DO_LANGUAGE": "en",
+		},
+	}
+	coreData, _ := json.MarshalIndent(coreSettings, "", "  ")
+	if err := os.WriteFile(filepath.Join(coreDir, "settings.json"), coreData, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	reg := newTestRegistry(nil)
+	manifest := &model.PersonaManifest{
+		Name: "test-persona",
+		Settings: map[string]interface{}{
+			"outputStyle": "sprint",
+			"env": map[string]interface{}{
+				"DO_LANGUAGE": "ko",
+				"DO_PERSONA":  "young-f",
+			},
+		},
+	}
+
+	orch := NewAssembler(coreDir, personaDir, outputDir, manifest, reg)
+	result, err := orch.Assemble()
+	if err != nil {
+		t.Fatalf("Assemble error: %v", err)
+	}
+
+	if result.FilesWritten < 1 {
+		t.Error("expected at least 1 file written (settings.json)")
+	}
+
+	// Read merged settings.
+	data, err := os.ReadFile(filepath.Join(outputDir, "settings.json"))
+	if err != nil {
+		t.Fatalf("read settings.json: %v", err)
+	}
+	var merged map[string]interface{}
+	if err := json.Unmarshal(data, &merged); err != nil {
+		t.Fatalf("parse settings.json: %v", err)
+	}
+
+	// Top-level override.
+	if merged["outputStyle"] != "sprint" {
+		t.Errorf("expected outputStyle 'sprint' (persona override), got %v", merged["outputStyle"])
+	}
+
+	// Core permissions preserved.
+	if _, ok := merged["permissions"]; !ok {
+		t.Error("expected permissions preserved from core")
+	}
+
+	// Env deep merged.
+	envRaw, ok := merged["env"]
+	if !ok {
+		t.Fatal("expected env field")
+	}
+	envMap := envRaw.(map[string]interface{})
+	if envMap["DO_MODE"] != "do" {
+		t.Errorf("expected DO_MODE preserved, got %v", envMap["DO_MODE"])
+	}
+	if envMap["DO_LANGUAGE"] != "ko" {
+		t.Errorf("expected DO_LANGUAGE overridden to 'ko', got %v", envMap["DO_LANGUAGE"])
+	}
+	if envMap["DO_PERSONA"] != "young-f" {
+		t.Errorf("expected DO_PERSONA added, got %v", envMap["DO_PERSONA"])
+	}
+}
+
+func TestAssemble_PersonaSettingsJsonMergedWithCore(t *testing.T) {
+	coreDir := t.TempDir()
+	personaDir := t.TempDir()
+	outputDir := t.TempDir()
+
+	// Core settings.
+	coreSettings := map[string]interface{}{
+		"outputStyle": "pair",
+		"permissions": map[string]interface{}{
+			"allow": []interface{}{"Read", "Write"},
+		},
+	}
+	coreData, _ := json.MarshalIndent(coreSettings, "", "  ")
+	if err := os.WriteFile(filepath.Join(coreDir, "settings.json"), coreData, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Persona settings.json with override.
+	personaSettings := map[string]interface{}{
+		"outputStyle":    "direct",
+		"plansDirectory": ".do/plans/",
+	}
+	personaData, _ := json.MarshalIndent(personaSettings, "", "  ")
+	if err := os.WriteFile(filepath.Join(personaDir, "settings.json"), personaData, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	reg := newTestRegistry(nil)
+	manifest := &model.PersonaManifest{
+		Name: "test-persona",
+	}
+
+	orch := NewAssembler(coreDir, personaDir, outputDir, manifest, reg)
+	_, err := orch.Assemble()
+	if err != nil {
+		t.Fatalf("Assemble error: %v", err)
+	}
+
+	data, err := os.ReadFile(filepath.Join(outputDir, "settings.json"))
+	if err != nil {
+		t.Fatalf("read settings.json: %v", err)
+	}
+	var merged map[string]interface{}
+	if err := json.Unmarshal(data, &merged); err != nil {
+		t.Fatalf("parse settings.json: %v", err)
+	}
+
+	// Persona override.
+	if merged["outputStyle"] != "direct" {
+		t.Errorf("expected outputStyle 'direct' from persona settings.json, got %v", merged["outputStyle"])
+	}
+	// Persona addition.
+	if merged["plansDirectory"] != ".do/plans/" {
+		t.Errorf("expected plansDirectory from persona, got %v", merged["plansDirectory"])
+	}
+	// Core preserved.
+	if _, ok := merged["permissions"]; !ok {
+		t.Error("expected permissions preserved from core")
 	}
 }

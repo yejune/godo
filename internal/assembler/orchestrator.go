@@ -1,6 +1,7 @@
 package assembler
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -13,12 +14,13 @@ import (
 
 // AssembleResult contains the summary of a full assembly run.
 type AssembleResult struct {
-	FilesWritten  int
-	SlotsResolved int
-	SlotsUnfilled int
-	AgentsPatched int
-	Warnings      []string
-	Files         []string
+	FilesWritten    int
+	SlotsResolved   int
+	SlotsUnfilled   int
+	AgentsPatched   int
+	SkillsMapped    int
+	Warnings        []string
+	Files           []string
 }
 
 // Assembler orchestrates the full assembly pipeline: core templates + persona
@@ -46,8 +48,9 @@ func NewAssembler(coreDir, personaDir, outputDir string, manifest *model.Persona
 //  1. Copy core files to output, filling slots with persona content
 //  2. Apply agent patches (append/remove skills, append content)
 //  3. Copy persona-only files (agents, skills, rules, styles)
-//  4. Merge settings.json (core + persona settings/hooks)
-//  5. Copy persona CLAUDE.md
+//  4. Apply skill mappings to all agent files in output
+//  5. Merge settings.json (core + persona settings/hooks + manifest.Settings)
+//  6. Copy persona CLAUDE.md
 func (a *Assembler) Assemble() (*AssembleResult, error) {
 	result := &AssembleResult{}
 	merger := NewMerger(a.coreDir, a.personaDir, a.outputDir, a.manifest, a.registry)
@@ -67,12 +70,17 @@ func (a *Assembler) Assemble() (*AssembleResult, error) {
 		return nil, err
 	}
 
-	// Step 4: Merge settings.json.
+	// Step 4: Apply skill mappings to all agent files.
+	if err := a.applySkillMappings(merger, result); err != nil {
+		return nil, err
+	}
+
+	// Step 5: Merge settings.json.
 	if err := a.mergeSettings(merger, result); err != nil {
 		return nil, err
 	}
 
-	// Step 5: Copy persona CLAUDE.md.
+	// Step 6: Copy persona CLAUDE.md.
 	if err := a.copyClaudeMD(merger, result); err != nil {
 		return nil, err
 	}
@@ -195,38 +203,127 @@ func (a *Assembler) copyPersonaFiles(merger *Merger, result *AssembleResult) err
 	return nil
 }
 
-// mergeSettings handles settings.json assembly. If persona has settings.json,
-// it is used as the base. If core also has settings.json, persona settings are
-// merged on top. The manifest's Settings field (containing hooks etc.) is also
-// injected.
+// applySkillMappings applies manifest.SkillMappings to all agent .md files
+// in the output directory. This is a global replacement that runs after all
+// files are assembled and agent patches are applied.
+func (a *Assembler) applySkillMappings(merger *Merger, result *AssembleResult) error {
+	if a.manifest == nil || len(a.manifest.SkillMappings) == 0 {
+		return nil
+	}
+
+	mapped, err := merger.ApplySkillMappings()
+	if err != nil {
+		return err
+	}
+	result.SkillsMapped = mapped
+	return nil
+}
+
+// mergeSettings handles settings.json assembly. Core settings.json is used as
+// the base, persona settings.json (if present) is merged on top, then
+// manifest.Settings is applied with deep merge for "env" and override for
+// other top-level keys.
 func (a *Assembler) mergeSettings(merger *Merger, result *AssembleResult) error {
 	if a.manifest == nil {
 		return nil
 	}
 
-	// Check for persona settings.json.
+	coreSettingsPath := filepath.Join(a.coreDir, "settings.json")
 	personaSettingsPath := filepath.Join(a.personaDir, "settings.json")
+
+	coreExists := true
+	if _, err := os.Stat(coreSettingsPath); os.IsNotExist(err) {
+		coreExists = false
+	}
+	personaExists := true
 	if _, err := os.Stat(personaSettingsPath); os.IsNotExist(err) {
-		// No persona settings.json; check if core has one and use MergeSettings.
-		coreSettingsPath := filepath.Join(a.coreDir, "settings.json")
-		if _, err := os.Stat(coreSettingsPath); err == nil {
-			if err := merger.MergeSettings(coreSettingsPath); err != nil {
-				return err
-			}
-			result.FilesWritten++
-			result.Files = append(result.Files, "settings.json")
-		}
+		personaExists = false
+	}
+
+	if !coreExists && !personaExists && len(a.manifest.Settings) == 0 && len(a.manifest.Hooks) == 0 {
 		return nil
 	}
 
-	// Persona has settings.json -- copy it directly.
-	if _, err := merger.CopyPersonaFile("settings.json"); err != nil {
+	// Build base settings from core.
+	var settings map[string]interface{}
+	if coreExists {
+		data, err := os.ReadFile(coreSettingsPath)
+		if err != nil {
+			return &model.ErrAssembly{
+				Phase:   "merge_settings",
+				File:    "settings.json",
+				Message: fmt.Sprintf("read core settings: %v", err),
+			}
+		}
+		if err := json.Unmarshal(data, &settings); err != nil {
+			return &model.ErrAssembly{
+				Phase:   "merge_settings",
+				File:    "settings.json",
+				Message: fmt.Sprintf("parse core settings: %v", err),
+			}
+		}
+	} else {
+		settings = make(map[string]interface{})
+	}
+
+	// Merge persona settings.json on top if present.
+	if personaExists {
+		data, err := os.ReadFile(personaSettingsPath)
+		if err != nil {
+			return &model.ErrAssembly{
+				Phase:   "merge_settings",
+				File:    "settings.json",
+				Message: fmt.Sprintf("read persona settings: %v", err),
+			}
+		}
+		var personaSettings map[string]interface{}
+		if err := json.Unmarshal(data, &personaSettings); err != nil {
+			return &model.ErrAssembly{
+				Phase:   "merge_settings",
+				File:    "settings.json",
+				Message: fmt.Sprintf("parse persona settings: %v", err),
+			}
+		}
+		mergeSettingsMap(settings, personaSettings)
+	}
+
+	// Inject persona hooks if present.
+	if len(a.manifest.Hooks) > 0 {
+		settings["hooks"] = a.manifest.Hooks
+	}
+
+	// Apply manifest.Settings overrides.
+	if len(a.manifest.Settings) > 0 {
+		mergeSettingsMap(settings, a.manifest.Settings)
+	}
+
+	buf, err := json.MarshalIndent(settings, "", "  ")
+	if err != nil {
 		return &model.ErrAssembly{
 			Phase:   "merge_settings",
 			File:    "settings.json",
-			Message: fmt.Sprintf("copy persona settings.json: %v", err),
+			Message: fmt.Sprintf("marshal merged settings: %v", err),
 		}
 	}
+	buf = append(buf, '\n')
+
+	dstPath := filepath.Join(a.outputDir, "settings.json")
+	if err := os.MkdirAll(filepath.Dir(dstPath), 0o755); err != nil {
+		return &model.ErrAssembly{
+			Phase:   "merge_settings",
+			File:    "settings.json",
+			Message: fmt.Sprintf("create output dir: %v", err),
+		}
+	}
+
+	if err := os.WriteFile(dstPath, buf, 0o644); err != nil {
+		return &model.ErrAssembly{
+			Phase:   "merge_settings",
+			File:    "settings.json",
+			Message: fmt.Sprintf("write merged settings: %v", err),
+		}
+	}
+
 	result.FilesWritten++
 	result.Files = append(result.Files, "settings.json")
 	return nil

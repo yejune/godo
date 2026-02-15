@@ -254,8 +254,9 @@ func (m *Merger) appendContentToBody(body, appendRelPath string) (string, error)
 	return body + string(appendData), nil
 }
 
-// MergeSettings reads core settings.json, injects persona-specific hooks from
-// the manifest, and writes the merged result to the output directory.
+// MergeSettings reads core settings.json, merges manifest Settings on top
+// (with deep merge for the "env" sub-object), injects persona-specific hooks,
+// and writes the merged result to the output directory.
 func (m *Merger) MergeSettings(coreSettingsPath string) error {
 	data, err := os.ReadFile(coreSettingsPath)
 	if err != nil {
@@ -278,6 +279,11 @@ func (m *Merger) MergeSettings(coreSettingsPath string) error {
 	// Inject persona hooks if present.
 	if len(m.manifest.Hooks) > 0 {
 		settings["hooks"] = m.manifest.Hooks
+	}
+
+	// Apply manifest.Settings overrides (deep merge for "env", override for top-level).
+	if len(m.manifest.Settings) > 0 {
+		mergeSettingsMap(settings, m.manifest.Settings)
 	}
 
 	buf, err := json.MarshalIndent(settings, "", "  ")
@@ -308,6 +314,121 @@ func (m *Merger) MergeSettings(coreSettingsPath string) error {
 	}
 
 	return nil
+}
+
+// mergeSettingsMap merges persona settings into base settings.
+// For the "env" key: deep merge (persona keys add/override, base keys preserved).
+// For all other top-level keys: persona values override base values.
+func mergeSettingsMap(base, persona map[string]interface{}) {
+	for key, personaVal := range persona {
+		if key == "env" {
+			// Deep merge for env sub-object.
+			baseEnv, baseOk := base["env"]
+			if baseOk {
+				baseEnvMap, baseIsMap := baseEnv.(map[string]interface{})
+				personaEnvMap, personaIsMap := personaVal.(map[string]interface{})
+				if baseIsMap && personaIsMap {
+					for k, v := range personaEnvMap {
+						baseEnvMap[k] = v
+					}
+					base["env"] = baseEnvMap
+					continue
+				}
+			}
+		}
+		// Top-level override (including env when base has no env or types don't match).
+		base[key] = personaVal
+	}
+}
+
+// ApplySkillMappings walks all agent .md files in the output directory and
+// replaces skill names in frontmatter according to the manifest's SkillMappings.
+func (m *Merger) ApplySkillMappings() (int, error) {
+	if len(m.manifest.SkillMappings) == 0 {
+		return 0, nil
+	}
+
+	agentsDir := filepath.Join(m.outputDir, "agents")
+	if _, err := os.Stat(agentsDir); os.IsNotExist(err) {
+		return 0, nil
+	}
+
+	agentsModified := 0
+
+	err := filepath.Walk(agentsDir, func(path string, info os.FileInfo, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		if info.IsDir() || !strings.HasSuffix(info.Name(), ".md") {
+			return nil
+		}
+
+		modified, err := m.applySkillMappingsToFile(path)
+		if err != nil {
+			relPath, _ := filepath.Rel(m.outputDir, path)
+			return &model.ErrAssembly{
+				Phase:   "skill_mappings",
+				File:    relPath,
+				Message: fmt.Sprintf("apply skill mappings: %v", err),
+			}
+		}
+		if modified {
+			agentsModified++
+		}
+		return nil
+	})
+
+	return agentsModified, err
+}
+
+// applySkillMappingsToFile reads a single agent file, replaces skill names
+// in frontmatter per the manifest's SkillMappings, and writes back if changed.
+func (m *Merger) applySkillMappingsToFile(agentPath string) (bool, error) {
+	data, err := os.ReadFile(agentPath)
+	if err != nil {
+		return false, err
+	}
+
+	content := string(data)
+	rawYaml, body, hasFM := parser.SplitFrontmatter(content)
+	if !hasFM {
+		return false, nil
+	}
+
+	fm, err := parser.ParseFrontmatter(rawYaml)
+	if err != nil {
+		return false, err
+	}
+
+	if len(fm.Skills) == 0 {
+		return false, nil
+	}
+
+	// Apply mappings to the skills list.
+	changed := false
+	newSkills := make([]string, len(fm.Skills))
+	for i, skill := range fm.Skills {
+		if replacement, ok := m.manifest.SkillMappings[skill]; ok {
+			newSkills[i] = replacement
+			changed = true
+		} else {
+			newSkills[i] = skill
+		}
+	}
+
+	if !changed {
+		return false, nil
+	}
+
+	// Patch raw YAML to update skills, preserving format.
+	patchedYaml := parser.PatchFrontmatterSkills(rawYaml, newSkills)
+	output := "---\n" + patchedYaml + "---\n" + body
+
+	if err := os.WriteFile(agentPath, []byte(output), 0o644); err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 // CopyCommands copies persona-specific command files listed in the manifest

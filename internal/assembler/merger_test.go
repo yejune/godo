@@ -996,3 +996,335 @@ Implementation agent.`
 		t.Errorf("key order not preserved:\n%s", output)
 	}
 }
+
+func TestMergeSettings_WithManifestSettingsOverride(t *testing.T) {
+	reg := newTestRegistry(nil)
+	personaDir := t.TempDir()
+	coreDir := t.TempDir()
+	outputDir := t.TempDir()
+
+	// Core settings with outputStyle and env.
+	coreSettings := map[string]interface{}{
+		"outputStyle": "pair",
+		"permissions": map[string]interface{}{
+			"allow": []interface{}{"Read", "Write"},
+		},
+		"env": map[string]interface{}{
+			"DO_MODE":     "do",
+			"DO_LANGUAGE": "en",
+		},
+	}
+	coreData, _ := json.MarshalIndent(coreSettings, "", "  ")
+	coreSettingsPath := filepath.Join(coreDir, "settings.json")
+	if err := os.WriteFile(coreSettingsPath, coreData, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Manifest with Settings that overrides outputStyle and deep-merges env.
+	manifest := &model.PersonaManifest{
+		Settings: map[string]interface{}{
+			"outputStyle": "direct",
+			"env": map[string]interface{}{
+				"DO_LANGUAGE": "ko",
+				"DO_PERSONA":  "young-f",
+			},
+		},
+	}
+
+	m := NewMerger(coreDir, personaDir, outputDir, manifest, reg)
+	err := m.MergeSettings(coreSettingsPath)
+	if err != nil {
+		t.Fatalf("MergeSettings error: %v", err)
+	}
+
+	outPath := filepath.Join(outputDir, "settings.json")
+	data, err := os.ReadFile(outPath)
+	if err != nil {
+		t.Fatalf("read output settings: %v", err)
+	}
+
+	var result map[string]interface{}
+	if err := json.Unmarshal(data, &result); err != nil {
+		t.Fatalf("unmarshal output settings: %v", err)
+	}
+
+	// outputStyle overridden by persona.
+	if result["outputStyle"] != "direct" {
+		t.Errorf("expected outputStyle 'direct', got %v", result["outputStyle"])
+	}
+
+	// permissions preserved from core.
+	if _, ok := result["permissions"]; !ok {
+		t.Error("expected permissions field preserved from core")
+	}
+
+	// env deep merged: core DO_MODE preserved, DO_LANGUAGE overridden, DO_PERSONA added.
+	envRaw, ok := result["env"]
+	if !ok {
+		t.Fatal("expected env field in merged settings")
+	}
+	envMap, ok := envRaw.(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected env as map, got %T", envRaw)
+	}
+	if envMap["DO_MODE"] != "do" {
+		t.Errorf("expected DO_MODE 'do' preserved, got %v", envMap["DO_MODE"])
+	}
+	if envMap["DO_LANGUAGE"] != "ko" {
+		t.Errorf("expected DO_LANGUAGE 'ko' (overridden), got %v", envMap["DO_LANGUAGE"])
+	}
+	if envMap["DO_PERSONA"] != "young-f" {
+		t.Errorf("expected DO_PERSONA 'young-f' (added), got %v", envMap["DO_PERSONA"])
+	}
+}
+
+func TestMergeSettings_EnvDeepMerge_NoBaseEnv(t *testing.T) {
+	reg := newTestRegistry(nil)
+	personaDir := t.TempDir()
+	coreDir := t.TempDir()
+	outputDir := t.TempDir()
+
+	// Core settings without env.
+	coreSettings := map[string]interface{}{
+		"outputStyle": "pair",
+	}
+	coreData, _ := json.MarshalIndent(coreSettings, "", "  ")
+	coreSettingsPath := filepath.Join(coreDir, "settings.json")
+	if err := os.WriteFile(coreSettingsPath, coreData, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	manifest := &model.PersonaManifest{
+		Settings: map[string]interface{}{
+			"env": map[string]interface{}{
+				"DO_PERSONA": "senior-m",
+			},
+		},
+	}
+
+	m := NewMerger(coreDir, personaDir, outputDir, manifest, reg)
+	err := m.MergeSettings(coreSettingsPath)
+	if err != nil {
+		t.Fatalf("MergeSettings error: %v", err)
+	}
+
+	outPath := filepath.Join(outputDir, "settings.json")
+	data, err := os.ReadFile(outPath)
+	if err != nil {
+		t.Fatalf("read output settings: %v", err)
+	}
+
+	var result map[string]interface{}
+	if err := json.Unmarshal(data, &result); err != nil {
+		t.Fatalf("unmarshal output settings: %v", err)
+	}
+
+	// env should be set even when core had none.
+	envRaw, ok := result["env"]
+	if !ok {
+		t.Fatal("expected env field in output")
+	}
+	envMap, ok := envRaw.(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected env as map, got %T", envRaw)
+	}
+	if envMap["DO_PERSONA"] != "senior-m" {
+		t.Errorf("expected DO_PERSONA 'senior-m', got %v", envMap["DO_PERSONA"])
+	}
+}
+
+func TestApplySkillMappings_ReplacesSkillNames(t *testing.T) {
+	reg := newTestRegistry(nil)
+	coreDir := t.TempDir()
+	personaDir := t.TempDir()
+	outputDir := t.TempDir()
+
+	// Create agent files in output (simulating post-assembly state).
+	agentDir := filepath.Join(outputDir, "agents")
+	if err := os.MkdirAll(agentDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	agent1 := `---
+name: expert-backend
+description: Backend expert
+skills:
+    - moai-foundation-quality
+    - do-domain-backend
+    - moai-workflow-spec
+---
+# Expert Backend`
+	if err := os.WriteFile(filepath.Join(agentDir, "expert-backend.md"), []byte(agent1), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	agent2 := `---
+name: expert-frontend
+description: Frontend expert
+skills: moai-foundation-quality, do-domain-frontend
+---
+# Expert Frontend`
+	if err := os.WriteFile(filepath.Join(agentDir, "expert-frontend.md"), []byte(agent2), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	manifest := &model.PersonaManifest{
+		SkillMappings: map[string]string{
+			"moai-foundation-quality": "do-foundation-checklist",
+			"moai-workflow-spec":      "do-workflow-plan",
+		},
+	}
+
+	m := NewMerger(coreDir, personaDir, outputDir, manifest, reg)
+	modified, err := m.ApplySkillMappings()
+	if err != nil {
+		t.Fatalf("ApplySkillMappings error: %v", err)
+	}
+
+	if modified != 2 {
+		t.Errorf("expected 2 agents modified, got %d", modified)
+	}
+
+	// Verify agent1: list format skills replaced.
+	data1, err := os.ReadFile(filepath.Join(agentDir, "expert-backend.md"))
+	if err != nil {
+		t.Fatalf("read agent1: %v", err)
+	}
+	out1 := string(data1)
+	if strings.Contains(out1, "moai-foundation-quality") {
+		t.Error("agent1: moai-foundation-quality should have been replaced")
+	}
+	if !strings.Contains(out1, "do-foundation-checklist") {
+		t.Error("agent1: expected do-foundation-checklist after mapping")
+	}
+	if strings.Contains(out1, "moai-workflow-spec") {
+		t.Error("agent1: moai-workflow-spec should have been replaced")
+	}
+	if !strings.Contains(out1, "do-workflow-plan") {
+		t.Error("agent1: expected do-workflow-plan after mapping")
+	}
+	if !strings.Contains(out1, "do-domain-backend") {
+		t.Error("agent1: do-domain-backend should be preserved (not in mapping)")
+	}
+
+	// Verify agent2: inline format skills replaced.
+	data2, err := os.ReadFile(filepath.Join(agentDir, "expert-frontend.md"))
+	if err != nil {
+		t.Fatalf("read agent2: %v", err)
+	}
+	out2 := string(data2)
+	if strings.Contains(out2, "moai-foundation-quality") {
+		t.Error("agent2: moai-foundation-quality should have been replaced")
+	}
+	if !strings.Contains(out2, "do-foundation-checklist") {
+		t.Error("agent2: expected do-foundation-checklist after mapping")
+	}
+	if !strings.Contains(out2, "do-domain-frontend") {
+		t.Error("agent2: do-domain-frontend should be preserved")
+	}
+}
+
+func TestApplySkillMappings_NoMappings(t *testing.T) {
+	reg := newTestRegistry(nil)
+	coreDir := t.TempDir()
+	personaDir := t.TempDir()
+	outputDir := t.TempDir()
+
+	manifest := &model.PersonaManifest{
+		SkillMappings: nil,
+	}
+
+	m := NewMerger(coreDir, personaDir, outputDir, manifest, reg)
+	modified, err := m.ApplySkillMappings()
+	if err != nil {
+		t.Fatalf("ApplySkillMappings error: %v", err)
+	}
+	if modified != 0 {
+		t.Errorf("expected 0 agents modified with nil mappings, got %d", modified)
+	}
+}
+
+func TestApplySkillMappings_NoMatchingSkills(t *testing.T) {
+	reg := newTestRegistry(nil)
+	coreDir := t.TempDir()
+	personaDir := t.TempDir()
+	outputDir := t.TempDir()
+
+	agentDir := filepath.Join(outputDir, "agents")
+	if err := os.MkdirAll(agentDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	agent := `---
+name: expert-backend
+skills:
+    - do-domain-backend
+---
+# Expert Backend`
+	if err := os.WriteFile(filepath.Join(agentDir, "expert-backend.md"), []byte(agent), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	manifest := &model.PersonaManifest{
+		SkillMappings: map[string]string{
+			"nonexistent-skill": "replacement",
+		},
+	}
+
+	m := NewMerger(coreDir, personaDir, outputDir, manifest, reg)
+	modified, err := m.ApplySkillMappings()
+	if err != nil {
+		t.Fatalf("ApplySkillMappings error: %v", err)
+	}
+	if modified != 0 {
+		t.Errorf("expected 0 agents modified (no matching skills), got %d", modified)
+	}
+}
+
+func TestApplySkillMappings_NestedAgentDirs(t *testing.T) {
+	reg := newTestRegistry(nil)
+	coreDir := t.TempDir()
+	personaDir := t.TempDir()
+	outputDir := t.TempDir()
+
+	// Create nested agent directory.
+	nestedDir := filepath.Join(outputDir, "agents", "moai")
+	if err := os.MkdirAll(nestedDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	agent := `---
+name: manager-spec
+skills: moai-workflow-spec, moai-foundation-core
+---
+# Manager Spec`
+	if err := os.WriteFile(filepath.Join(nestedDir, "manager-spec.md"), []byte(agent), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	manifest := &model.PersonaManifest{
+		SkillMappings: map[string]string{
+			"moai-workflow-spec":   "do-workflow-plan",
+			"moai-foundation-core": "do-foundation-core",
+		},
+	}
+
+	m := NewMerger(coreDir, personaDir, outputDir, manifest, reg)
+	modified, err := m.ApplySkillMappings()
+	if err != nil {
+		t.Fatalf("ApplySkillMappings error: %v", err)
+	}
+	if modified != 1 {
+		t.Errorf("expected 1 agent modified in nested dir, got %d", modified)
+	}
+
+	data, err := os.ReadFile(filepath.Join(nestedDir, "manager-spec.md"))
+	if err != nil {
+		t.Fatalf("read nested agent: %v", err)
+	}
+	out := string(data)
+	if !strings.Contains(out, "do-workflow-plan") {
+		t.Error("expected do-workflow-plan after mapping in nested agent")
+	}
+	if !strings.Contains(out, "do-foundation-core") {
+		t.Error("expected do-foundation-core after mapping in nested agent")
+	}
+}
