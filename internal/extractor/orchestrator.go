@@ -33,12 +33,14 @@ const (
 	fileTypeSettings
 	fileTypeCommand
 	fileTypeHook
+	fileTypeAsset // non-markdown files in known directories (skills, etc.)
 )
 
 // ExtractorOrchestrator walks a .claude/ source directory, routes each file
 // to the appropriate sub-extractor, and aggregates all core templates into
 // a TemplateRegistry and all persona content into a merged PersonaManifest.
 type ExtractorOrchestrator struct {
+	registry *detector.PatternRegistry
 	agent   *AgentExtractor
 	skill   *SkillExtractor
 	rule    *RuleExtractor
@@ -49,6 +51,7 @@ type ExtractorOrchestrator struct {
 // NewExtractorOrchestrator creates an orchestrator wired with all sub-extractors.
 func NewExtractorOrchestrator(det *detector.PersonaDetector, reg *detector.PatternRegistry) *ExtractorOrchestrator {
 	return &ExtractorOrchestrator{
+		registry: reg,
 		agent:   NewAgentExtractor(det, reg),
 		skill:   NewSkillExtractor(reg),
 		rule:    NewRuleExtractor(reg),
@@ -110,6 +113,16 @@ func (o *ExtractorOrchestrator) Extract(srcDir string) (*template.Registry, *mod
 		case fileTypeHook:
 			merged.HookScripts = append(merged.HookScripts, relPath)
 			merged.PersonaFiles[relPath] = path
+			return nil
+		case fileTypeAsset:
+			// Non-markdown files in known directories (e.g., .yml, .json, .py, .sh in skills/).
+			// Classify as core or persona based on the parent skill directory name.
+			skillName := extractSkillDirName(relPath)
+			if skillName != "" && o.registry.IsWholeFilePersonaSkill(skillName) {
+				merged.PersonaFiles[relPath] = path
+			} else {
+				merged.CoreFiles = append(merged.CoreFiles, relPath)
+			}
 			return nil
 		}
 
@@ -254,6 +267,8 @@ func classifyFile(relPath string) fileType {
 		if strings.HasSuffix(normalized, ".md") {
 			return fileTypeSkill
 		}
+		return fileTypeAsset
+
 	case "rules":
 		if strings.HasSuffix(normalized, ".md") {
 			return fileTypeRule
@@ -446,4 +461,20 @@ func detectPersonaName(personaFiles map[string]string) string {
 	}
 
 	return bestName
+}
+
+// extractSkillDirName extracts the skill directory name from a relative path.
+// For example, "skills/moai-tool-ast-grep/rules/go.yml" returns "moai-tool-ast-grep".
+// Returns empty string if the path doesn't have a skill subdirectory component.
+func extractSkillDirName(relPath string) string {
+	normalized := filepath.ToSlash(relPath)
+	parts := strings.Split(normalized, "/")
+	// Need at least: skills/<name>/<file> (3 parts)
+	if len(parts) < 3 {
+		return ""
+	}
+	if parts[0] != "skills" {
+		return ""
+	}
+	return parts[1]
 }

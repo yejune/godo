@@ -550,6 +550,9 @@ func TestClassifyFile(t *testing.T) {
 		{"agents/README.txt", fileTypeUnknown}, // not .md
 		{"nested/CLAUDE.md", fileTypeUnknown},  // not at root
 		{"nested/settings.json", fileTypeUnknown},
+		{"skills/moai-tool-ast-grep/rules/go.yml", fileTypeAsset},
+		{"skills/moai-workflow-testing/scripts/with_server.py", fileTypeAsset},
+		{"skills/moai-workflow-testing/LICENSE.txt", fileTypeAsset},
 	}
 
 	for _, tt := range tests {
@@ -663,6 +666,29 @@ func TestDetectPersonaName(t *testing.T) {
 			got := detectPersonaName(tt.personaFiles)
 			if got != tt.want {
 				t.Errorf("detectPersonaName() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestExtractSkillDirName(t *testing.T) {
+	tests := []struct {
+		path string
+		want string
+	}{
+		{"skills/moai-tool-ast-grep/rules/go.yml", "moai-tool-ast-grep"},
+		{"skills/moai-workflow-testing/scripts/with_server.py", "moai-workflow-testing"},
+		{"skills/moai-foundation-quality/templates/quality-config.yaml", "moai-foundation-quality"},
+		{"skills/do-foundation.md", ""}, // only 2 parts, no subdirectory
+		{"agents/moai/manager.md", ""},  // not a skills path
+		{"rules/quality.md", ""},         // not a skills path
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.path, func(t *testing.T) {
+			got := extractSkillDirName(tt.path)
+			if got != tt.want {
+				t.Errorf("extractSkillDirName(%q) = %q, want %q", tt.path, got, tt.want)
 			}
 		})
 	}
