@@ -27,7 +27,7 @@ triggers:
 
 Create comprehensive plan documents by assessing task complexity and running the appropriate pipeline. Simple tasks go directly to plan generation. Complex tasks go through Analysis -> Architecture -> Plan.
 
-All artifacts are stored at `.do/jobs/{YYMMDD}/{title-kebab-case}/`.
+All artifacts are stored at `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/`.
 
 ## Scope
 
@@ -86,7 +86,7 @@ Tasks for analyst:
 - Identify risks with impact levels (HIGH/MEDIUM/LOW)
 - Map change scope and affected files/modules
 
-Output: `.do/jobs/{YYMMDD}/{title}/analysis.md`
+Output: `.do/jobs/{YY}/{MM}/{DD}/{title}/analysis.md`
 Template: dev-checklist.md Analysis template (Sections 1-6)
 
 [HARD] Analysis must complete before Architecture proceeds.
@@ -105,7 +105,7 @@ Tasks for architect:
 - Define testing strategy (Unit/Integration with file paths)
 - Cross-verify all MUST/SHOULD requirements from analysis.md are addressed
 
-Output: `.do/jobs/{YYMMDD}/{title}/architecture.md`
+Output: `.do/jobs/{YY}/{MM}/{DD}/{title}/architecture.md`
 Template: dev-checklist.md Architecture template (Sections 1-10)
 
 [HARD] Architecture must complete before Plan proceeds.
@@ -123,7 +123,7 @@ Tasks:
 - Specify verification method per task (test file path or build check)
 - Ask user about TDD preference via AskUserQuestion: "TDD로 개발할까요?"
 
-Output: `.do/jobs/{YYMMDD}/{title}/plan.md`
+Output: `.do/jobs/{YY}/{MM}/{DD}/{title}/plan.md`
 
 ### Phase 4: User Approval
 
@@ -139,10 +139,10 @@ Display plan summary and present options:
 
 When Claude Code Plan Mode is entered (Shift+Tab):
 
-- [HARD] Save location: `.do/jobs/{YYMMDD}/{title-kebab-case}/plan.md`
+- [HARD] Save location: `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/plan.md`
 - [HARD] NEVER use `~/.claude/plans/` -- even if system suggests it
-- [HARD] Create `.do/jobs/{YYMMDD}/{title-kebab-case}/` directory if it doesn't exist
-- [HARD] Date folder uses YYMMDD format (e.g., 260215)
+- [HARD] Create `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/` directory if it doesn't exist
+- [HARD] Date folder uses YY/MM/DD format (e.g., 26/02/15)
 
 ---
 

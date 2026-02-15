@@ -38,18 +38,21 @@ do-focus/.claude/에서 복사하는 것이 아니다.
 
 변환: moai SPEC 워크플로우 → do 체크리스트 워크플로우
 
-### C. output-styles/do/ (3개) — 확인 필요
-소스: `/tmp/e2e4-extract/personas/moai/output-styles/moai/`
-현재 do-focus styles/에서 복사했는데, moai 원본에서 복사+변환이 맞음
-- moai.md → pair.md (또는 do 스타일에 맞게)
-- r2d2.md → sprint.md
-- yoda.md → direct.md
+### C. output-styles/do/ (3개) — 폐기 후 재작업
+소스 양식: `/tmp/e2e4-extract/personas/moai/output-styles/moai/` (섹션 구조만 참고)
+내용: do 고유 스타일 (pair, sprint, direct)
 
-### D. commands/do/ (6개) — 유지 가능
-이건 do 고유 커맨드라서 moai에 대응하는 것이 다름.
-moai: 2개 (99-release, github)
-do: 6개 (check, checklist, mode, plan, setup, style)
-→ do 커맨드는 do-focus 원본에서 복사한 것이 맞을 수 있음. 단 moai 참조 있으면 수정.
+moai 스타일과 do 스타일은 1:1 대응이 아니다. moai의 양식(섹션 구조)만 복사하고, 내용은 do 스타일을 주입:
+- moai 양식 → pair.md (친절한 동료, 기본 스타일)
+- moai 양식 → sprint.md (민첩한 실행자, 말 최소화)
+- moai 양식 → direct.md (직설적 전문가, 군더더기 없음)
+
+주의: moai.md→pair, r2d2.md→sprint 같은 rename이 아님!
+
+### D. commands/do/ (6개) — 유지 (do-focus 원본 복사 정당)
+do 고유 커맨드이므로 do-focus 원본에서 복사한 것이 맞음.
+moai에 대응하는 커맨드가 없거나 다름 (moai: 2개, do: 6개).
+단 moai 참조가 있으면 수정.
 
 ### E. characters/ (4개) — 유지
 do 고유 기능. moai에 없음. 새로 작성한 것이 맞음.

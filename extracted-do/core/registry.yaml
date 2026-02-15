@@ -1,0 +1,34 @@
+version: 1.0.0
+source: ""
+source_version: ""
+extracted_at: ""
+slots:
+    QUALITY_FRAMEWORK:
+        category: section
+        scope: agent
+        description: Slot from section 'TRUST 5 Compliance'
+        marker_type: section
+        found_in:
+            - path: agents/do/expert-testing.md
+              line: 558
+              original_header: TRUST 5 Compliance
+        default: ""
+    QUALITY_GATE_TEXT:
+        category: content_pattern
+        scope: rule
+        description: Inline content pattern slot in 'MoAI Integration'
+        marker_type: inline
+        found_in:
+            - path: rules/do/languages/cpp.md
+              line: 47
+        default: ""
+    TRACEABILITY_SYSTEM:
+        category: section
+        scope: agent
+        description: Slot from section 'TAG Chain Integrity'
+        marker_type: section
+        found_in:
+            - path: agents/do/expert-frontend.md
+              line: 716
+              original_header: TAG Chain Integrity
+        default: ""

@@ -91,17 +91,17 @@ find . -type d -maxdepth 3 -not -path '*/\.*' -not -path '*/node_modules/*' | he
 ### Step 4: 디렉토리 생성 및 저장
 
 ```bash
-mkdir -p .do/jobs/{YYMMDD}/{제목-kebab-case}
+mkdir -p .do/jobs/{YY}/{MM}/{DD}/{제목-kebab-case}
 ```
 
-파일 경로: `.do/jobs/{YYMMDD}/{제목-kebab-case}/plan.md`
+파일 경로: `.do/jobs/{YY}/{MM}/{DD}/{제목-kebab-case}/plan.md`
 
-예시: `.do/jobs/260107/user-auth/plan.md`
+예시: `.do/jobs/26/01/07/user-auth/plan.md`
 
 ### Step 5: 완료 메시지
 
 ```
-플랜 생성 완료: .do/jobs/{YYMMDD}/{제목-kebab-case}/plan.md
+플랜 생성 완료: .do/jobs/{YY}/{MM}/{DD}/{제목-kebab-case}/plan.md
 
 다음 단계:
 - 플랜 검토 후 수정 필요시 알려주세요
@@ -117,11 +117,11 @@ mkdir -p .do/jobs/{YYMMDD}/{제목-kebab-case}
 → "플랜 제목을 입력하세요" 질문
 → "user-auth" 입력
 → 분석 수행
-→ .do/jobs/260107/user-auth/plan.md 생성
+→ .do/jobs/26/01/07/user-auth/plan.md 생성
 
 /do:plan api-rate-limiting
 → 바로 분석 시작
-→ .do/jobs/260107/api-rate-limiting/plan.md 생성
+→ .do/jobs/26/01/07/api-rate-limiting/plan.md 생성
 ```
 
 ---

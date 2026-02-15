@@ -137,7 +137,7 @@ If the intent is clearly a development task with no specific routing signal, def
 
 Purpose: Create comprehensive plan documents through complexity assessment and optional analysis/architecture phases.
 Agents: expert-analyst (analysis), expert-architect (architecture), plan agent
-Output: `.do/jobs/{YYMMDD}/{title}/plan.md` (+ analysis.md, architecture.md for complex tasks)
+Output: `.do/jobs/{YY}/{MM}/{DD}/{title}/plan.md` (+ analysis.md, architecture.md for complex tasks)
 For detailed orchestration: Read workflows/plan.md
 
 ### run - Checklist-Based Implementation
@@ -158,7 +158,7 @@ For detailed orchestration: Read workflows/test.md
 
 Purpose: Generate completion report after all checklist items done.
 Agents: report agent
-Output: `.do/jobs/{YYMMDD}/{title}/report.md`
+Output: `.do/jobs/{YY}/{MM}/{DD}/{title}/report.md`
 For detailed orchestration: Read workflows/report.md
 
 ### do (default) - Autonomous Pipeline
@@ -224,7 +224,7 @@ Constraints: Maximum 4 options, no emoji, user's language.
 
 ### Checklist Tracking
 
-[HARD] Track all work via checklist files (`.do/jobs/{YYMMDD}/{title}/`).
+[HARD] Track all work via checklist files (`.do/jobs/{YY}/{MM}/{DD}/{title}/`).
 
 - Checklist = agent state file: agents read it on start, update on progress, new agents resume from `[o]`
 - Status transitions: `[ ]`->`[~]`->`[*]`->`[o]` (forbidden: `[ ]`->`[o]` skip testing)

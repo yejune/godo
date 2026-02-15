@@ -66,7 +66,7 @@ User approval via AskUserQuestion:
 
 Execute workflows/plan.md:
 - Complexity assessment -> Analysis (if complex) -> Architecture (if complex) -> Plan generation
-- Output: `.do/jobs/{YYMMDD}/{title}/plan.md` (+ analysis.md, architecture.md if complex)
+- Output: `.do/jobs/{YY}/{MM}/{DD}/{title}/plan.md` (+ analysis.md, architecture.md if complex)
 - User approval checkpoint before proceeding
 
 ## Phase 2: Checklist
@@ -80,7 +80,7 @@ After plan is approved:
    - Dependencies linked with `depends on:`
 
 2. Generate sub-checklists per agent:
-   - `.do/jobs/{YYMMDD}/{title}/checklists/{NN}_{agent-topic}.md`
+   - `.do/jobs/{YY}/{MM}/{DD}/{title}/checklists/{NN}_{agent-topic}.md`
    - Each follows the sub-checklist template from dev-checklist.md
    - Problem Summary, Acceptance Criteria, Critical Files, FINAL STEP: Commit
 

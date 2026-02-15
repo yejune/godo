@@ -35,9 +35,9 @@ Execute checklist items by dispatching agents with sub-checklist files. Each age
 
 ## Input
 
-- Existing plan.md at `.do/jobs/{YYMMDD}/{title}/plan.md`
-- Existing checklist.md at `.do/jobs/{YYMMDD}/{title}/checklist.md`
-- Sub-checklists at `.do/jobs/{YYMMDD}/{title}/checklists/{NN}_{agent}.md`
+- Existing plan.md at `.do/jobs/{YY}/{MM}/{DD}/{title}/plan.md`
+- Existing checklist.md at `.do/jobs/{YY}/{MM}/{DD}/{title}/checklist.md`
+- Sub-checklists at `.do/jobs/{YY}/{MM}/{DD}/{title}/checklists/{NN}_{agent}.md`
 
 ## Prerequisites
 
@@ -77,7 +77,7 @@ For each sub-checklist with incomplete items:
 Agent invocation MUST include these 4 items [HARD]:
 
 1. **Task instruction**: What to implement (from sub-checklist Problem Summary)
-2. **Sub-checklist path**: `.do/jobs/{YYMMDD}/{title}/checklists/{NN}_{agent}.md`
+2. **Sub-checklist path**: `.do/jobs/{YY}/{MM}/{DD}/{title}/checklists/{NN}_{agent}.md`
 3. **Docker environment info**: Container names, service names, domains
 4. **Commit instruction**: "After completing work, you MUST `git add` (specific files only) + `git commit`. Do NOT terminate without committing."
 

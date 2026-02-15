@@ -99,7 +99,7 @@ For detailed agent descriptions, see @.claude/rules/do/development/agent-authori
 
 Do uses a checklist-driven development pipeline instead of SPEC documents:
 
-- **Plan**: Analysis -> Architecture -> Plan (`.do/jobs/{YYMMDD}/{title}/plan.md`)
+- **Plan**: Analysis -> Architecture -> Plan (`.do/jobs/{YY}/{MM}/{DD}/{title}/plan.md`)
 - **Checklist**: Plan -> checklist.md + checklists/{NN}_{agent}.md (agent state files)
 - **Develop**: Agent reads sub-checklist -> implement -> test -> commit -> update status
 - **Test**: TDD RED-GREEN-REFACTOR or post-implementation verification

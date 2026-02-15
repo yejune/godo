@@ -15,9 +15,9 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 3. 있으면 현재 상태 요약 표시 (완료/전체 비율)
 
 **인자가 `create {title}`이면**:
-1. 현재 날짜로 폴더명 생성 (YYMMDD 형식)
-2. 메인 파일 생성: `.do/jobs/{YYMMDD}/{title}/checklist.md`
-3. 서브 디렉토리 생성: `.do/jobs/{YYMMDD}/{title}/checklists/`
+1. 현재 날짜로 폴더명 생성 (YY/MM/DD 형식)
+2. 메인 파일 생성: `.do/jobs/{YY}/{MM}/{DD}/{title}/checklist.md`
+3. 서브 디렉토리 생성: `.do/jobs/{YY}/{MM}/{DD}/{title}/checklists/`
 4. 메인 파일에 템플릿 작성:
 
 ```
@@ -46,7 +46,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 ## 서브 체크리스트
 
 에이전트 실행단위별 서브 체크리스트 생성 시:
-- 파일: `.do/jobs/{YYMMDD}/{title}/checklists/{order}_{agent-topic}.md`
+- 파일: `.do/jobs/{YY}/{MM}/{DD}/{title}/checklists/{order}_{agent-topic}.md`
 - 템플릿:
 
 ```

@@ -176,7 +176,7 @@ Do가 MoAI보다 2개 더 많은 hook 이벤트를 처리한다:
 
 ### 3.6 Jobs 디렉토리 (날짜 기반 산출물)
 
-`.do/jobs/{YYMMDD}/{title-kebab-case}/` 구조로 모든 작업 산출물 관리.
+`.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/` 구조로 모든 작업 산출물 관리.
 - MoAI의 `.moai/specs/SPEC-XXX/` (번호 기반)과 대조적.
 - 날짜 기반이므로 시간순 탐색이 자연스럽다.
 - `~/.claude/plans/` 전역 디렉토리 사용 금지.
@@ -244,7 +244,7 @@ MoAI는 `.moai/config/sections/*.yaml` (YAML 분리)로 설정을 관리한다.
 | 5 | **상태 관리** | TaskCreate/TaskUpdate (세션 스코프) | 파일 기반 체크리스트 (영속) | 체크리스트가 에이전트 상태 파일 |
 | 6 | **완료 증거** | `<moai>DONE</moai>` XML 마커 | 커밋 해시 (`[o]` + commit hash) | 커밋이 곧 증거 |
 | 7 | **요구사항 형식** | EARS (Easy Approach to Requirements Syntax) | MoSCoW (MUST/SHOULD/COULD/WON'T) | 형식론 차이 |
-| 8 | **산출물 위치** | `.moai/specs/SPEC-XXX/` (번호 기반) | `.do/jobs/{YYMMDD}/{title}/` (날짜 기반) | 시간순 vs 번호순 |
+| 8 | **산출물 위치** | `.moai/specs/SPEC-XXX/` (번호 기반) | `.do/jobs/{YY}/{MM}/{DD}/{title}/` (날짜 기반) | 시간순 vs 번호순 |
 | 9 | **지시문 언어** | 영어 단일 언어 | 한국어+영어 혼합 | Do의 CLAUDE.md는 이중 언어 |
 | 10 | **설정 저장소** | `.moai/config/sections/*.yaml` | `settings.local.json` `DO_*` env | YAML 분리 vs JSON 환경변수 |
 | 11 | **Hook 아키텍처** | Shell wrapper (7개 .sh) -> binary | godo binary 직접 호출 (0개 .sh) | Do가 더 간결 |
@@ -285,7 +285,7 @@ MoAI는 `.moai/config/sections/*.yaml` (YAML 분리)로 설정을 관리한다.
 | `hooks/moai/*.sh` | (없음 -- godo 직접 호출) | Hook 스크립트 |
 | `moai-constitution.md` | `do-constitution.md` | 핵심 원칙 파일 |
 | SPEC | Plan (+ Checklist) | 워크플로우 산출물 |
-| SPEC-XXX | `.do/jobs/{YYMMDD}/{title}/` | 산출물 식별자/경로 |
+| SPEC-XXX | `.do/jobs/{YY}/{MM}/{DD}/{title}/` | 산출물 식별자/경로 |
 | EARS | MoSCoW | 요구사항 형식 |
 | TAG Chain | Checklist dependency (`depends on:`) | 작업 의존성 |
 | `<moai>DONE</moai>` | `[o]` + commit hash | 완료 마커 |
@@ -329,7 +329,7 @@ moai가 업데이트되더라도 다음 Do 정체성 요소는 **절대 변경�
 - **파일**: `rules/dev-checklist.md` (core rule이지만 Do의 핵심 워크플로우)
 - **파일**: `personas/do/skills/do/workflows/run.md` (Checklist 기반 실행)
 - **패턴**: `[ ] [~] [*] [!] [o] [x]` 상태 기호
-- **패턴**: `.do/jobs/{YYMMDD}/{title}/checklist.md` 경로
+- **패턴**: `.do/jobs/{YY}/{MM}/{DD}/{title}/checklist.md` 경로
 - **패턴**: `checklists/{NN}_{agent}.md` 서브 체크리스트
 - **로직**: 상태 전이 규칙 (`[ ]`->`[~]`->`[*]`->`[o]`)
 - **로직**: 커밋 해시 = 완료 증거
@@ -373,7 +373,7 @@ moai가 업데이트되더라도 다음 Do 정체성 요소는 **절대 변경�
 
 ### 6.8 Jobs 디렉토리 경로 (MEDIUM)
 
-- **패턴**: `.do/jobs/{YYMMDD}/{title-kebab-case}/`
+- **패턴**: `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/`
 - **설정**: `plansDirectory: ".do/jobs"`
 - **이유**: MoAI의 `.moai/specs/SPEC-XXX/`와 다른 조직 방식.
 
@@ -419,7 +419,7 @@ moai가 업데이트되더라도 다음 Do 정체성 요소는 **절대 변경�
 1. **삼원 선언문**: "나는 Do다. 말하면 한다." 등 3개 선언문
 2. **상태 기호**: `[ ] [~] [*] [!] [o] [x]` 6개 기호와 전이 규칙
 3. **페르소나 호칭**: `{name}선배`, `{name}선배님`, `{name}님`, `{name}씨`
-4. **Jobs 경로 패턴**: `.do/jobs/{YYMMDD}/{title-kebab-case}/`
+4. **Jobs 경로 패턴**: `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/`
 5. **DO_* 환경변수**: 7개 환경변수명과 의미
 6. **godo 직접 호출**: settings.json의 `"command": "godo hook ..."` 패턴
 7. **VIOLATION 정의**: Do가 직접 코드 작성, 에이전트 위임 없이 파일 수정 등
@@ -460,7 +460,7 @@ moai가 업데이트되더라도 다음 Do 정체성 요소는 **절대 변경�
 
 ### 8.6 왜 날짜 기반 Jobs인가? (번호 기반 SPEC 대신)
 
-**결정**: `.do/jobs/{YYMMDD}/{title}/` 날짜 기반
+**결정**: `.do/jobs/{YY}/{MM}/{DD}/{title}/` 날짜 기반
 **MoAI와의 차이**: MoAI는 `.moai/specs/SPEC-XXX/` 번호 기반
 **근거**: 날짜 기반은 시간순 탐색이 자연스럽고, 이름만 보고 언제 한 작업인지 알 수 있다.
 

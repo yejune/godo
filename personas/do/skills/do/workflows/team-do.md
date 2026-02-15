@@ -73,7 +73,7 @@ Flow: Team Plan -> Checklist -> Team Run -> Quality -> Report -> Shutdown
 5. After all research tasks complete:
    - Collect findings from all three teammates
    - Synthesize into plan: Delegate to plan agent (sub-agent, NOT teammate) with all findings
-   - Generate: analysis.md, architecture.md, plan.md at `.do/jobs/{YYMMDD}/{title}/`
+   - Generate: analysis.md, architecture.md, plan.md at `.do/jobs/{YY}/{MM}/{DD}/{title}/`
 
 6. User approval:
    - AskUserQuestion: "Plan complete. Proceed to implementation?"

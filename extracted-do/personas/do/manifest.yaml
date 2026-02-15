@@ -1,0 +1,540 @@
+name: do
+version: ""
+description: ""
+brand: do
+brand_dir: do
+brand_cmd: do
+claude_md: CLAUDE.md
+agents:
+    - agents/do/manager-ddd.md
+    - agents/do/manager-project.md
+    - agents/do/manager-quality.md
+    - agents/do/manager-spec.md
+    - agents/do/manager-tdd.md
+    - agents/do/team-quality.md
+skills: []
+rules:
+    - rules/do/workflow/spec-workflow.md
+    - rules/do/workflow/workflow-modes.md
+styles:
+    - styles/moai.md
+    - styles/r2d2.md
+    - styles/yoda.md
+commands:
+    - commands/do/check.md
+    - commands/do/checklist.md
+    - commands/do/mode.md
+    - commands/do/plan.md
+    - commands/do/setup.md
+    - commands/do/style.md
+settings:
+    attribution:
+        commit: ""
+        pr: ""
+    hooks:
+        PostToolUse:
+            - hooks:
+                - command: godo hook post-tool-use
+                  type: command
+              matcher: .*
+            - hooks:
+                - command: godo hook compact
+                  timeout: 5
+                  type: command
+        PreToolUse:
+            - hooks:
+                - command: godo hook pre-tool
+                  timeout: 5
+                  type: command
+              matcher: Write|Edit|Bash
+        SessionEnd:
+            - hooks:
+                - command: godo hook session-end
+                  type: command
+        SessionStart:
+            - hooks:
+                - command: godo hook session-start
+                  type: command
+        Stop:
+            - hooks:
+                - command: godo hook stop
+                  type: command
+        SubagentStop:
+            - hooks:
+                - command: godo hook subagent-stop
+                  type: command
+        UserPromptSubmit:
+            - hooks:
+                - command: godo hook user-prompt-submit
+                  type: command
+    outputStyle: pair
+    plansDirectory: .do/jobs
+    statusLine:
+        command: godo statusline
+        type: command
+slot_content:
+    QUALITY_FRAMEWORK: |
+        ### TRUST 5 Compliance
+
+        - Test First: Comprehensive test strategy before implementation
+        - Readable: Clear test documentation and maintainable test code
+        - Unified: Consistent testing patterns across all components
+        - Secured: Security testing integrated into strategy
+    QUALITY_GATE_TEXT: TRUST 5 quality gates
+    TRACEABILITY_SYSTEM: |
+        ### TAG Chain Integrity
+
+        Frontend TAG Types:
+
+        Example with Research Integration:
+
+        ```
+
+        ```
+agent_patches: {}
+source_dir: /Users/max/Work/do-focus.workspace/do-focus/.claude
+core_files:
+    - agents/do/builder-agent.md
+    - agents/do/builder-plugin.md
+    - agents/do/builder-skill.md
+    - agents/do/expert-backend.md
+    - agents/do/expert-chrome-extension.md
+    - agents/do/expert-debug.md
+    - agents/do/expert-devops.md
+    - agents/do/expert-frontend.md
+    - agents/do/expert-performance.md
+    - agents/do/expert-refactoring.md
+    - agents/do/expert-security.md
+    - agents/do/expert-testing.md
+    - agents/do/manager-docs.md
+    - agents/do/manager-git.md
+    - agents/do/manager-strategy.md
+    - agents/do/team-analyst.md
+    - agents/do/team-architect.md
+    - agents/do/team-backend-dev.md
+    - agents/do/team-designer.md
+    - agents/do/team-frontend-dev.md
+    - agents/do/team-researcher.md
+    - agents/do/team-tester.md
+    - rules/dev-checklist.md
+    - rules/dev-environment.md
+    - rules/dev-testing.md
+    - rules/dev-workflow.md
+    - rules/do/core/agent-hooks.md
+    - rules/do/core/hooks-system.md
+    - rules/do/core/mcp-integration.md
+    - rules/do/core/moai-constitution.md
+    - rules/do/core/settings-management.md
+    - rules/do/development/agent-authoring.md
+    - rules/do/development/coding-standards.md
+    - rules/do/development/skill-authoring.md
+    - rules/do/languages/cpp.md
+    - rules/do/languages/csharp.md
+    - rules/do/languages/elixir.md
+    - rules/do/languages/flutter.md
+    - rules/do/languages/go.md
+    - rules/do/languages/java.md
+    - rules/do/languages/javascript.md
+    - rules/do/languages/kotlin.md
+    - rules/do/languages/php.md
+    - rules/do/languages/python.md
+    - rules/do/languages/r.md
+    - rules/do/languages/ruby.md
+    - rules/do/languages/rust.md
+    - rules/do/languages/scala.md
+    - rules/do/languages/swift.md
+    - rules/do/languages/typescript.md
+    - rules/do/workflow/file-reading-optimization.md
+    - rules/file-reading.md
+    - rules/go.md
+    - skills/do-design-tools/SKILL.md
+    - skills/do-design-tools/reference/comparison.md
+    - skills/do-design-tools/reference/figma.md
+    - skills/do-design-tools/reference/pencil-code.md
+    - skills/do-design-tools/reference/pencil-renderer.md
+    - skills/do-docs-generation/SKILL.md
+    - skills/do-docs-generation/modules/INDEX.md
+    - skills/do-docs-generation/modules/api-documentation.md
+    - skills/do-docs-generation/modules/code-documentation.md
+    - skills/do-docs-generation/modules/multi-format-output.md
+    - skills/do-docs-generation/modules/user-guides.md
+    - skills/do-docs-generation/references/examples.md
+    - skills/do-docs-generation/references/reference.md
+    - skills/do-domain-backend/SKILL.md
+    - skills/do-domain-backend/references/examples.md
+    - skills/do-domain-backend/references/reference.md
+    - skills/do-domain-database/SKILL.md
+    - skills/do-domain-database/modules/INDEX.md
+    - skills/do-domain-database/modules/mongodb.md
+    - skills/do-domain-database/modules/oracle.md
+    - skills/do-domain-database/modules/postgresql.md
+    - skills/do-domain-database/modules/redis.md
+    - skills/do-domain-database/references/examples.md
+    - skills/do-domain-database/references/reference.md
+    - skills/do-domain-frontend/SKILL.md
+    - skills/do-domain-frontend/modules/component-architecture.md
+    - skills/do-domain-frontend/modules/nextjs16-patterns.md
+    - skills/do-domain-frontend/modules/performance-optimization.md
+    - skills/do-domain-frontend/modules/react19-patterns.md
+    - skills/do-domain-frontend/modules/state-management.md
+    - skills/do-domain-frontend/modules/vercel-react-best-practices.md
+    - skills/do-domain-frontend/modules/vue35-patterns.md
+    - skills/do-domain-frontend/references/examples.md
+    - skills/do-domain-frontend/references/reference.md
+    - skills/do-domain-uiux/SKILL.md
+    - skills/do-domain-uiux/modules/accessibility-wcag.md
+    - skills/do-domain-uiux/modules/component-architecture.md
+    - skills/do-domain-uiux/modules/icon-libraries.md
+    - skills/do-domain-uiux/modules/theming-system.md
+    - skills/do-domain-uiux/modules/web-interface-guidelines.md
+    - skills/do-domain-uiux/references/examples.md
+    - skills/do-domain-uiux/references/reference.md
+    - skills/do-formats-data/SKILL.md
+    - skills/do-formats-data/modules/INDEX.md
+    - skills/do-formats-data/modules/SKILL-MODULARIZATION-TEMPLATE.md
+    - skills/do-formats-data/modules/caching-performance.md
+    - skills/do-formats-data/modules/data-validation.md
+    - skills/do-formats-data/modules/json-optimization.md
+    - skills/do-formats-data/modules/toon-encoding.md
+    - skills/do-formats-data/references/examples.md
+    - skills/do-formats-data/references/reference.md
+    - skills/do-foundation-claude/SKILL.md
+    - skills/do-foundation-claude/reference/advanced-agent-patterns.md
+    - skills/do-foundation-claude/reference/best-practices-checklist.md
+    - skills/do-foundation-claude/reference/claude-code-cli-reference-official.md
+    - skills/do-foundation-claude/reference/claude-code-custom-slash-commands-official.md
+    - skills/do-foundation-claude/reference/claude-code-devcontainers-official.md
+    - skills/do-foundation-claude/reference/claude-code-discover-plugins-official.md
+    - skills/do-foundation-claude/reference/claude-code-headless-official.md
+    - skills/do-foundation-claude/reference/claude-code-hooks-official.md
+    - skills/do-foundation-claude/reference/claude-code-iam-official.md
+    - skills/do-foundation-claude/reference/claude-code-memory-official.md
+    - skills/do-foundation-claude/reference/claude-code-plugin-marketplaces-official.md
+    - skills/do-foundation-claude/reference/claude-code-plugins-official.md
+    - skills/do-foundation-claude/reference/claude-code-sandboxing-official.md
+    - skills/do-foundation-claude/reference/claude-code-settings-official.md
+    - skills/do-foundation-claude/reference/claude-code-skills-official.md
+    - skills/do-foundation-claude/reference/claude-code-statusline-official.md
+    - skills/do-foundation-claude/reference/claude-code-sub-agents-official.md
+    - skills/do-foundation-claude/reference/complete-configuration-guide.md
+    - skills/do-foundation-claude/reference/skill-examples.md
+    - skills/do-foundation-claude/reference/skill-formatting-guide.md
+    - skills/do-foundation-claude/reference/sub-agents/sub-agent-examples.md
+    - skills/do-foundation-claude/reference/sub-agents/sub-agent-formatting-guide.md
+    - skills/do-foundation-claude/reference/sub-agents/sub-agent-integration-patterns.md
+    - skills/do-foundation-claude/references/examples.md
+    - skills/do-foundation-claude/references/reference.md
+    - skills/do-foundation-context/SKILL.md
+    - skills/do-foundation-context/references/examples.md
+    - skills/do-foundation-context/references/reference.md
+    - skills/do-foundation-core/SKILL.md
+    - skills/do-foundation-core/modules/INDEX.md
+    - skills/do-foundation-core/modules/agents-reference.md
+    - skills/do-foundation-core/modules/commands-reference.md
+    - skills/do-foundation-core/modules/delegation-advanced.md
+    - skills/do-foundation-core/modules/delegation-implementation.md
+    - skills/do-foundation-core/modules/delegation-patterns.md
+    - skills/do-foundation-core/modules/execution-rules.md
+    - skills/do-foundation-core/modules/modular-system.md
+    - skills/do-foundation-core/modules/patterns.md
+    - skills/do-foundation-core/modules/progressive-disclosure.md
+    - skills/do-foundation-core/modules/spec-ddd-implementation.md
+    - skills/do-foundation-core/modules/spec-ears-format.md
+    - skills/do-foundation-core/modules/spec-first-ddd.md
+    - skills/do-foundation-core/modules/trust-5-framework.md
+    - skills/do-foundation-core/modules/trust-5-implementation.md
+    - skills/do-foundation-core/modules/trust-5-validation.md
+    - skills/do-foundation-core/references/examples.md
+    - skills/do-foundation-core/references/reference.md
+    - skills/do-foundation-philosopher/SKILL.md
+    - skills/do-foundation-philosopher/modules/assumption-matrix.md
+    - skills/do-foundation-philosopher/modules/cognitive-bias.md
+    - skills/do-foundation-philosopher/modules/first-principles.md
+    - skills/do-foundation-philosopher/modules/trade-off-analysis.md
+    - skills/do-foundation-philosopher/references/examples.md
+    - skills/do-foundation-philosopher/references/reference.md
+    - skills/do-foundation-quality/SKILL.md
+    - skills/do-foundation-quality/modules/best-practices.md
+    - skills/do-foundation-quality/modules/integration-patterns.md
+    - skills/do-foundation-quality/modules/proactive-analysis.md
+    - skills/do-foundation-quality/modules/trust5-validation.md
+    - skills/do-foundation-quality/references/examples.md
+    - skills/do-foundation-quality/references/reference.md
+    - skills/do-foundation-quality/scripts/quality-gate.sh
+    - skills/do-foundation-quality/templates/github-actions-quality.yml
+    - skills/do-foundation-quality/templates/quality-config.yaml
+    - skills/do-framework-electron/SKILL.md
+    - skills/do-framework-electron/references/examples.md
+    - skills/do-framework-electron/references/reference.md
+    - skills/do-lang-cpp/SKILL.md
+    - skills/do-lang-cpp/modules/advanced-patterns.md
+    - skills/do-lang-cpp/references/examples.md
+    - skills/do-lang-cpp/references/reference.md
+    - skills/do-lang-csharp/SKILL.md
+    - skills/do-lang-csharp/modules/aspnet-core.md
+    - skills/do-lang-csharp/modules/blazor-components.md
+    - skills/do-lang-csharp/modules/cqrs-validation.md
+    - skills/do-lang-csharp/modules/csharp12-features.md
+    - skills/do-lang-csharp/modules/efcore-patterns.md
+    - skills/do-lang-csharp/references/examples.md
+    - skills/do-lang-csharp/references/reference.md
+    - skills/do-lang-elixir/SKILL.md
+    - skills/do-lang-elixir/modules/advanced-patterns.md
+    - skills/do-lang-elixir/references/examples.md
+    - skills/do-lang-elixir/references/reference.md
+    - skills/do-lang-flutter/SKILL.md
+    - skills/do-lang-flutter/reference/adaptive.md
+    - skills/do-lang-flutter/reference/animations.md
+    - skills/do-lang-flutter/reference/expert.md
+    - skills/do-lang-flutter/references/examples.md
+    - skills/do-lang-flutter/references/reference.md
+    - skills/do-lang-go/SKILL.md
+    - skills/do-lang-go/reference/advanced.md
+    - skills/do-lang-go/reference/testing.md
+    - skills/do-lang-go/references/examples.md
+    - skills/do-lang-go/references/reference.md
+    - skills/do-lang-java/SKILL.md
+    - skills/do-lang-java/references/examples.md
+    - skills/do-lang-java/references/reference.md
+    - skills/do-lang-javascript/SKILL.md
+    - skills/do-lang-javascript/references/examples.md
+    - skills/do-lang-javascript/references/reference.md
+    - skills/do-lang-kotlin/SKILL.md
+    - skills/do-lang-kotlin/references/examples.md
+    - skills/do-lang-kotlin/references/reference.md
+    - skills/do-lang-php/SKILL.md
+    - skills/do-lang-php/modules/advanced-patterns.md
+    - skills/do-lang-php/references/examples.md
+    - skills/do-lang-php/references/reference.md
+    - skills/do-lang-python/SKILL.md
+    - skills/do-lang-python/references/examples.md
+    - skills/do-lang-python/references/reference.md
+    - skills/do-lang-r/SKILL.md
+    - skills/do-lang-r/modules/advanced-patterns.md
+    - skills/do-lang-r/references/examples.md
+    - skills/do-lang-r/references/reference.md
+    - skills/do-lang-ruby/SKILL.md
+    - skills/do-lang-ruby/modules/advanced-patterns.md
+    - skills/do-lang-ruby/modules/testing-patterns.md
+    - skills/do-lang-ruby/references/examples.md
+    - skills/do-lang-ruby/references/reference.md
+    - skills/do-lang-rust/SKILL.md
+    - skills/do-lang-rust/reference/engineering.md
+    - skills/do-lang-rust/reference/guidelines.md
+    - skills/do-lang-rust/reference/performance.md
+    - skills/do-lang-rust/references/examples.md
+    - skills/do-lang-rust/references/reference.md
+    - skills/do-lang-scala/SKILL.md
+    - skills/do-lang-scala/modules/akka-actors.md
+    - skills/do-lang-scala/modules/cats-effect.md
+    - skills/do-lang-scala/modules/functional-programming.md
+    - skills/do-lang-scala/modules/spark-data.md
+    - skills/do-lang-scala/modules/zio-patterns.md
+    - skills/do-lang-scala/references/examples.md
+    - skills/do-lang-scala/references/reference.md
+    - skills/do-lang-swift/SKILL.md
+    - skills/do-lang-swift/modules/combine-reactive.md
+    - skills/do-lang-swift/modules/concurrency.md
+    - skills/do-lang-swift/modules/swift6-features.md
+    - skills/do-lang-swift/modules/swiftui-patterns.md
+    - skills/do-lang-swift/references/examples.md
+    - skills/do-lang-swift/references/reference.md
+    - skills/do-lang-typescript/SKILL.md
+    - skills/do-lang-typescript/references/examples.md
+    - skills/do-lang-typescript/references/reference.md
+    - skills/do-library-mermaid/SKILL.md
+    - skills/do-library-mermaid/modules/advanced-patterns.md
+    - skills/do-library-mermaid/modules/optimization.md
+    - skills/do-library-mermaid/references/examples.md
+    - skills/do-library-mermaid/references/reference.md
+    - skills/do-library-nextra/SKILL.md
+    - skills/do-library-nextra/modules/advanced-deployment-patterns.md
+    - skills/do-library-nextra/modules/advanced-patterns.md
+    - skills/do-library-nextra/modules/configuration.md
+    - skills/do-library-nextra/modules/content-architecture-optimization.md
+    - skills/do-library-nextra/modules/deployment.md
+    - skills/do-library-nextra/modules/framework-core-configuration.md
+    - skills/do-library-nextra/modules/i18n-setup.md
+    - skills/do-library-nextra/modules/mdx-components.md
+    - skills/do-library-nextra/modules/optimization.md
+    - skills/do-library-nextra/references/examples.md
+    - skills/do-library-nextra/references/reference.md
+    - skills/do-library-shadcn/SKILL.md
+    - skills/do-library-shadcn/modules/advanced-patterns.md
+    - skills/do-library-shadcn/modules/optimization.md
+    - skills/do-library-shadcn/modules/shadcn-components.md
+    - skills/do-library-shadcn/modules/shadcn-theming.md
+    - skills/do-library-shadcn/references/examples.md
+    - skills/do-library-shadcn/references/reference.md
+    - skills/do-platform-auth/SKILL.md
+    - skills/do-platform-auth/reference/auth0.md
+    - skills/do-platform-auth/reference/clerk.md
+    - skills/do-platform-auth/reference/comparison.md
+    - skills/do-platform-auth/reference/firebase-auth.md
+    - skills/do-platform-chrome-extension/SKILL.md
+    - skills/do-platform-chrome-extension/modules/apis-quick-reference.md
+    - skills/do-platform-chrome-extension/modules/content-scripts-guide.md
+    - skills/do-platform-chrome-extension/modules/manifest-v3-reference.md
+    - skills/do-platform-chrome-extension/modules/messaging-patterns.md
+    - skills/do-platform-chrome-extension/modules/publishing-guide.md
+    - skills/do-platform-chrome-extension/modules/security-csp.md
+    - skills/do-platform-chrome-extension/modules/service-worker-patterns.md
+    - skills/do-platform-chrome-extension/modules/ui-components.md
+    - skills/do-platform-database-cloud/SKILL.md
+    - skills/do-platform-database-cloud/reference/comparison.md
+    - skills/do-platform-database-cloud/reference/firestore.md
+    - skills/do-platform-database-cloud/reference/neon.md
+    - skills/do-platform-database-cloud/reference/supabase.md
+    - skills/do-platform-deployment/SKILL.md
+    - skills/do-platform-deployment/reference/comparison.md
+    - skills/do-platform-deployment/reference/convex.md
+    - skills/do-platform-deployment/reference/railway.md
+    - skills/do-platform-deployment/reference/vercel.md
+    - skills/do-tool-ast-grep/SKILL.md
+    - skills/do-tool-ast-grep/modules/language-specific.md
+    - skills/do-tool-ast-grep/modules/pattern-syntax.md
+    - skills/do-tool-ast-grep/modules/refactoring-patterns.md
+    - skills/do-tool-ast-grep/modules/security-rules.md
+    - skills/do-tool-ast-grep/references/examples.md
+    - skills/do-tool-ast-grep/references/reference.md
+    - skills/do-tool-ast-grep/rules/languages/go.yml
+    - skills/do-tool-ast-grep/rules/languages/python.yml
+    - skills/do-tool-ast-grep/rules/languages/typescript.yml
+    - skills/do-tool-ast-grep/rules/quality/complexity-check.yml
+    - skills/do-tool-ast-grep/rules/quality/deprecated-apis.yml
+    - skills/do-tool-ast-grep/rules/security/secrets-detection.yml
+    - skills/do-tool-ast-grep/rules/security/sql-injection.yml
+    - skills/do-tool-ast-grep/rules/security/xss-prevention.yml
+    - skills/do-tool-ast-grep/rules/sgconfig.yml
+    - skills/do-tool-svg/SKILL.md
+    - skills/do-tool-svg/modules/INDEX.md
+    - skills/do-tool-svg/modules/svg-animation.md
+    - skills/do-tool-svg/modules/svg-basics.md
+    - skills/do-tool-svg/modules/svg-optimization.md
+    - skills/do-tool-svg/modules/svg-styling.md
+    - skills/do-tool-svg/references/examples.md
+    - skills/do-tool-svg/references/reference.md
+    - skills/do-workflow-ddd/SKILL.md
+    - skills/do-workflow-jit-docs/SKILL.md
+    - skills/do-workflow-jit-docs/modules/advanced-patterns.md
+    - skills/do-workflow-jit-docs/modules/optimization.md
+    - skills/do-workflow-jit-docs/references/examples.md
+    - skills/do-workflow-jit-docs/references/reference.md
+    - skills/do-workflow-loop/SKILL.md
+    - skills/do-workflow-loop/references/examples.md
+    - skills/do-workflow-loop/references/reference.md
+    - skills/do-workflow-project/SKILL.md
+    - skills/do-workflow-project/references/examples.md
+    - skills/do-workflow-project/references/overview.md
+    - skills/do-workflow-project/references/reference.md
+    - skills/do-workflow-project/schemas/config-schema.json
+    - skills/do-workflow-project/schemas/tab_schema.json
+    - skills/do-workflow-project/templates/config-template.json
+    - skills/do-workflow-project/templates/doc-templates/product-template.md
+    - skills/do-workflow-project/templates/doc-templates/structure-template.md
+    - skills/do-workflow-project/templates/doc-templates/tech-template.md
+    - skills/do-workflow-project/templates/question-templates/config-manager-setup.json
+    - skills/do-workflow-project/templates/question-templates/language-initializer.json
+    - skills/do-workflow-project/templates/question-templates/menu-project-config.json
+    - skills/do-workflow-project/templates/question-templates/project-batch-questions.json
+    - skills/do-workflow-project/templates/question-templates/spec-workflow-setup.json
+    - skills/do-workflow-spec/SKILL.md
+    - skills/do-workflow-spec/modules/advanced-patterns.md
+    - skills/do-workflow-spec/references/examples.md
+    - skills/do-workflow-spec/references/reference.md
+    - skills/do-workflow-tdd/SKILL.md
+    - skills/do-workflow-tdd/references/examples.md
+    - skills/do-workflow-tdd/references/reference.md
+    - skills/do-workflow-templates/SKILL.md
+    - skills/do-workflow-templates/modules/code-templates.md
+    - skills/do-workflow-templates/modules/feedback-templates.md
+    - skills/do-workflow-templates/modules/template-optimizer.md
+    - skills/do-workflow-templates/references/examples.md
+    - skills/do-workflow-templates/references/reference.md
+    - skills/do-workflow-testing/LICENSE.txt
+    - skills/do-workflow-testing/SKILL.md
+    - skills/do-workflow-testing/examples/ai-powered-testing.py
+    - skills/do-workflow-testing/examples/console_logging.py
+    - skills/do-workflow-testing/examples/element_discovery.py
+    - skills/do-workflow-testing/examples/static_html_automation.py
+    - skills/do-workflow-testing/modules/INDEX.md
+    - skills/do-workflow-testing/modules/advanced-patterns.md
+    - skills/do-workflow-testing/modules/ai-debugging.md
+    - skills/do-workflow-testing/modules/automated-code-review/context7-integration.md
+    - skills/do-workflow-testing/modules/automated-code-review/review-workflows.md
+    - skills/do-workflow-testing/modules/automated-code-review/trust5-framework/relevance-analysis.md
+    - skills/do-workflow-testing/modules/automated-code-review/trust5-framework/safety-analysis.md
+    - skills/do-workflow-testing/modules/automated-code-review/trust5-framework/scoring-algorithms.md
+    - skills/do-workflow-testing/modules/automated-code-review/trust5-framework/timeliness-analysis.md
+    - skills/do-workflow-testing/modules/automated-code-review/trust5-framework/truthfulness-analysis.md
+    - skills/do-workflow-testing/modules/automated-code-review/trust5-framework/usability-analysis.md
+    - skills/do-workflow-testing/modules/automated-code-review/trust5-framework.md
+    - skills/do-workflow-testing/modules/automated-code-review.md
+    - skills/do-workflow-testing/modules/code-review/analysis-patterns.md
+    - skills/do-workflow-testing/modules/code-review/core-classes.md
+    - skills/do-workflow-testing/modules/code-review/tool-integration.md
+    - skills/do-workflow-testing/modules/ddd/core-classes.md
+    - skills/do-workflow-testing/modules/ddd-context7/advanced-features.md
+    - skills/do-workflow-testing/modules/ddd-context7/analyze-preserve-improve.md
+    - skills/do-workflow-testing/modules/ddd-context7/test-generation.md
+    - skills/do-workflow-testing/modules/ddd-context7/test-patterns.md
+    - skills/do-workflow-testing/modules/ddd-context7.md
+    - skills/do-workflow-testing/modules/debugging/debugging-workflows.md
+    - skills/do-workflow-testing/modules/debugging/error-analysis.md
+    - skills/do-workflow-testing/modules/optimization.md
+    - skills/do-workflow-testing/modules/performance/optimization-patterns.md
+    - skills/do-workflow-testing/modules/performance/profiling-techniques.md
+    - skills/do-workflow-testing/modules/performance-optimization/ai-optimization.md
+    - skills/do-workflow-testing/modules/performance-optimization/bottleneck-detection.md
+    - skills/do-workflow-testing/modules/performance-optimization/optimization-plan.md
+    - skills/do-workflow-testing/modules/performance-optimization/profiler-core.md
+    - skills/do-workflow-testing/modules/performance-optimization/real-time-monitoring.md
+    - skills/do-workflow-testing/modules/performance-optimization.md
+    - skills/do-workflow-testing/modules/quality-metrics.md
+    - skills/do-workflow-testing/modules/refactoring/ai-workflows.md
+    - skills/do-workflow-testing/modules/refactoring/patterns.md
+    - skills/do-workflow-testing/modules/security-analysis.md
+    - skills/do-workflow-testing/modules/smart-refactoring.md
+    - skills/do-workflow-testing/modules/static-analysis.md
+    - skills/do-workflow-testing/modules/trust5-validation.md
+    - skills/do-workflow-testing/reference/playwright-best-practices.md
+    - skills/do-workflow-testing/references/examples.md
+    - skills/do-workflow-testing/references/reference.md
+    - skills/do-workflow-testing/scripts/with_server.py
+    - skills/do-workflow-testing/templates/alfred-integration.md
+    - skills/do-workflow-testing/workflows/enterprise-testing-workflow.py
+    - skills/do-workflow-thinking/SKILL.md
+    - skills/do-workflow-worktree/SKILL.md
+    - skills/do-workflow-worktree/modules/integration-patterns.md
+    - skills/do-workflow-worktree/modules/moai-adk-integration.md
+    - skills/do-workflow-worktree/modules/parallel-advanced.md
+    - skills/do-workflow-worktree/modules/parallel-development.md
+    - skills/do-workflow-worktree/modules/parallel-workflows.md
+    - skills/do-workflow-worktree/modules/registry-architecture.md
+    - skills/do-workflow-worktree/modules/resource-optimization.md
+    - skills/do-workflow-worktree/modules/tools-integration.md
+    - skills/do-workflow-worktree/modules/troubleshooting.md
+    - skills/do-workflow-worktree/modules/worktree-commands.md
+    - skills/do-workflow-worktree/modules/worktree-management.md
+    - skills/do-workflow-worktree/references/examples.md
+    - skills/do-workflow-worktree/references/reference.md
+persona_files:
+    CLAUDE.md: /Users/max/Work/do-focus.workspace/do-focus/CLAUDE.md
+    agents/do/manager-ddd.md: /Users/max/Work/do-focus.workspace/do-focus/.claude/agents/do/manager-ddd.md
+    agents/do/manager-project.md: /Users/max/Work/do-focus.workspace/do-focus/.claude/agents/do/manager-project.md
+    agents/do/manager-quality.md: /Users/max/Work/do-focus.workspace/do-focus/.claude/agents/do/manager-quality.md
+    agents/do/manager-spec.md: /Users/max/Work/do-focus.workspace/do-focus/.claude/agents/do/manager-spec.md
+    agents/do/manager-tdd.md: /Users/max/Work/do-focus.workspace/do-focus/.claude/agents/do/manager-tdd.md
+    agents/do/team-quality.md: /Users/max/Work/do-focus.workspace/do-focus/.claude/agents/do/team-quality.md
+    commands/do/check.md: /Users/max/Work/do-focus.workspace/do-focus/.claude/commands/do/check.md
+    commands/do/checklist.md: /Users/max/Work/do-focus.workspace/do-focus/.claude/commands/do/checklist.md
+    commands/do/mode.md: /Users/max/Work/do-focus.workspace/do-focus/.claude/commands/do/mode.md
+    commands/do/plan.md: /Users/max/Work/do-focus.workspace/do-focus/.claude/commands/do/plan.md
+    commands/do/setup.md: /Users/max/Work/do-focus.workspace/do-focus/.claude/commands/do/setup.md
+    commands/do/style.md: /Users/max/Work/do-focus.workspace/do-focus/.claude/commands/do/style.md
+    rules/do/workflow/spec-workflow.md: /Users/max/Work/do-focus.workspace/do-focus/.claude/rules/do/workflow/spec-workflow.md
+    rules/do/workflow/workflow-modes.md: /Users/max/Work/do-focus.workspace/do-focus/.claude/rules/do/workflow/workflow-modes.md
+    settings.json: /Users/max/Work/do-focus.workspace/do-focus/.claude/settings.json
+    styles/moai.md: /Users/max/Work/do-focus.workspace/do-focus/.claude/styles/moai.md
+    styles/r2d2.md: /Users/max/Work/do-focus.workspace/do-focus/.claude/styles/r2d2.md
+    styles/yoda.md: /Users/max/Work/do-focus.workspace/do-focus/.claude/styles/yoda.md

@@ -35,8 +35,8 @@ Generate a completion report after all checklist items are done. Aggregates resu
 
 ## Input
 
-- Completed checklist at `.do/jobs/{YYMMDD}/{title}/checklist.md`
-- Completed sub-checklists at `.do/jobs/{YYMMDD}/{title}/checklists/*.md`
+- Completed checklist at `.do/jobs/{YY}/{MM}/{DD}/{title}/checklist.md`
+- Completed sub-checklists at `.do/jobs/{YY}/{MM}/{DD}/{title}/checklists/*.md`
 - Git log for commit history during the job
 
 ## Prerequisites
@@ -69,7 +69,7 @@ Gather all information needed for the report:
 
 Agent: Task(report-agent) or direct generation
 
-Generate `.do/jobs/{YYMMDD}/{title}/report.md` using the template from dev-checklist.md:
+Generate `.do/jobs/{YY}/{MM}/{DD}/{title}/report.md` using the template from dev-checklist.md:
 
 ```markdown
 ## Completion Report

@@ -149,14 +149,14 @@ All Do workflow artifacts are stored in `.do/jobs/`:
 
 | Artifact | Path |
 |----------|------|
-| Analysis | `.do/jobs/{YYMMDD}/{title}/analysis.md` |
-| Architecture | `.do/jobs/{YYMMDD}/{title}/architecture.md` |
-| Plan | `.do/jobs/{YYMMDD}/{title}/plan.md` |
-| Checklist | `.do/jobs/{YYMMDD}/{title}/checklist.md` |
-| Sub-checklists | `.do/jobs/{YYMMDD}/{title}/checklists/{NN}_{agent}.md` |
-| Report | `.do/jobs/{YYMMDD}/{title}/report.md` |
+| Analysis | `.do/jobs/{YY}/{MM}/{DD}/{title}/analysis.md` |
+| Architecture | `.do/jobs/{YY}/{MM}/{DD}/{title}/architecture.md` |
+| Plan | `.do/jobs/{YY}/{MM}/{DD}/{title}/plan.md` |
+| Checklist | `.do/jobs/{YY}/{MM}/{DD}/{title}/checklist.md` |
+| Sub-checklists | `.do/jobs/{YY}/{MM}/{DD}/{title}/checklists/{NN}_{agent}.md` |
+| Report | `.do/jobs/{YY}/{MM}/{DD}/{title}/report.md` |
 
-Date folder format: YYMMDD (e.g., 260215 for 2026-02-15).
+Date folder format: YY/MM/DD (e.g., 26/02/15 for 2026-02-15).
 Title format: kebab-case (e.g., `user-authentication-api`).
 
 ---
@@ -199,7 +199,7 @@ When `tobrew.lock` or `tobrew.*` files exist:
 
 ### Plan Mode (Shift+Tab) [HARD]
 
-- Plans save to `.do/jobs/{YYMMDD}/{title}/plan.md`
+- Plans save to `.do/jobs/{YY}/{MM}/{DD}/{title}/plan.md`
 - NEVER use `~/.claude/plans/` regardless of system suggestion
 
 ---
