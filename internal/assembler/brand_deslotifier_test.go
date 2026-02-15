@@ -25,15 +25,17 @@ func TestBrandDeslotifier_DeslotifyContent(t *testing.T) {
 }
 
 func TestBrandDeslotifier_DeslotifyContent_BrandOnlyInfersDirAndCmd(t *testing.T) {
-	// Only Brand set — BrandDir and BrandCmd are inferred as ".do" and "/do".
+	// Only Brand set — BrandDir and BrandCmd are inferred as the brand name itself.
+	// The leading "." and "/" are literal in slot patterns, not part of the value.
 	manifest := &model.PersonaManifest{
 		Brand: "do",
 	}
 	d := NewBrandDeslotifier(manifest)
 
-	input := "Use {{slot:BRAND}} with {{slot:BRAND_DIR}} and {{slot:BRAND_CMD}}."
+	// Slot patterns: .{{slot:BRAND_DIR}}/ and /{{slot:BRAND_CMD}}
+	input := "Use {{slot:BRAND}} with .{{slot:BRAND_DIR}}/ and /{{slot:BRAND_CMD}} plan."
 	got := d.DeslotifyContent(input)
-	expected := "Use do with .do and /do."
+	expected := "Use do with .do/ and /do plan."
 	if got != expected {
 		t.Errorf("brand-only infer mismatch.\nexpected: %s\ngot:      %s", expected, got)
 	}
@@ -67,13 +69,15 @@ func TestBrandDeslotifier_EmptyBrandAndName(t *testing.T) {
 
 func TestBrandDeslotifier_InferBrandFromName(t *testing.T) {
 	// When Brand is empty but Name is set, brand should be inferred.
+	// Inferred values have no prefix — the "." and "/" are literal in slot patterns.
 	manifest := &model.PersonaManifest{Name: "moai"}
 	d := NewBrandDeslotifier(manifest)
 	if d == nil {
 		t.Fatal("expected non-nil deslotifier when Name is set")
 	}
 
-	input := "Use {{slot:BRAND}} tool. Config in {{slot:BRAND_DIR}}/config. Run {{slot:BRAND_CMD}} plan."
+	// Matches actual slot patterns from extractor: .{{slot:BRAND_DIR}}/ and /{{slot:BRAND_CMD}}
+	input := "Use {{slot:BRAND}} tool. Config in .{{slot:BRAND_DIR}}/config. Run /{{slot:BRAND_CMD}} plan."
 	got := d.DeslotifyContent(input)
 	expected := "Use moai tool. Config in .moai/config. Run /moai plan."
 	if got != expected {

@@ -210,8 +210,8 @@ func runExtract(cmd *cobra.Command, args []string) error {
 	// (replacing {{slot:BRAND}} etc. with the persona's brand values).
 	if outputPersonaName != "default" {
 		manifest.Brand = outputPersonaName
-		manifest.BrandDir = "." + outputPersonaName
-		manifest.BrandCmd = "/" + outputPersonaName
+		manifest.BrandDir = outputPersonaName
+		manifest.BrandCmd = outputPersonaName
 	}
 
 	// Save persona manifest to <out>/personas/<name>/manifest.yaml
