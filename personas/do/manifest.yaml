@@ -6,6 +6,20 @@ brand_dir: do
 brand_cmd: do
 claude_md: CLAUDE.md
 
+# Character files (4 personas)
+characters:
+    - characters/young-f.md
+    - characters/young-m.md
+    - characters/senior-f.md
+    - characters/senior-m.md
+
+# Spinner verb definitions (per character)
+spinners:
+    - spinners/young-f.yaml
+    - spinners/young-m.yaml
+    - spinners/senior-f.yaml
+    - spinners/senior-m.yaml
+
 # Persona-specific agents (core agents are inherited automatically)
 agents:
     - agents/do/manager-ddd.md
@@ -30,11 +44,11 @@ rules:
     - rules/do/workflow/spec-workflow.md
     - rules/do/workflow/workflow-modes.md
 
-# Do-specific output styles
+# Output styles (3 styles)
 styles:
-    - output-styles/do/sprint.md
-    - output-styles/do/pair.md
-    - output-styles/do/direct.md
+    - styles/sprint.md
+    - styles/pair.md
+    - styles/direct.md
 
 # Do-specific commands
 commands:
