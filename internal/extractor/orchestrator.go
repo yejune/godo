@@ -173,6 +173,11 @@ func (o *ExtractorOrchestrator) Extract(srcDir string) (*template.Registry, *mod
 		}
 	}
 
+	// Auto-detect persona name from directory structure if not already set.
+	if merged.Name == "" {
+		merged.Name = detectPersonaName(merged.PersonaFiles)
+	}
+
 	return registry, merged, nil
 }
 
@@ -378,4 +383,67 @@ func extractSlotID(content string) string {
 	}
 
 	return strings.TrimSpace(rest[:endIdx])
+}
+
+// personaDirs lists the top-level directories that may contain persona subdirectories.
+var personaDirs = map[string]bool{
+	"agents":       true,
+	"hooks":        true,
+	"commands":     true,
+	"skills":       true,
+	"rules":        true,
+	"styles":       true,
+	"output-styles": true,
+}
+
+// detectPersonaName scans persona file relative paths to find the most common
+// first-level subdirectory name under known top-level directories (agents/, hooks/,
+// commands/, etc.). For example, given paths like "agents/moai/manager-spec.md" and
+// "hooks/moai/pre-tool.sh", the common subdirectory "moai" is returned.
+// Returns empty string if no common subdirectory is found.
+func detectPersonaName(personaFiles map[string]string) string {
+	// Count how many top-level dirs each subdirectory name appears under.
+	// e.g., "moai" -> {"agents": true, "hooks": true, "commands": true}
+	subDirTopDirs := make(map[string]map[string]bool)
+
+	for relPath := range personaFiles {
+		normalized := filepath.ToSlash(relPath)
+		parts := strings.Split(normalized, "/")
+		// Need at least 3 parts: topDir/subDir/file (e.g., agents/moai/spec.md)
+		if len(parts) < 3 {
+			continue
+		}
+
+		topDir := parts[0]
+		if !personaDirs[topDir] {
+			continue
+		}
+
+		subDir := parts[1]
+		if subDirTopDirs[subDir] == nil {
+			subDirTopDirs[subDir] = make(map[string]bool)
+		}
+		subDirTopDirs[subDir][topDir] = true
+	}
+
+	if len(subDirTopDirs) == 0 {
+		return ""
+	}
+
+	// Find the subdirectory name that appears under the most top-level dirs.
+	var bestName string
+	bestCount := 0
+	for name, topDirs := range subDirTopDirs {
+		if len(topDirs) > bestCount {
+			bestCount = len(topDirs)
+			bestName = name
+		}
+	}
+
+	// Require at least 2 top-level dirs to be confident this is a persona name.
+	if bestCount < 2 {
+		return ""
+	}
+
+	return bestName
 }

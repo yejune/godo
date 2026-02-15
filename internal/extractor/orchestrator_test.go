@@ -587,3 +587,83 @@ func min(a, b int) int {
 	}
 	return b
 }
+
+func TestDetectPersonaName(t *testing.T) {
+	tests := []struct {
+		name         string
+		personaFiles map[string]string
+		want         string
+	}{
+		{
+			name:         "empty map",
+			personaFiles: map[string]string{},
+			want:         "",
+		},
+		{
+			name: "moai persona across multiple dirs",
+			personaFiles: map[string]string{
+				"agents/moai/manager-spec.md": "/abs/agents/moai/manager-spec.md",
+				"agents/moai/manager-ddd.md":  "/abs/agents/moai/manager-ddd.md",
+				"hooks/moai/pre-tool.sh":      "/abs/hooks/moai/pre-tool.sh",
+				"commands/moai/plan.md":        "/abs/commands/moai/plan.md",
+				"output-styles/moai/pair.md":   "/abs/output-styles/moai/pair.md",
+				"skills/moai-workflow-ddd.md":  "/abs/skills/moai-workflow-ddd.md", // only 2 parts, ignored
+				"settings.json":               "/abs/settings.json",               // no subdir, ignored
+				"CLAUDE.md":                    "/abs/CLAUDE.md",                   // no subdir, ignored
+			},
+			want: "moai",
+		},
+		{
+			name: "single top-level dir not enough",
+			personaFiles: map[string]string{
+				"agents/custom/agent.md": "/abs/agents/custom/agent.md",
+				"CLAUDE.md":             "/abs/CLAUDE.md",
+			},
+			want: "", // only 1 top-level dir, need at least 2
+		},
+		{
+			name: "two top-level dirs is enough",
+			personaFiles: map[string]string{
+				"agents/mypersona/agent.md":  "/abs/agents/mypersona/agent.md",
+				"hooks/mypersona/hook.sh":    "/abs/hooks/mypersona/hook.sh",
+			},
+			want: "mypersona",
+		},
+		{
+			name: "picks most common subdirectory",
+			personaFiles: map[string]string{
+				"agents/alpha/a.md":        "/abs/agents/alpha/a.md",
+				"hooks/alpha/h.sh":         "/abs/hooks/alpha/h.sh",
+				"commands/alpha/c.md":      "/abs/commands/alpha/c.md",
+				"agents/beta/b.md":         "/abs/agents/beta/b.md",
+				"hooks/beta/h.sh":          "/abs/hooks/beta/h.sh",
+			},
+			want: "alpha", // alpha appears in 3 top dirs, beta in 2
+		},
+		{
+			name: "non-persona top dirs are ignored",
+			personaFiles: map[string]string{
+				"docs/custom/readme.md":   "/abs/docs/custom/readme.md",
+				"config/custom/app.yaml":  "/abs/config/custom/app.yaml",
+			},
+			want: "", // docs and config are not in personaDirs
+		},
+		{
+			name: "rules subdir counted",
+			personaFiles: map[string]string{
+				"rules/do/workflow/spec.md":  "/abs/rules/do/workflow/spec.md",
+				"agents/do/manager.md":       "/abs/agents/do/manager.md",
+			},
+			want: "do", // "do" appears under rules and agents
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := detectPersonaName(tt.personaFiles)
+			if got != tt.want {
+				t.Errorf("detectPersonaName() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
