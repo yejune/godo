@@ -30,6 +30,82 @@ func TestSkillExtractor_WholeFilePersona(t *testing.T) {
 	}
 }
 
+
+
+func TestSkillExtractor_WholeDirectoryPersona(t *testing.T) {
+	reg := detector.NewDefaultRegistry()
+	ext := NewSkillExtractor(reg)
+
+	tests := []struct {
+		name string
+		path string
+		frontmatterName string
+	}{
+		{
+			name: "moai SKILL.md",
+			path: "skills/moai/SKILL.md",
+			frontmatterName: "moai",
+		},
+		{
+			name: "moai workflow plan",
+			path: "skills/moai/workflows/plan.md",
+			frontmatterName: "moai-workflow-plan",
+		},
+		{
+			name: "moai workflow run",
+			path: "skills/moai/workflows/run.md",
+			frontmatterName: "moai-workflow-run",
+		},
+		{
+			name: "moai workflow sync",
+			path: "skills/moai/workflows/sync.md",
+			frontmatterName: "moai-workflow-sync",
+		},
+		{
+			name: "moai workflow moai",
+			path: "skills/moai/workflows/moai.md",
+			frontmatterName: "moai-workflow-moai",
+		},
+		{
+			name: "moai workflow feedback",
+			path: "skills/moai/workflows/feedback.md",
+			frontmatterName: "moai-workflow-feedback",
+		},
+		{
+			name: "moai references",
+			path: "skills/moai/references/reference.md",
+			frontmatterName: "moai-reference",
+		},
+		{
+			name: "moai team workflow",
+			path: "skills/moai/moai-workflow-team/SKILL.md",
+			frontmatterName: "moai-workflow-team",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			doc := &model.Document{
+				Path: tt.path,
+				Frontmatter: &model.Frontmatter{
+					Name: tt.frontmatterName,
+				},
+			}
+
+			coreDoc, manifest, err := ext.Extract(doc)
+			if err \!= nil {
+				t.Fatalf("Extract() error: %v", err)
+			}
+			if coreDoc \!= nil {
+				t.Errorf("expected nil coreDoc for whole-directory persona skill at %s", tt.path)
+			}
+			if len(manifest.Skills) \!= 1 || manifest.Skills[0] \!= tt.path {
+				t.Errorf("manifest.Skills = %v, want [%q]", manifest.Skills, tt.path)
+			}
+		})
+	}
+}
+
 func TestSkillExtractor_CoreSkill(t *testing.T) {
 	reg := detector.NewDefaultRegistry()
 	ext := NewSkillExtractor(reg)

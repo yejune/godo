@@ -237,6 +237,29 @@ func TestIsWholeFilePersonaSkill(t *testing.T) {
 	}
 }
 
+
+
+func TestIsWholeFilePersonaSkillDir(t *testing.T) {
+	reg := NewDefaultRegistry()
+
+	positives := []string{"moai"}
+	for _, name := range positives {
+		if !reg.IsWholeFilePersonaSkillDir(name) {
+			t.Errorf("IsWholeFilePersonaSkillDir(%q) = false, want true", name)
+		}
+	}
+
+	negatives := []string{
+		"do-foundation-claude", "moai-workflow-testing",
+		"moai-foundation-core", "",
+	}
+	for _, name := range negatives {
+		if reg.IsWholeFilePersonaSkillDir(name) {
+			t.Errorf("IsWholeFilePersonaSkillDir(%q) = true, want false", name)
+		}
+	}
+}
+
 func TestIsWholeFilePersonaRule(t *testing.T) {
 	reg := NewDefaultRegistry()
 

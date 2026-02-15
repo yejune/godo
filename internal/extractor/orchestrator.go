@@ -119,7 +119,10 @@ func (o *ExtractorOrchestrator) Extract(srcDir string) (*template.Registry, *mod
 			// Non-markdown files in known directories (e.g., .yml, .json, .py, .sh in skills/).
 			// Classify as core or persona based on parent skill directory and module patterns.
 			skillName := extractSkillDirName(relPath)
-			if skillName != "" && o.registry.IsWholeFilePersonaSkill(skillName) {
+			if skillName != "" && o.registry.IsWholeFilePersonaSkillDir(skillName) {
+				// Whole-directory persona skill: all assets are persona.
+				merged.PersonaFiles[relPath] = path
+			} else if skillName != "" && o.registry.IsWholeFilePersonaSkill(skillName) {
 				// Whole-file persona skill: all assets are persona.
 				merged.PersonaFiles[relPath] = path
 			} else if skillName != "" && o.registry.IsPartialSkill(skillName) {

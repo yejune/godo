@@ -31,6 +31,7 @@ type PatternRegistry struct {
 	PartialSkillPatterns []PartialSkillPattern  // Skills with module-level persona classification
 	WholeFileAgents      []string               // agent names that are 100% persona
 	WholeFileSkills      []string               // skill names that are 100% persona
+	WholeFileSkillDirs   []string               // skill directory names where ALL contents are persona
 	WholeFileRules       []string               // rule files that are 100% persona
 }
 
@@ -158,6 +159,9 @@ func NewDefaultRegistry() *PatternRegistry {
 			"moai-workflow-spec",
 			"moai-workflow-project",
 		},
+		WholeFileSkillDirs: []string{
+			"moai", // skills/moai/ and all subdirectories (workflows/, references/, etc.)
+		},
 		WholeFileRules: []string{
 			"spec-workflow.md",
 			"workflow-modes.md",
@@ -181,6 +185,18 @@ func (r *PatternRegistry) IsWholeFilePersonaAgent(name string) bool {
 func (r *PatternRegistry) IsWholeFilePersonaSkill(name string) bool {
 	for _, s := range r.WholeFileSkills {
 		if s == name {
+			return true
+		}
+	}
+	return false
+}
+
+// IsWholeFilePersonaSkillDir returns true if the given skill directory name
+// is a whole-directory persona skill dir. All files under skills/<dirName>/
+// (including subdirectories) should be moved entirely to persona output.
+func (r *PatternRegistry) IsWholeFilePersonaSkillDir(dirName string) bool {
+	for _, d := range r.WholeFileSkillDirs {
+		if d == dirName {
 			return true
 		}
 	}

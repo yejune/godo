@@ -35,7 +35,15 @@ func (e *SkillExtractor) Extract(doc *model.Document) (*model.Document, *model.P
 		SlotContent: make(map[string]string),
 	}
 
-	// Check whole-file persona first (by frontmatter name).
+	// Check whole-directory persona first (by file path).
+	// All files under skills/<personaDir>/ are persona regardless of frontmatter name.
+	skillDir := extractSkillName(doc.Path)
+	if skillDir != "" && e.registry.IsWholeFilePersonaSkillDir(skillDir) {
+		manifest.Skills = append(manifest.Skills, doc.Path)
+		return nil, manifest, nil
+	}
+
+	// Check whole-file persona by frontmatter name.
 	if doc.Frontmatter != nil && e.registry.IsWholeFilePersonaSkill(doc.Frontmatter.Name) {
 		manifest.Skills = append(manifest.Skills, doc.Path)
 		return nil, manifest, nil
