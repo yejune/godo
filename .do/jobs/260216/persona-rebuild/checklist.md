@@ -107,6 +107,43 @@
   - 서브: checklists/05_style-cleanup.md
   - depends on: #7, #8, #9, #10, #14, #15, #16
 
+- [ ] #18 Phase 6a: manager-ddd.md, manager-tdd.md 에이전트 정의 Do 철학 반영 (2파일)
+  - 담당: expert-backend
+  - 서브: checklists/06_agents-philosophy.md
+  - 파일: agents/do/manager-ddd.md, agents/do/manager-tdd.md
+
+- [ ] #19 Phase 6b: manager-quality.md, manager-project.md, team-quality.md Do 철학 반영 (3파일)
+  - 담당: expert-backend
+  - 서브: checklists/06_agents-philosophy.md
+  - 파일: agents/do/manager-quality.md, agents/do/manager-project.md, agents/do/team-quality.md
+  - depends on: #18 (일관된 패턴 확립 후)
+
+- [ ] #20 Phase 7: rules/ 개발 규칙 갱신 (2파일)
+  - 담당: expert-backend
+  - 서브: checklists/07_rules-update.md
+  - 파일: rules/do/workflow/spec-workflow.md, rules/do/workflow/workflow-modes.md
+
+- [ ] #21 Phase 8a: SKILL.md + reference.md 스킬 철학 반영 (2파일)
+  - 담당: expert-backend
+  - 서브: checklists/08_skills-philosophy.md
+  - 파일: skills/do/SKILL.md, skills/do/references/reference.md
+
+- [ ] #22 Phase 8b: workflows/ 스킬 파일 Do 철학 반영 (6파일)
+  - 담당: expert-backend
+  - 서브: checklists/08_skills-philosophy.md
+  - 파일: skills/do/workflows/do.md, team-do.md, report.md, run.md, plan.md, test.md
+  - depends on: #21 (SKILL.md 패턴 확립 후)
+
+- [ ] #23 Phase 9: commands/ 확인 및 갱신 (5파일)
+  - 담당: expert-backend
+  - 서브: checklists/09_commands-update.md
+  - 파일: commands/do/setup.md, style.md, mode.md, checklist.md, plan.md
+
+- [ ] #24 Phase 6-9 전체 검증: MoAI 잔재 최종 grep
+  - 담당: expert-testing
+  - 서브: checklists/09_commands-update.md
+  - depends on: #18, #19, #20, #21, #22, #23
+
 ---
 
 ## 병렬 실행 가능 그룹
@@ -123,6 +160,21 @@
 ### Group D: Phase 5 (#3 완료 후, Group B/C와 병렬)
 (#14, #15, #16 병렬) → #17
 
+### Group E: Phase 6 (Group A-D와 독립, 병렬 가능)
+#18 → #19
+
+### Group F: Phase 7 (Group A-D와 독립, 병렬 가능)
+#20
+
+### Group G: Phase 8 (Group A-D와 독립, 병렬 가능)
+#21 → #22
+
+### Group H: Phase 9 (Group A-D와 독립, 병렬 가능)
+#23
+
+### Group I: Phase 6-9 최종 검증
+#24 (depends on: #18-#23 전체 완료)
+
 ---
 
 ## 상태 요약
@@ -134,3 +186,7 @@
 | Phase 3 (Hook 연결) | #7, #8, #9, #10 | [ ] |
 | Phase 4 (convert 도구) | #11, #12, #13 | [ ] |
 | Phase 5 (스타일 정리) | #14, #15, #16, #17 | [ ] |
+| Phase 6 (agents 철학 반영) | #18, #19 | [ ] |
+| Phase 7 (rules 갱신) | #20 | [ ] |
+| Phase 8 (skills 철학 반영) | #21, #22 | [ ] |
+| Phase 9 (commands 갱신) | #23, #24 | [ ] |

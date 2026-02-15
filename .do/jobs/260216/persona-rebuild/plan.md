@@ -23,7 +23,7 @@ Architecture 문서의 Approach C (Hybrid: File-First with Embedded Fallback)를
 
 ---
 
-## 5-Phase Implementation
+## 9-Phase Implementation
 
 ### Phase 1: 페르소나 파일 생성 (하드코딩에서 추출)
 
@@ -160,11 +160,102 @@ Phase 1 (파일 생성)
   │     └── Phase 3 (Hook 연결) depends on Phase 2
   ├── Phase 4 (convert 도구) depends on Phase 1 (병렬 가능 with Phase 2/3)
   └── Phase 5 (스타일 정리) depends on Phase 1
+
+Phase 6 (agents 철학 반영) — 독립 (Phase 1-5와 병렬 가능)
+Phase 7 (rules 갱신) — 독립 (Phase 1-5와 병렬 가능)
+Phase 8 (skills 철학 반영) — 독립 (Phase 1-5와 병렬 가능)
+Phase 9 (commands 갱신) — 독립 (Phase 1-5와 병렬 가능)
 ```
 
 Phase 2와 Phase 4는 Phase 1 완료 후 **병렬 실행 가능**.
 Phase 5는 Phase 1 완료 후 **병렬 실행 가능**.
 Phase 3은 Phase 2 완료 후에만 진행.
+Phase 6-9는 Phase 1-5와 **완전 독립** — 다른 파일셋이므로 병렬 실행 가능.
+
+### Phase 6: agents/do/ 에이전트 정의 철학 반영
+
+**목적**: 에이전트 정의 파일을 Do 철학에 맞게 갱신 — MoAI 잔재 제거, Do 체크리스트 기반 워크플로우 반영
+
+**작업 내용**:
+- 5개 에이전트 파일을 Do 철학에 맞게 재작성
+- plan-mode artifact writing rule 반영 (플랜 산출물 위치 규칙)
+- MoAI 잔재 제거 (TRUST 5, SPEC, EARS, MoAI 설정 경로 등)
+- Do 체크리스트 기반 워크플로우 반영 (살아있는 체크리스트, 커밋 기반 증명)
+
+**변경 파일**: 5개 (manager-ddd.md, manager-tdd.md, team-quality.md, manager-quality.md, manager-project.md)
+**의존성**: 없음 (Phase 1-5와 다른 파일셋이므로 병렬 가능)
+**검증**: MoAI 용어 grep으로 잔재 없음 확인, 에이전트 정의 구문 검증
+
+### Phase 7: rules/ 개발 규칙 갱신
+
+**목적**: 개발 규칙 파일을 Do 철학에 맞게 갱신 — 커밋 기반 증명, 살아있는 체크리스트, 멱등성 규칙 반영
+
+**작업 내용**:
+- 2개 규칙 파일을 Do 철학에 맞게 재작성
+- MoAI 특유 용어/개념 제거 (SPEC, EARS, MoAI config 경로 등)
+- Do 워크플로우 규칙 반영 (Plan → Checklist → Develop → Test → Report)
+
+**변경 파일**: 2개 (spec-workflow.md, workflow-modes.md)
+**의존성**: 없음 (Phase 1-5와 다른 파일셋이므로 병렬 가능)
+**검증**: MoAI 용어 grep으로 잔재 없음 확인
+
+### Phase 8: skills/do/ 스킬 철학 반영
+
+**목적**: 스킬 파일을 Do 철학에 맞게 갱신 — Progressive Disclosure 채택, MoAI 잔재 제거
+
+**작업 내용**:
+- 8개 스킬 파일을 Do 철학에 맞게 재작성
+- Progressive Disclosure 패턴 반영
+- MoAI 잔재 제거 (TRUST 5, SPEC, XML 마커 등)
+
+**변경 파일**: 8개 (SKILL.md, references/reference.md, workflows/do.md, workflows/team-do.md, workflows/report.md, workflows/run.md, workflows/plan.md, workflows/test.md)
+**의존성**: 없음 (Phase 1-5와 다른 파일셋이므로 병렬 가능)
+**검증**: MoAI 용어 grep으로 잔재 없음 확인, 스킬 YAML frontmatter 파싱 가능 여부 확인
+
+### Phase 9: commands/ 확인 및 갱신
+
+**목적**: 명령 파일을 Do 워크플로우에 맞게 갱신
+
+**작업 내용**:
+- 5개 커맨드 파일을 확인하고 Do 워크플로우에 맞게 갱신
+- MoAI 잔재 제거 (필요시)
+- Do 워크플로우 반영 (Plan → Checklist → Develop 등)
+
+**변경 파일**: 5개 (setup.md, style.md, mode.md, checklist.md, plan.md)
+**의존성**: 없음 (Phase 1-5와 다른 파일셋이므로 병렬 가능)
+**검증**: MoAI 용어 grep으로 잔재 없음 확인, 커맨드 구문 검증
+
+---
+
+## File Impact Summary (Phase 6-9)
+
+### 수정 (Phase 6 — agents)
+- `personas/do/agents/do/manager-ddd.md`
+- `personas/do/agents/do/manager-tdd.md`
+- `personas/do/agents/do/team-quality.md`
+- `personas/do/agents/do/manager-quality.md`
+- `personas/do/agents/do/manager-project.md`
+
+### 수정 (Phase 7 — rules)
+- `personas/do/rules/do/workflow/spec-workflow.md`
+- `personas/do/rules/do/workflow/workflow-modes.md`
+
+### 수정 (Phase 8 — skills)
+- `personas/do/skills/do/SKILL.md`
+- `personas/do/skills/do/references/reference.md`
+- `personas/do/skills/do/workflows/do.md`
+- `personas/do/skills/do/workflows/team-do.md`
+- `personas/do/skills/do/workflows/report.md`
+- `personas/do/skills/do/workflows/run.md`
+- `personas/do/skills/do/workflows/plan.md`
+- `personas/do/skills/do/workflows/test.md`
+
+### 수정 (Phase 9 — commands)
+- `personas/do/commands/do/setup.md`
+- `personas/do/commands/do/style.md`
+- `personas/do/commands/do/mode.md`
+- `personas/do/commands/do/checklist.md`
+- `personas/do/commands/do/plan.md`
 
 ---
 
