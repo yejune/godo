@@ -633,6 +633,28 @@ Focus 모드는 가시성 문제에서 탄생했다: 서브에이전트 실행�
 
 **결정**: 당분간 3모드 모두 유지하되, Focus의 필요성은 약해졌다. Agent Teams가 성숙해짐에 따라 간소화 추세이며, 잠재적으로 2모드 시스템(Do/Team)으로 통합될 수 있다.
 
+### 7.4 Plan 모드 산출물 멱등성 규칙
+
+Do의 plan 단계 에이전트(researcher, analyst, architect)는 `permissionMode: plan`(읽기전용)으로 실행된다. 하지만 조사 결과는 반드시 **파일로 남겨야** 멱등성이 보장된다.
+
+**문제**: Write/Edit 도구가 plan 모드에서 차단됨 → 조사 결과가 메시지로만 존재 → 세션 종료 시 소멸
+
+**해결**: Bash heredoc으로 `.do/jobs/` 디렉토리에 산출물 작성
+
+```
+permissionMode: plan
+├── Write/Edit 도구 → 차단 (소스코드 보호)
+└── Bash heredoc → 허용 (.do/jobs/ 산출물 작성)
+```
+
+**규칙**:
+1. plan 모드 에이전트는 Write/Edit 대신 Bash heredoc으로 `.do/jobs/` 디렉토리에만 산출물을 작성한다
+2. 소스코드 수정은 Bash로도 금지 — `.do/jobs/`에 새 파일 생성만 허용
+3. 산출물은 메시지가 아닌 파일이 정본(source of truth)
+4. 파일이 있으므로 세션 중단 후 다음 에이전트가 파일을 읽고 이어받기 가능 (멱등)
+
+**MoAI와의 차이**: MoAI는 plan 단계 결과를 메시지로 전달하고 리더가 SPEC 문서로 종합한다(2단계). Do는 각 에이전트가 직접 파일을 남겨 1단계로 완결하며, 이는 커밋 기반 증명 철학의 연장이다.
+
 ---
 
 ## 8. Hook 아키텍처와 Tool Matching
@@ -1112,6 +1134,7 @@ MoAI는 Do의 삼원 모드 시스템을 채택할 수 있다(구조적 기능�
 | **서브 체크리스트** | 에이전트별 자체 완결적 작업 지시서. 사전(Problem, Criteria, Strategy) → 실행(Progress Log) → 사후(Commit, Lessons) 3단계 구조 |
 | **피드백 루프** | Lessons Learned에서 개선사항 발견 시 새 서브 체크리스트 생성 → 메인 체크리스트 갱신 → 재개발하는 순환 구조 |
 | **파일 소유권** | 팀 모드에서 각 에이전트가 수정 가능한 파일 범위. Critical Files 섹션이 경계를 정의 |
+| **멱등성 (Idempotency)** | 같은 작업을 여러 번 실행해도 동일한 결과를 보장하는 성질. Do에서는 체크리스트와 파일 산출물이 이를 보장한다 |
 
 ### 기술 용어
 
