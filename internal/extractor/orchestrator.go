@@ -21,6 +21,22 @@ var skipDirs = map[string]bool{
 	"__pycache__":  true,
 }
 
+// isSkillTemplateDir returns true if the given path (relative to srcDir) is a
+// templates/ directory inside a skill. These contain runtime-only files with
+// project variables (e.g., {{PRIMARY_USERS}}, {{ timestamp }}) that belong to
+// the moai runtime workflow, not to persona/core distribution.
+//
+// Matches paths like: skills/<skill-name>/templates
+func isSkillTemplateDir(relPath string) bool {
+	normalized := filepath.ToSlash(relPath)
+	parts := strings.Split(normalized, "/")
+	// Match: skills/<name>/templates (exactly 3 parts when walking into the dir)
+	if len(parts) >= 3 && parts[0] == "skills" && parts[2] == "templates" {
+		return true
+	}
+	return false
+}
+
 // fileType classifies a file path into a known extractor category.
 type fileType int
 
@@ -83,6 +99,13 @@ func (o *ExtractorOrchestrator) Extract(srcDir string) (*template.Registry, *mod
 		// Skip irrelevant directories
 		if info.IsDir() {
 			if skipDirs[info.Name()] {
+				return filepath.SkipDir
+			}
+			// Skip skill template directories (doc-templates, question-templates, etc.)
+			// These contain runtime-only files with project variables that should not
+			// be distributed via convert.
+			dirRelPath, _ := filepath.Rel(srcDir, path)
+			if dirRelPath != "" && isSkillTemplateDir(filepath.ToSlash(dirRelPath)) {
 				return filepath.SkipDir
 			}
 			return nil
