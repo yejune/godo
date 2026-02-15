@@ -70,7 +70,12 @@ output/
     ├── manifest.yaml              # Persona manifest (assets, slots, patches)
     ├── agents/                    # Persona-only agents
     ├── skills/                    # Persona-only skills
-    ├── rules/                     # Persona-only rules
+    ├── rules/                     # Persona-only rules + development rules
+    │   ├── dev-checklist.md       #   Checklist system, 6-state transitions, commit-as-proof
+    │   ├── dev-workflow.md        #   Workflow orchestration, complexity gates, commit discipline
+    │   ├── dev-testing.md         #   AI anti-patterns, Real DB only, FIRST principles
+    │   ├── dev-environment.md     #   Docker-first, bootapp domains, .env prohibition
+    │   └── file-reading.md        #   Progressive file loading, token budget awareness
     ├── commands/                  # Persona slash commands
     ├── hooks/                     # Persona hook scripts
     └── CLAUDE.md                  # Persona CLAUDE.md
@@ -100,6 +105,20 @@ convert assemble --core ./output/core --persona ./output/personas/moai/manifest.
 4. Apply skill name mappings across all agent files
 5. Merge settings.json (core base + persona overrides)
 6. Copy persona CLAUDE.md
+
+## Development Rules
+
+The persona package includes 5 development rules (`dev-*.md` and `file-reading.md`) that enforce Do's core development philosophy. These are not optional extras -- they are the operational backbone that makes the persona's workflow system function.
+
+| Rule file | What it enforces |
+|-----------|-----------------|
+| `dev-checklist.md` | 6-state checklist transitions, sub-checklist templates, commit hash as completion proof |
+| `dev-workflow.md` | Complexity-based workflow selection, Analysis/Architecture gates, Read Before Write, retry discipline |
+| `dev-testing.md` | 7 AI anti-patterns (assertion weakening, test deletion, etc.), Real DB only, mutation testing mindset |
+| `dev-environment.md` | Docker-first with bootapp domains, `.env` prohibition, container-only execution, 12-Factor principles |
+| `file-reading.md` | 4-tier progressive file loading by size, Grep-first strategy, token budget awareness |
+
+Without these rules, the persona's checklist system loses its state transition enforcement, the testing philosophy has no concrete prohibitions, and commit discipline becomes an unenforced suggestion. A persona package missing these files will produce a `.claude/` directory that declares a workflow but cannot enforce it.
 
 ## Classification Rules
 
