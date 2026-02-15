@@ -133,7 +133,8 @@ func (a *Assembler) applyAgentPatches(merger *Merger, result *AssembleResult) er
 }
 
 // copyPersonaFiles copies persona-only files (agents, skills, rules, styles,
-// commands, hook scripts) to the output directory.
+// commands, hook scripts) and any additional persona assets (scripts, templates,
+// schemas, etc.) to the output directory.
 func (a *Assembler) copyPersonaFiles(merger *Merger, result *AssembleResult) error {
 	if a.manifest == nil {
 		return nil
@@ -148,12 +149,41 @@ func (a *Assembler) copyPersonaFiles(merger *Merger, result *AssembleResult) err
 	files = append(files, a.manifest.Commands...)
 	files = append(files, a.manifest.HookScripts...)
 
+	// Track which files are already handled via the named slices.
+	handled := make(map[string]bool, len(files))
+	for _, relPath := range files {
+		handled[relPath] = true
+	}
+
 	for _, relPath := range files {
 		if _, err := merger.CopyPersonaFile(relPath); err != nil {
 			// Check if file was already written by core copy (skip duplicate).
 			if strings.Contains(err.Error(), "read persona file") {
 				result.Warnings = append(result.Warnings,
 					fmt.Sprintf("persona file %q not found, skipping", relPath))
+				continue
+			}
+			return err
+		}
+		result.FilesWritten++
+		result.Files = append(result.Files, relPath)
+	}
+
+	// Copy additional persona assets from PersonaFiles that aren't in named
+	// slices (e.g., scripts/, templates/, schemas/ inside skill directories).
+	// Also skip special files handled by other assembly steps.
+	for relPath := range a.manifest.PersonaFiles {
+		if handled[relPath] {
+			continue
+		}
+		// Skip files handled by other steps (settings.json, CLAUDE.md).
+		if relPath == "settings.json" || relPath == a.manifest.ClaudeMD {
+			continue
+		}
+		if _, err := merger.CopyPersonaFile(relPath); err != nil {
+			if strings.Contains(err.Error(), "read persona file") {
+				result.Warnings = append(result.Warnings,
+					fmt.Sprintf("persona asset %q not found, skipping", relPath))
 				continue
 			}
 			return err
