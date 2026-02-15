@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -9,7 +10,6 @@ import (
 
 	"github.com/do-focus/convert/internal/detector"
 	"github.com/do-focus/convert/internal/extractor"
-	"github.com/do-focus/convert/internal/model"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
@@ -154,6 +154,17 @@ func runExtract(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("save core templates: %w", err)
 	}
 
+	// Copy core files to <out>/core/
+	coreFileCount := 0
+	for _, relPath := range manifest.CoreFiles {
+		src := filepath.Join(manifest.SourceDir, relPath)
+		dst := filepath.Join(coreDir, relPath)
+		if err := copyFile(src, dst); err != nil {
+			return fmt.Errorf("copy core file %s: %w", relPath, err)
+		}
+		coreFileCount++
+	}
+
 	// Determine persona name
 	personaName := extractPersona
 	if personaName == "" {
@@ -179,22 +190,51 @@ func runExtract(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("write persona manifest %s: %w", manifestPath, err)
 	}
 
+	// Copy persona files to <out>/personas/<name>/
+	personaFileCount := 0
+	for relPath, srcPath := range manifest.PersonaFiles {
+		dst := filepath.Join(personaDir, relPath)
+		if err := copyFile(srcPath, dst); err != nil {
+			return fmt.Errorf("copy persona file %s: %w", relPath, err)
+		}
+		personaFileCount++
+	}
+
 	// Print summary
-	slotCount := len(registry.Slots)
-	personaFiles := countPersonaFiles(manifest)
-	fmt.Fprintf(cmd.OutOrStdout(), "Extraction complete: %d core slots, %d persona files extracted\n", slotCount, personaFiles)
-	fmt.Fprintf(cmd.OutOrStdout(), "  Core:    %s\n", coreDir)
-	fmt.Fprintf(cmd.OutOrStdout(), "  Persona: %s\n", personaDir)
+	fmt.Fprintf(cmd.OutOrStdout(), "Extracted %d core files, %d persona files to %s\n", coreFileCount, personaFileCount, extractOut)
+	fmt.Fprintf(cmd.OutOrStdout(), "  Core:    %s (%d files + registry.yaml)\n", coreDir, coreFileCount)
+	fmt.Fprintf(cmd.OutOrStdout(), "  Persona: %s (%d files + manifest.yaml)\n", personaDir, personaFileCount)
 
 	return nil
 }
 
-// countPersonaFiles counts the total number of persona asset references in a manifest.
-func countPersonaFiles(m *model.PersonaManifest) int {
-	n := len(m.Agents) + len(m.Skills) + len(m.Rules) + len(m.Styles) +
-		len(m.Commands) + len(m.HookScripts) + len(m.SlotContent) + len(m.AgentPatches)
-	if m.ClaudeMD != "" {
-		n++
+// copyFile copies a file from src to dst, preserving the source file's permissions.
+// Parent directories are created as needed.
+func copyFile(src, dst string) error {
+	srcFile, err := os.Open(src)
+	if err != nil {
+		return fmt.Errorf("open source %s: %w", src, err)
 	}
-	return n
+	defer srcFile.Close()
+
+	srcInfo, err := srcFile.Stat()
+	if err != nil {
+		return fmt.Errorf("stat source %s: %w", src, err)
+	}
+
+	if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
+		return fmt.Errorf("create parent dir for %s: %w", dst, err)
+	}
+
+	dstFile, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, srcInfo.Mode().Perm())
+	if err != nil {
+		return fmt.Errorf("create destination %s: %w", dst, err)
+	}
+	defer dstFile.Close()
+
+	if _, err := io.Copy(dstFile, srcFile); err != nil {
+		return fmt.Errorf("copy data to %s: %w", dst, err)
+	}
+
+	return nil
 }
