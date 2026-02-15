@@ -117,7 +117,12 @@ func (a *Assembler) copyCoreFiles(merger *Merger, result *AssembleResult) error 
 		result.FilesWritten += mergeResult.FilesWritten
 		result.SlotsResolved += mergeResult.SlotsResolved
 		result.Warnings = append(result.Warnings, mergeResult.Warnings...)
-		result.Files = append(result.Files, relPath)
+		// Use remapped output path (brand prefix restored for skill dirs).
+		outPath := mergeResult.OutputPath
+		if outPath == "" {
+			outPath = relPath
+		}
+		result.Files = append(result.Files, outPath)
 
 		return nil
 	})

@@ -21,6 +21,13 @@ type PersonaManifest struct {
 	Version     string `yaml:"version"`
 	Description string `yaml:"description"`
 
+	// Brand identity fields used for deslotification during assembly.
+	// The assembler replaces {{slot:BRAND}}, {{slot:BRAND_DIR}}, {{slot:BRAND_CMD}}
+	// and prepends Brand to stripped skill directory names.
+	Brand    string `yaml:"brand,omitempty"`     // e.g., "moai", "do"
+	BrandDir string `yaml:"brand_dir,omitempty"` // e.g., ".moai", ".do"
+	BrandCmd string `yaml:"brand_cmd,omitempty"` // e.g., "/moai", "/do"
+
 	// Top-level persona definition
 	ClaudeMD string `yaml:"claude_md"` // Path to persona's CLAUDE.md
 

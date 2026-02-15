@@ -17,28 +17,31 @@ type MergeResult struct {
 	FilesWritten  int
 	SlotsResolved int
 	Warnings      []string
+	OutputPath    string // Remapped output path (may differ from input relPath for skills)
 }
 
 // Merger combines core template files with persona-specific content
 // to produce a final assembled output directory.
 type Merger struct {
-	coreDir    string
-	personaDir string
-	outputDir  string
-	manifest   *model.PersonaManifest
-	registry   *template.Registry
-	filler     *SlotFiller
+	coreDir      string
+	personaDir   string
+	outputDir    string
+	manifest     *model.PersonaManifest
+	registry     *template.Registry
+	filler       *SlotFiller
+	deslotifier  *BrandDeslotifier
 }
 
 // NewMerger creates a Merger with the given directories, manifest, and registry.
 func NewMerger(coreDir, personaDir, outputDir string, manifest *model.PersonaManifest, registry *template.Registry) *Merger {
 	return &Merger{
-		coreDir:    coreDir,
-		personaDir: personaDir,
-		outputDir:  outputDir,
-		manifest:   manifest,
-		registry:   registry,
-		filler:     NewSlotFiller(registry, manifest, personaDir),
+		coreDir:     coreDir,
+		personaDir:  personaDir,
+		outputDir:   outputDir,
+		manifest:    manifest,
+		registry:    registry,
+		filler:      NewSlotFiller(registry, manifest, personaDir),
+		deslotifier: NewBrandDeslotifier(manifest),
 	}
 }
 
@@ -60,13 +63,20 @@ func (m *Merger) MergeFile(relPath string) (*MergeResult, error) {
 	content := string(data)
 	filled, resolved, warnings := m.filler.FillContent(content)
 
+	// Apply brand deslotification: replace {{slot:BRAND}}, {{slot:BRAND_DIR}}, {{slot:BRAND_CMD}}.
+	filled = m.deslotifier.DeslotifyContent(filled)
+
+	// Remap skill directory paths: add brand prefix back (e.g., skills/lang-python/ → skills/moai-lang-python/).
+	outRelPath := m.deslotifier.RemapSkillPath(relPath)
+
 	result := &MergeResult{
 		FilesWritten:  1,
 		SlotsResolved: len(resolved),
 		Warnings:      warnings,
+		OutputPath:    outRelPath,
 	}
 
-	dstPath := filepath.Join(m.outputDir, relPath)
+	dstPath := filepath.Join(m.outputDir, outRelPath)
 	if err := os.MkdirAll(filepath.Dir(dstPath), 0o755); err != nil {
 		return nil, &model.ErrAssembly{
 			Phase:   "merge",
@@ -99,6 +109,9 @@ func (m *Merger) CopyPersonaFile(relPath string) (*MergeResult, error) {
 		}
 	}
 
+	// Apply brand deslotification to persona file content.
+	content := m.deslotifier.DeslotifyContent(string(data))
+
 	dstPath := filepath.Join(m.outputDir, relPath)
 	if err := os.MkdirAll(filepath.Dir(dstPath), 0o755); err != nil {
 		return nil, &model.ErrAssembly{
@@ -108,7 +121,7 @@ func (m *Merger) CopyPersonaFile(relPath string) (*MergeResult, error) {
 		}
 	}
 
-	if err := os.WriteFile(dstPath, data, 0o644); err != nil {
+	if err := os.WriteFile(dstPath, []byte(content), 0o644); err != nil {
 		return nil, &model.ErrAssembly{
 			Phase:   "copy",
 			File:    relPath,
