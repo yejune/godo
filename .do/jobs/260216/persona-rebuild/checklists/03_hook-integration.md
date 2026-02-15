@@ -1,5 +1,5 @@
 # hook-integration: 훅에 PersonaLoader 연결 (Phase 3)
-상태: [ ] | 담당: expert-backend
+상태: [o] | 담당: expert-backend
 
 ## Problem Summary
 - 현재 3개 훅 파일(session_start, post_tool_use, user_prompt_submit)과 spinner.go가 `buildPersona()` 하드코딩 함수를 직접 호출함
@@ -8,14 +8,14 @@
 - 기존 동작과 정확히 동일한 출력을 보장해야 함 (행동 변경 없이 내부 구현만 교체)
 
 ## Acceptance Criteria
-- [ ] hook_session_start.go: LoadCharacter + LoadSpinner 사용, 폴백 시 buildPersona() + 하드코딩 spinners
-- [ ] hook_post_tool_use.go: LoadCharacter → BuildReminder 사용, 폴백 시 buildPersona()
-- [ ] hook_user_prompt_submit.go: LoadCharacter → BuildReminder 사용, 폴백 시 buildPersona()
-- [ ] spinner.go: LoadSpinner → BuildSpinnerVerbs 사용, 폴백 시 하드코딩 배열
-- [ ] 기존 테스트 전체 통과 (회귀 없음)
-- [ ] 파일 기반 로딩 시 기존과 동일한 hook 출력 생성
-- [ ] 파일 미존재 시 stderr 경고 출력: `[godo] persona file not found, using built-in defaults`
-- [ ] 커밋 완료
+- [o] hook_session_start.go: LoadCharacter + LoadSpinner 사용, 폴백 시 buildPersona() + 하드코딩 spinners
+- [o] hook_post_tool_use.go: LoadCharacter → BuildReminder 사용, 폴백 시 buildPersona()
+- [o] hook_user_prompt_submit.go: LoadCharacter → BuildReminder 사용, 폴백 시 buildPersona()
+- [o] spinner.go: LoadSpinner → BuildSpinnerVerbs 사용, 폴백 시 하드코딩 배열
+- [o] 기존 테스트 전체 통과 (회귀 없음)
+- [o] 파일 기반 로딩 시 기존과 동일한 hook 출력 생성
+- [o] 파일 미존재 시 stderr 경고 출력: `[godo] persona file not found, using built-in defaults`
+- [o] 커밋 완료
 
 ## Solution Approach
 - 각 훅 파일에서 `buildPersona()` 호출부를 찾아 LoadCharacter() 호출로 교체
@@ -58,16 +58,22 @@
 - 4개 파일을 한 에이전트가 수정하므로 3파일 제한에 근접 — 필요 시 #7/#8을 한 커밋, #9/#10을 다른 커밋으로 분리
 
 ## Progress Log
-- (작업 시작 시 기록)
+- 2026-02-16 02:51:30 [~] 작업 시작: 4개 훅 파일에 PersonaLoader 연결
+- 2026-02-16 02:51:45 [~] hook_session_start.go: LoadSpinner() 호출 추가, 폴백 패턴 적용
+- 2026-02-16 02:52:00 [~] hook_post_tool_use.go: LoadCharacter() + BuildReminder() 연결, 폴백 처리
+- 2026-02-16 02:52:10 [~] hook_user_prompt_submit.go: 동일 패턴 적용
+- 2026-02-16 02:52:18 [~] spinner.go: getPersonaSpinnerVerbs() 내부에 LoadSpinner() + BuildSpinnerVerbs() 연결
+- 2026-02-16 02:52:22 [*] 기존 테스트 전체 통과 확인 — 회귀 없음
+- 2026-02-16 02:52:26 [o] 완료 (commit: 8633d15)
 
 ## FINAL STEP: Commit (절대 생략 금지)
-- [ ] `git add` — hook_session_start.go, hook_post_tool_use.go, hook_user_prompt_submit.go, spinner.go만 스테이징
-- [ ] `git diff --cached` — 의도한 변경만 포함되었는지 확인
-- [ ] `git commit` — 커밋 메시지에 WHY 포함
-- [ ] 커밋 해시를 Progress Log에 기록
+- [o] `git add` — hook_session_start.go, hook_post_tool_use.go, hook_user_prompt_submit.go, spinner.go만 스테이징
+- [o] `git diff --cached` — 의도한 변경만 포함되었는지 확인
+- [o] `git commit` — 커밋 메시지에 WHY 포함 (commit: 8633d15)
+- [o] 커밋 해시를 Progress Log에 기록 (8633d15)
 ⚠️ 이 섹션을 완료하지 않으면 작업은 미완료(incomplete) 상태임
 
 ## Lessons Learned (완료 시 작성)
-- 잘된 점:
-- 어려웠던 점:
-- 다음에 다르게 할 점:
+- 잘된 점: Hybrid 패턴(파일 우선 + 폴백)이 깔끔하게 적용됨. 4개 파일 모두 동일한 에러 처리 패턴으로 일관성 유지.
+- 어려웠던 점: Phase 2의 PersonaLoader 커밋(edca1c6) 직후 바로 이어서 작업해야 해서 타이밍이 촉박했음.
+- 다음에 다르게 할 점: 체크리스트 갱신을 커밋과 동시에 수행해야 상태 추적이 정확함. 작업 완료 후 갱신하면 잊기 쉬움.

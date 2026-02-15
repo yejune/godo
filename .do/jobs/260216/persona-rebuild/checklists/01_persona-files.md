@@ -1,5 +1,5 @@
 # persona-files: 페르소나 파일 생성 (Phase 1)
-상태: [ ] | 담당: expert-backend
+상태: [o] | 담당: expert-backend
 
 ## Problem Summary
 - godo의 `buildPersona()` 함수에 하드코딩된 페르소나 데이터를 파일로 외부화해야 한다
@@ -9,12 +9,12 @@
 - persona.yaml 매니페스트가 새 파일 타입을 참조하지 않는다
 
 ## Acceptance Criteria
-- [ ] 4개 캐릭터 파일에 YAML frontmatter 추가 (id, name, honorific_template, honorific_default, tone, character_summary, relationship)
-- [ ] 4개 스피너 YAML 파일 생성 (persona, suffix_pattern, stems)
-- [ ] 3개 스타일 파일이 `personas/do/styles/`에 존재
-- [ ] persona.yaml에 characters, spinners, styles 섹션 추가
-- [ ] 모든 YAML이 파싱 가능 (검증: `yq` 또는 Go yaml 파서로 확인)
-- [ ] 커밋 완료
+- [o] 4개 캐릭터 파일에 YAML frontmatter 추가 (id, name, honorific_template, honorific_default, tone, character_summary, relationship)
+- [o] 4개 스피너 YAML 파일 생성 (persona, suffix_pattern, stems)
+- [o] 3개 스타일 파일이 `personas/do/styles/`에 존재
+- [o] persona.yaml에 characters, spinners, styles 섹션 추가
+- [o] 모든 YAML이 파싱 가능 (검증: `yq` 또는 Go yaml 파서로 확인)
+- [o] 커밋 완료
 
 ## Solution Approach
 - Architecture 문서 Section 2 (Core Interfaces / Data Formats)의 형식을 정확히 따름
@@ -57,16 +57,21 @@
 - output-styles/do/ 원본을 삭제하면 안 됨 (Phase 5에서 정리 후 판단)
 
 ## Progress Log
-- (작업 시작 시 기록)
+- 2026-02-16 02:15:00 [~] 작업 시작: 캐릭터 파일 frontmatter + 스피너 추출
+- 2026-02-16 02:20:33 [~] characters/ 4개 YAML frontmatter 추가 완료
+- 2026-02-16 02:25:17 [~] spinners/ 4개 YAML 생성 완료 (godo 소스에서 추출)
+- 2026-02-16 02:28:45 [~] persona.yaml 매니페스트 업데이트
+- 2026-02-16 02:30:10 [*] YAML 파싱 검증 중
+- 2026-02-16 02:32:55 [o] 완료 (commit: b6ab965, 061c9a4)
 
 ## FINAL STEP: Commit (절대 생략 금지)
-- [ ] `git add` — 변경된 파일만 스테이징 (characters 4개 + spinners 4개 + styles 3개 + persona.yaml)
-- [ ] `git diff --cached` — 의도한 변경만 포함되었는지 확인
-- [ ] `git commit` — 커밋 메시지에 WHY 포함
-- [ ] 커밋 해시를 Progress Log에 기록
+- [o] `git add` — 변경된 파일만 스테이징 (characters 4개 + spinners 4개 + styles 3개 + persona.yaml)
+- [o] `git diff --cached` — 의도한 변경만 포함되었는지 확인
+- [o] `git commit` — 커밋 메시지에 WHY 포함 (commit: b6ab965)
+- [o] 커밋 해시를 Progress Log에 기록 (b6ab965, 061c9a4)
 ⚠️ 이 섹션을 완료하지 않으면 작업은 미완료(incomplete) 상태임
 
 ## Lessons Learned (완료 시 작성)
-- 잘된 점:
-- 어려웠던 점:
-- 다음에 다르게 할 점:
+- 잘된 점: architecture 문서의 형식을 정확히 따라 구현함
+- 어려웠던 점: 스타일 파일이 별도 커밋(061c9a4)으로 분리됨 — Agent B와 작업 겹침
+- 다음에 다르게 할 점: 서브 체크리스트를 작업 중간중간 갱신해야 함
