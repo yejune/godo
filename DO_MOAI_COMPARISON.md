@@ -825,6 +825,27 @@ EARS와 MoSCoW는 경쟁 관계가 아니라 **상호보완 관계**다:
 - 체크리스트 작성 시 MUST 항목이 먼저, COULD/WON'T는 후순위 또는 제외
 - 살아있는 문서이므로 개발 중 우선순위 변경 가능 (SHOULD → MUST 승격 등)
 
+**EARS에서 체크리스트로의 변환 흐름**:
+
+EARS 요구사항은 체크리스트의 **입력 원천(source)**이지, 체크리스트 자체가 아니다. 변환 과정은 다음과 같다:
+
+```
+EARS 요구사항 작성 (analysis.md)
+  → MoSCoW 우선순위 부여 (MUST/SHOULD/COULD/WON'T)
+  → 구현 단위로 분해 (파일 소유권, 에이전트 배정)
+  → Test Strategy 할당 (unit/integration/E2E/pass)
+  → checklist.md 항목 생성
+  → 서브 체크리스트 배포
+```
+
+| 단계 | 예시 |
+|------|------|
+| EARS 요구사항 | "로그인 실패 시, 시스템은 3초 대기 후 재시도를 허용한다" (MUST) |
+| 분해 | 핸들러 구현 (handler.go) + 테스트 (handler_test.go) + 프론트엔드 대기 UI (LoginForm.tsx) |
+| 체크리스트 항목 | `[ ] #1 로그인 실패 대기 로직 (expert-backend)`, `[ ] #2 대기 UI (expert-frontend, depends on: #1)` |
+
+하나의 EARS 요구사항이 여러 체크리스트 항목이 될 수 있고, 여러 EARS 요구사항이 하나의 항목으로 묶일 수도 있다. EARS는 "무엇을"을 정의하고, 체크리스트는 "누가 뭘 어떻게"를 정의한다.
+
 이전 버전에서는 "EARS는 SPEC에 적합하지만 Do에는 과도 설계"라고 거부했으나, EARS의 구조화된 문법은 모호함을 제거하는 데 유용하다. MoSCoW와 결합하면 Do의 체크리스트 워크플로우에 자연스럽게 통합된다.
 
 ### 10.7 거부: XML 완료 마커
@@ -1072,9 +1093,10 @@ MoAI는 Do의 삼원 모드 시스템을 채택할 수 있다(구조적 기능�
 | **MoSCoW** | Must/Should/Could/Won't. 요구사항 우선순위 분류법. 소문자 o는 발음용 | Clegg, 1994 (Oracle/DSDM) |
 | **TDD** | Test-Driven Development. RED(실패 테스트) → GREEN(최소 구현) → REFACTOR(정리) 사이클 | Kent Beck, 2003 |
 | **DDD** | Domain-Driven Development. ANALYZE(분석) → PRESERVE(보존) → IMPROVE(개선) 사이클. Do에서는 기존 코드 리팩토링에 사용 | Eric Evans, 2003 |
+| **ADR** | Architecture Decision Record. 아키텍처 결정을 구조화된 형식(맥락, 결정, 결과)으로 기록하는 방법 | Nygard, 2011 |
 | **DSDM** | Dynamic Systems Development Method. MoSCoW의 출처인 Agile 프레임워크 | DSDM Consortium, 1994 |
 | **SPEC** | MoAI의 3단계 워크플로우 (Plan → Run → Sync). 고정 단계별 토큰 예산을 할당하는 명세 우선 접근법 | MoAI-ADK |
-| **TRUST 5** | MoAI의 품질 게이트 프레임워크. Tested, Readable, Unified, Secured, Trackable의 두문자어. Do는 내용은 채택하되 브랜딩은 거부 | MoAI-ADK |
+| **TRUST 5** | MoAI-ADK 자체 품질 게이트 프레임워크. Tested, Readable, Unified, Secured, Trackable의 두문자어. **업계 표준이 아닌 MoAI 고유 브랜딩**. Do는 5가지 품질 차원의 내용은 채택하되 브랜딩은 거부 | MoAI-ADK (자체 정의) |
 
 ### Do 고유 용어
 
