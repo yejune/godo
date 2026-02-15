@@ -93,13 +93,13 @@ func TestSkillExtractor_WholeDirectoryPersona(t *testing.T) {
 			}
 
 			coreDoc, manifest, err := ext.Extract(doc)
-			if err \!= nil {
+			if err != nil {
 				t.Fatalf("Extract() error: %v", err)
 			}
-			if coreDoc \!= nil {
+			if coreDoc != nil {
 				t.Errorf("expected nil coreDoc for whole-directory persona skill at %s", tt.path)
 			}
-			if len(manifest.Skills) \!= 1 || manifest.Skills[0] \!= tt.path {
+			if len(manifest.Skills) != 1 || manifest.Skills[0] != tt.path {
 				t.Errorf("manifest.Skills = %v, want [%q]", manifest.Skills, tt.path)
 			}
 		})
