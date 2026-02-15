@@ -1,0 +1,102 @@
+name: do
+version: "3.0.0"
+description: "Do execution framework with 3 modes (Do/Focus/Team)"
+brand: do
+brand_dir: do
+brand_cmd: do
+claude_md: CLAUDE.md
+
+# Persona-specific agents (core agents are inherited automatically)
+agents:
+    - agents/do/manager-ddd.md
+    - agents/do/manager-project.md
+    - agents/do/manager-quality.md
+    - agents/do/manager-tdd.md
+    - agents/do/team-quality.md
+
+# Orchestrator skill + workflows + reference
+skills:
+    - skills/do/SKILL.md
+    - skills/do/workflows/plan.md
+    - skills/do/workflows/run.md
+    - skills/do/workflows/test.md
+    - skills/do/workflows/report.md
+    - skills/do/workflows/do.md
+    - skills/do/workflows/team-do.md
+    - skills/do/references/reference.md
+
+# Persona-specific rules
+rules:
+    - rules/do/workflow/spec-workflow.md
+    - rules/do/workflow/workflow-modes.md
+
+# Do-specific output styles
+styles:
+    - output-styles/do/sprint.md
+    - output-styles/do/pair.md
+    - output-styles/do/direct.md
+
+# Do-specific commands
+commands:
+    - commands/do/check.md
+    - commands/do/checklist.md
+    - commands/do/mode.md
+    - commands/do/plan.md
+    - commands/do/setup.md
+    - commands/do/style.md
+
+# No shell wrapper scripts needed (godo direct call)
+hook_scripts: []
+
+# Settings template (godo direct call pattern)
+settings:
+    outputStyle: pair
+    plansDirectory: .do/jobs
+    statusLine:
+        command: godo statusline
+        type: command
+    attribution:
+        commit: ""
+        pr: ""
+    hooks:
+        SessionStart:
+            - hooks:
+                  - command: godo hook session-start
+                    type: command
+        SessionEnd:
+            - hooks:
+                  - command: godo hook session-end
+                    type: command
+        PreToolUse:
+            - hooks:
+                  - command: godo hook pre-tool
+                    timeout: 5
+                    type: command
+              matcher: Write|Edit|Bash
+        PostToolUse:
+            - hooks:
+                  - command: godo hook post-tool-use
+                    type: command
+              matcher: ".*"
+            - hooks:
+                  - command: godo hook compact
+                    timeout: 5
+                    type: command
+        Stop:
+            - hooks:
+                  - command: godo hook stop
+                    type: command
+        SubagentStop:
+            - hooks:
+                  - command: godo hook subagent-stop
+                    type: command
+        UserPromptSubmit:
+            - hooks:
+                  - command: godo hook user-prompt-submit
+                    type: command
+
+# No slot_content overrides (Do uses rules instead of slot injection)
+slot_content: {}
+
+# No agent patches (no override skills to inject)
+agent_patches: {}
