@@ -1,5 +1,5 @@
 ---
-description: Do 프레임워크 실행 모드 전환 (do/focus/auto)
+description: Do 프레임워크 실행 모드 전환 (do/focus/team)
 allowed-tools: Bash, Read, Write, Edit, AskUserQuestion
 ---
 
@@ -16,7 +16,7 @@ allowed-tools: Bash, Read, Write, Edit, AskUserQuestion
 **인자가 없으면**: 현재 모드와 사용 가능한 모드 표시
 
 **인자가 있으면** ($ARGUMENTS):
-1. 실행 모드: "do", "focus", "auto" → Step 3
+1. 실행 모드: "do", "focus", "team" → Step 3
 2. 권한 모드: "bypass", "accept", "default", "plan" → Step 3-B
 3. 유효하지 않으면 오류 메시지 표시하고 종료
 
@@ -40,7 +40,7 @@ settings.local.json의 defaultMode가 업데이트됨.
 ```
 현재 모드: {모드명} ({모드 설명})
 
-실행 모드: do, focus, auto
+실행 모드: do, focus, team
 권한 모드: bypass, accept, default, plan
 
 전환: /do:mode <모드명>
@@ -65,10 +65,10 @@ settings.local.json의 defaultMode가 업데이트됨.
 - 에이전트 위임 없이 빠른 실행
 - 단순 수정, 작은 버그 수정에 적합
 
-### auto (Automatic Selection)
-- 작업 복잡도에 따라 자동으로 모드 선택
-- 간단한 작업은 focus, 복잡한 작업은 do
-- 권장 모드
+### team (Parallel Team Orchestrator)
+- Agent Teams API로 전문가 팀 구성
+- 팀원들이 동시에 독립 작업 수행
+- 대규모 멀티 도메인, 10개+ 파일 변경에 최적
 
 ## 권한 모드
 
