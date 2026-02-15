@@ -14,6 +14,12 @@ metadata:
   updated: "2026-02-15"
   tags: "report, completion, summary, lessons-learned"
 
+# Do Extension: Progressive Disclosure
+progressive_disclosure:
+  enabled: true
+  level1_tokens: 100
+  level2_tokens: 3000
+
 # Do Extension: Triggers
 triggers:
   keywords: ["report", "completion", "summary", "완료", "보고"]
@@ -138,4 +144,4 @@ AskUserQuestion with options:
 ---
 
 Version: 1.0.0
-Updated: 2026-02-15
+Updated: 2026-02-16

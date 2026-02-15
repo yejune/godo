@@ -14,6 +14,12 @@ metadata:
   updated: "2026-02-15"
   tags: "test, tdd, red-green-refactor, quality, coverage"
 
+# Do Extension: Progressive Disclosure
+progressive_disclosure:
+  enabled: true
+  level1_tokens: 100
+  level2_tokens: 4000
+
 # Do Extension: Triggers
 triggers:
   keywords: ["test", "tdd", "coverage", "테스트", "red-green", "refactor"]
@@ -126,6 +132,12 @@ The following are FORBIDDEN during test writing:
 - [HARD] Using wildcard matchers (`any()`, `mock.ANY`) when exact values are known
 - [HARD] Testing only happy path -- error paths, edge cases, boundary values are REQUIRED
 
+### Mutation Testing Mindset
+
+Apply this thinking exercise to every test: "If I change one line of this code, does a test fail?"
+If no test fails, the test coverage is insufficient. This is not a tool requirement -- it is a
+discipline that every agent must apply when writing tests.
+
 ---
 
 ## Test Execution Rules [HARD]
@@ -166,4 +178,4 @@ For existing code that needs modification:
 ---
 
 Version: 1.0.0
-Updated: 2026-02-15
+Updated: 2026-02-16

@@ -10,7 +10,24 @@ compatibility: Designed for Claude Code
 allowed-tools: Task AskUserQuestion TaskCreate TaskUpdate TaskList TaskGet Bash Read Write Edit Glob Grep
 user-invocable: true
 metadata:
+  version: "1.0.0"
+  category: "workflow"
+  status: "active"
+  updated: "2026-02-16"
+  tags: "orchestrator, do, focus, team, delegation, pipeline"
   argument-hint: "[subcommand] [args] | \"natural language task\""
+
+# Do Extension: Progressive Disclosure
+progressive_disclosure:
+  enabled: true
+  level1_tokens: 200
+  level2_tokens: 8000
+
+# Do Extension: Triggers
+triggers:
+  keywords: ["do", "plan", "run", "test", "report", "checklist", "mode", "style", "setup"]
+  agents: ["do"]
+  phases: ["plan", "run", "test", "report"]
 ---
 
 ## Pre-execution Context
@@ -222,14 +239,25 @@ Subagents invoked via Task() operate in isolated, stateless contexts and cannot 
 
 Constraints: Maximum 4 options, no emoji, user's language.
 
-### Checklist Tracking
+### Checklist Tracking (Living Document)
 
 [HARD] Track all work via checklist files (`.do/jobs/{YY}/{MM}/{DD}/{title}/`).
 
-- Checklist = agent state file: agents read it on start, update on progress, new agents resume from `[o]`
+- Checklist = agent persistent state file: agents read it on start, update on progress, new agents resume from `[o]`
+- Living document: evolves during implementation, not a fixed spec completed before coding
 - Status transitions: `[ ]`->`[~]`->`[*]`->`[o]` (forbidden: `[ ]`->`[o]` skip testing)
 - Agent must commit after completing items; uncommitted work = incomplete
 - Commit hash recorded in Progress Log as proof of completion
+- File-based persistence survives context resets, session ends, and agent crashes
+
+### Commit-as-Proof [HARD]
+
+Completion evidence is a git commit hash. Checklist items CANNOT transition to `[o]` (done) without a recorded commit hash.
+
+- Append-only: commit messages are never rewritten. No `--amend`, no `--force`.
+- Atomic: one logical change = one commit. Commit boundaries are work boundaries.
+- Traceable: the commit log is the complete audit trail of all work performed.
+- Agent verification layer: Read(original) -> modify -> git diff(verify) -> confirm only intended changes
 
 ### Output Rules
 
@@ -373,4 +401,4 @@ Use AskUserQuestion to present logical next actions based on the completed workf
 ---
 
 Version: 1.0.0
-Last Updated: 2026-02-15
+Last Updated: 2026-02-16

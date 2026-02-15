@@ -14,6 +14,12 @@ metadata:
   updated: "2026-02-15"
   tags: "reference, patterns, configuration, environment, persona"
 
+# Do Extension: Progressive Disclosure
+progressive_disclosure:
+  enabled: true
+  level1_tokens: 150
+  level2_tokens: 5000
+
 # Do Extension: Triggers
 triggers:
   keywords: ["reference", "pattern", "config", "environment", "persona", "mode"]
@@ -62,6 +68,16 @@ Each phase passes results forward:
 - Include previous phase outputs in Task() prompts
 - Reference specific file paths rather than inlining large content
 - Checklist files serve as the canonical state across phases
+
+### Commit-as-Proof
+
+Completion evidence is a git commit hash -- not an in-memory marker or conversation signal.
+
+- `[o]` transition requires commit hash: `[o] Done (commit: a1b2c3d)`
+- Append-only: commit messages are never rewritten (no `--amend`, no `--force`)
+- Atomic: one logical change = one commit
+- Agent verification layer: Read(original) -> modify -> git diff(verify) -> confirm intended changes only
+- Uncommitted work = incomplete work, regardless of code quality
 
 ---
 
@@ -127,6 +143,22 @@ Standard Claude Code settings fields:
 ### settings.local.json (Personal, Gitignored)
 
 Set via `/do:setup`. Contains `env` block with DO_* variables.
+
+```json
+{
+  "env": {
+    "DO_USER_NAME": "name",
+    "DO_LANGUAGE": "ko",
+    "DO_COMMIT_LANGUAGE": "en",
+    "DO_PERSONA": "young-f",
+    "DO_STYLE": "pair",
+    "DO_MODE": "do",
+    "DO_AI_FOOTER": "false"
+  }
+}
+```
+
+Hooks access these as environment variables: `$DO_USER_NAME`, `$DO_LANGUAGE`, etc.
 
 ---
 
@@ -204,6 +236,35 @@ When `tobrew.lock` or `tobrew.*` files exist:
 
 ---
 
+## Quality Gates (Built-in Rules)
+
+Do enforces 5 quality dimensions as always-active built-in rules (not a branded framework):
+
+| Dimension | Enforcement | Source |
+|-----------|------------|--------|
+| Tested | FIRST principles, 85%+ coverage, Real DB only, AI anti-pattern 7 | dev-testing.md |
+| Readable | Read Before Write, clear naming, match existing conventions | dev-workflow.md |
+| Unified | Language-specific syntax checks (go vet, tsc --noEmit, ruff) | dev-environment.md |
+| Secured | No secrets in commits, input validation, OWASP guidelines | core rules |
+| Trackable | Atomic commits, WHY in messages, commit hash as proof | dev-workflow.md, dev-checklist.md |
+
+### AI Anti-Pattern Prevention (7 Rules)
+
+These are FORBIDDEN during all development work:
+1. Weakening assertions (fake pass)
+2. Swallowing errors with try/catch (fake success)
+3. Adjusting expected values to wrong output (fake correctness)
+4. Using time.sleep() for timing issues (fake stability)
+5. Deleting/commenting failing tests (fake integrity)
+6. Using wildcard matchers when exact values known (fake verification)
+7. Testing only happy path (fake coverage)
+
+### Test Strategy Pre-Declaration
+
+Each checklist item declares test strategy BEFORE implementation:
+- Testable code: specify test type + file path (e.g., `unit: handler_test.go`)
+- Non-testable changes: declare `pass` with alternative verification (e.g., `pass (build check: go build ./...)`)
+
 ## Error Handling Delegation
 
 | Error Type | Action |
@@ -217,4 +278,4 @@ When `tobrew.lock` or `tobrew.*` files exist:
 ---
 
 Version: 1.0.0
-Last Updated: 2026-02-15
+Last Updated: 2026-02-16

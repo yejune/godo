@@ -14,6 +14,12 @@ metadata:
   updated: "2026-02-15"
   tags: "do, autonomous, pipeline, default"
 
+# Do Extension: Progressive Disclosure
+progressive_disclosure:
+  enabled: true
+  level1_tokens: 100
+  level2_tokens: 3000
+
 # Do Extension: Triggers
 triggers:
   keywords: ["do", "autonomous", "pipeline", "build", "implement", "create"]
@@ -128,4 +134,4 @@ Execute workflows/report.md:
 ---
 
 Version: 1.0.0
-Updated: 2026-02-15
+Updated: 2026-02-16

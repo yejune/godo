@@ -14,6 +14,12 @@ metadata:
   updated: "2026-02-15"
   tags: "team, autopilot, parallel, agent-teams, plan, run, report"
 
+# Do Extension: Progressive Disclosure
+progressive_disclosure:
+  enabled: true
+  level1_tokens: 100
+  level2_tokens: 5000
+
 # Do Extension: Triggers
 triggers:
   keywords: ["team", "autopilot", "parallel", "팀"]
@@ -135,7 +141,7 @@ Every teammate MUST follow these rules:
 2. Create shared task list from checklist items with dependencies
 
 3. Spawn teammates with sub-checklist paths:
-   - Each teammate prompt includes: SPEC summary, sub-checklist path, file ownership list, git staging rules, quality targets
+   - Each teammate prompt includes: Plan summary, sub-checklist path, file ownership list, git staging rules, quality targets
 
 4. Parallel implementation:
    - backend-dev: Implements server-side code (Task 1-2)
@@ -155,14 +161,16 @@ Every teammate MUST follow these rules:
    - Reports findings to team lead
    - If issues found: Direct fixes to responsible teammates
 
-### Quality Gates
+### Quality Gates (Built-in Rules)
 
-All must pass before proceeding:
-- Zero lint errors
-- Zero type errors
-- Coverage targets met (85%+ overall)
-- All checklist acceptance criteria verified
-- All tests pass
+All must pass before proceeding (enforced as always-active rules, not a branded framework):
+- Zero lint errors (Unified)
+- Zero type errors (Unified)
+- Coverage targets met -- 85%+ overall (Tested)
+- All checklist acceptance criteria verified (Trackable)
+- All tests pass with Real DB -- no mock DB substitution (Tested)
+- No AI anti-patterns in test code (7 forbidden patterns)
+- All `[o]` items have commit hashes as proof (Commit-as-Proof)
 
 ---
 
@@ -206,4 +214,4 @@ If team creation fails or Agent Teams not enabled at any point:
 ---
 
 Version: 1.0.0
-Updated: 2026-02-15
+Updated: 2026-02-16

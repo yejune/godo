@@ -14,6 +14,12 @@ metadata:
   updated: "2026-02-15"
   tags: "plan, analysis, architecture, design, requirements"
 
+# Do Extension: Progressive Disclosure
+progressive_disclosure:
+  enabled: true
+  level1_tokens: 100
+  level2_tokens: 4000
+
 # Do Extension: Triggers
 triggers:
   keywords: ["plan", "design", "architect", "requirements", "analyze", "설계", "계획", "분석"]
@@ -81,7 +87,8 @@ Input: User request + Phase 1 complexity assessment
 
 Tasks for analyst:
 - Reverse-engineer existing code and system (code-based, not guesswork)
-- Classify requirements using MoSCoW (MUST/SHOULD/COULD/WON'T)
+- Write requirements in EARS format (Ubiquitous/Event-driven/State-driven/Unwanted/Optional)
+- Classify requirements using MoSCoW priority (MUST/SHOULD/COULD/WON'T)
 - Compare at least 2 technical candidates with pros/cons
 - Identify risks with impact levels (HIGH/MEDIUM/LOW)
 - Map change scope and affected files/modules
@@ -178,4 +185,4 @@ If approved -> Checklist generation -> Develop
 ---
 
 Version: 1.0.0
-Updated: 2026-02-15
+Updated: 2026-02-16

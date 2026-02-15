@@ -14,6 +14,12 @@ metadata:
   updated: "2026-02-15"
   tags: "run, implementation, checklist, agent, dispatch"
 
+# Do Extension: Progressive Disclosure
+progressive_disclosure:
+  enabled: true
+  level1_tokens: 100
+  level2_tokens: 4000
+
 # Do Extension: Triggers
 triggers:
   keywords: ["run", "implement", "build", "create", "develop", "구현", "만들어"]
@@ -83,9 +89,11 @@ Agent invocation MUST include these 4 items [HARD]:
 
 Additional agent instructions:
 - "Read the sub-checklist file first to understand scope and acceptance criteria"
+- "Check Test Strategy section -- follow declared approach (TDD/DDD/pass)"
 - "Update checklist status as you progress: `[ ]` -> `[~]` -> `[*]` -> `[o]`"
-- "Record commit hash in Progress Log"
+- "Record commit hash in Progress Log -- `[o]` without commit hash is FORBIDDEN"
 - "Write Lessons Learned before marking final `[o]`"
+- "Stage ONLY your own files by name -- NEVER use `git add -A` or `git add .`"
 
 #### Focus Mode Dispatch (DO_MODE=focus)
 
@@ -171,4 +179,4 @@ This pattern ensures work continuity regardless of which agent instance runs.
 ---
 
 Version: 1.0.0
-Updated: 2026-02-15
+Updated: 2026-02-16
