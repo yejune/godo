@@ -46,9 +46,8 @@ func NewAssembler(coreDir, personaDir, outputDir string, manifest *model.Persona
 //  1. Copy core files to output, filling slots with persona content
 //  2. Apply agent patches (append/remove skills, append content)
 //  3. Copy persona-only files (agents, skills, rules, styles)
-//  4. Copy persona commands
-//  5. Copy persona hook scripts
-//  6. Copy persona CLAUDE.md
+//  4. Merge settings.json (core + persona settings/hooks)
+//  5. Copy persona CLAUDE.md
 func (a *Assembler) Assemble() (*AssembleResult, error) {
 	result := &AssembleResult{}
 	merger := NewMerger(a.coreDir, a.personaDir, a.outputDir, a.manifest, a.registry)
@@ -68,7 +67,12 @@ func (a *Assembler) Assemble() (*AssembleResult, error) {
 		return nil, err
 	}
 
-	// Step 4: Copy persona CLAUDE.md.
+	// Step 4: Merge settings.json.
+	if err := a.mergeSettings(merger, result); err != nil {
+		return nil, err
+	}
+
+	// Step 5: Copy persona CLAUDE.md.
 	if err := a.copyClaudeMD(merger, result); err != nil {
 		return nil, err
 	}
@@ -158,6 +162,43 @@ func (a *Assembler) copyPersonaFiles(merger *Merger, result *AssembleResult) err
 		result.Files = append(result.Files, relPath)
 	}
 
+	return nil
+}
+
+// mergeSettings handles settings.json assembly. If persona has settings.json,
+// it is used as the base. If core also has settings.json, persona settings are
+// merged on top. The manifest's Settings field (containing hooks etc.) is also
+// injected.
+func (a *Assembler) mergeSettings(merger *Merger, result *AssembleResult) error {
+	if a.manifest == nil {
+		return nil
+	}
+
+	// Check for persona settings.json.
+	personaSettingsPath := filepath.Join(a.personaDir, "settings.json")
+	if _, err := os.Stat(personaSettingsPath); os.IsNotExist(err) {
+		// No persona settings.json; check if core has one and use MergeSettings.
+		coreSettingsPath := filepath.Join(a.coreDir, "settings.json")
+		if _, err := os.Stat(coreSettingsPath); err == nil {
+			if err := merger.MergeSettings(coreSettingsPath); err != nil {
+				return err
+			}
+			result.FilesWritten++
+			result.Files = append(result.Files, "settings.json")
+		}
+		return nil
+	}
+
+	// Persona has settings.json -- copy it directly.
+	if _, err := merger.CopyPersonaFile("settings.json"); err != nil {
+		return &model.ErrAssembly{
+			Phase:   "merge_settings",
+			File:    "settings.json",
+			Message: fmt.Sprintf("copy persona settings.json: %v", err),
+		}
+	}
+	result.FilesWritten++
+	result.Files = append(result.Files, "settings.json")
 	return nil
 }
 
