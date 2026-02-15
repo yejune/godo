@@ -3,7 +3,7 @@ name: do-workflow-report
 description: >
   Generates completion reports after all checklist items are done. Aggregates
   sub-checklist results, lessons learned, and test outcomes into a final
-  report.md. Adapted from moai sync workflow for Do's checklist system.
+  report.md. Adapted from Do's checklist-based workflow.
 license: Apache-2.0
 compatibility: Designed for Claude Code
 user-invocable: false
@@ -14,7 +14,7 @@ metadata:
   updated: "2026-02-15"
   tags: "report, completion, summary, lessons-learned"
 
-# MoAI Extension: Triggers
+# Do Extension: Triggers
 triggers:
   keywords: ["report", "completion", "summary", "완료", "보고"]
   agents: ["manager-docs", "manager-quality"]

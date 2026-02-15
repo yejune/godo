@@ -14,7 +14,7 @@ metadata:
   updated: "2026-02-15"
   tags: "team, autopilot, parallel, agent-teams, plan, run, report"
 
-# MoAI Extension: Triggers
+# Do Extension: Triggers
 triggers:
   keywords: ["team", "autopilot", "parallel", "팀"]
   agents: ["team-researcher", "team-analyst", "team-architect", "team-backend-dev", "team-frontend-dev", "team-tester", "team-quality"]

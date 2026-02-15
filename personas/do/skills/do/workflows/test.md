@@ -14,7 +14,7 @@ metadata:
   updated: "2026-02-15"
   tags: "test, tdd, red-green-refactor, quality, coverage"
 
-# MoAI Extension: Triggers
+# Do Extension: Triggers
 triggers:
   keywords: ["test", "tdd", "coverage", "테스트", "red-green", "refactor"]
   agents: ["expert-testing", "manager-tdd"]

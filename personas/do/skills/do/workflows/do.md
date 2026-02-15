@@ -14,7 +14,7 @@ metadata:
   updated: "2026-02-15"
   tags: "do, autonomous, pipeline, default"
 
-# MoAI Extension: Triggers
+# Do Extension: Triggers
 triggers:
   keywords: ["do", "autonomous", "pipeline", "build", "implement", "create"]
   agents: ["do"]

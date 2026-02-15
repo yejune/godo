@@ -14,7 +14,7 @@ metadata:
   updated: "2026-02-15"
   tags: "plan, analysis, architecture, design, requirements"
 
-# MoAI Extension: Triggers
+# Do Extension: Triggers
 triggers:
   keywords: ["plan", "design", "architect", "requirements", "analyze", "설계", "계획", "분석"]
   agents: ["expert-analyst", "expert-architect", "Explore"]

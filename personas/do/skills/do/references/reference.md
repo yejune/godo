@@ -14,7 +14,7 @@ metadata:
   updated: "2026-02-15"
   tags: "reference, patterns, configuration, environment, persona"
 
-# MoAI Extension: Triggers
+# Do Extension: Triggers
 triggers:
   keywords: ["reference", "pattern", "config", "environment", "persona", "mode"]
   agents: ["manager-ddd", "manager-tdd", "manager-quality", "manager-git"]

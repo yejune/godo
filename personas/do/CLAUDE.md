@@ -19,7 +19,7 @@ Do is a unified orchestrator for Claude Code with three execution modes:
 - [HARD] Post-Implementation Review: List potential issues and suggest tests after coding
 - [HARD] Reproduction-First Bug Fix: Write reproduction test before fixing bugs
 
-Core principles are defined in @.claude/rules/do/core/moai-constitution.md.
+Core principles are defined in @.claude/rules/do/core/do-constitution.md.
 
 ### Auto-Escalation
 

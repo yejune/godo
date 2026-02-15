@@ -14,7 +14,7 @@ metadata:
   updated: "2026-02-15"
   tags: "run, implementation, checklist, agent, dispatch"
 
-# MoAI Extension: Triggers
+# Do Extension: Triggers
 triggers:
   keywords: ["run", "implement", "build", "create", "develop", "구현", "만들어"]
   agents: ["manager-ddd", "manager-tdd", "expert-backend", "expert-frontend"]
