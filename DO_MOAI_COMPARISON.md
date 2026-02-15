@@ -999,7 +999,7 @@ EARS 요구사항 작성 (analysis.md)
 
 ### ADR-06: 왜 번호 기반 SPEC 대신 날짜 기반 Jobs인가?
 
-**결정**: `.do/jobs/{YYMMDD}/{title-kebab-case}/`
+**결정**: `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/`
 **MoAI 비교**: `.moai/specs/SPEC-XXX/`
 **근거**: 날짜 기반 구성은 시간순 탐색을 가능하게 한다. 작업 폴더를 보면 언제 작업이 수행되었는지 즉시 알 수 있다. 번호 기반 SPEC-XXX는 순서를 이해하기 위해 레지스트리를 조회해야 한다.
 
@@ -1039,7 +1039,7 @@ EARS 요구사항 작성 (analysis.md)
 | `/moai` | `/do:*` (6개 명령) | 진입점 구조 |
 | `moai-` (스킬 접두사) | `do-` | 스킬 네이밍 |
 | SPEC | Plan + Checklist | 워크플로우 산출물 |
-| SPEC-XXX | `.do/jobs/{YYMMDD}/{title}/` | 산출물 위치 |
+| SPEC-XXX | `.do/jobs/{YY}/{MM}/{DD}/{title}/` | 산출물 위치 |
 | EARS | MoSCoW | 요구사항 형식 |
 | TRUST 5 | dev-*.md의 [HARD] 규칙 | 품질 프레임워크 |
 | TAG Chain | 체크리스트 의존성 (`depends on:`) | 작업 의존성 |

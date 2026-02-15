@@ -31,7 +31,7 @@
 
 - [HARD] 목적: 현황 파악 + 요구사항 정리 + 기술 선택지 비교
 - [HARD] 담당: analyst 에이전트 (expert-analyst 또는 해당 도메인 expert)
-- [HARD] 산출물: `.do/jobs/{YYMMDD}/{title-kebab-case}/analysis.md`
+- [HARD] 산출물: `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/analysis.md`
 - [HARD] Analysis 완료 전 Architecture 진행 금지
 
 Analysis 에이전트 역할:
@@ -46,7 +46,7 @@ Analysis 에이전트 역할:
 - [HARD] 목적: 솔루션 설계 + 인터페이스 명세 + 구현 순서 결정
 - [HARD] 담당: architect 에이전트 (expert-backend, expert-frontend 등 해당 도메인)
 - [HARD] 입력: analysis.md (Analysis 단계 산출물)
-- [HARD] 산출물: `.do/jobs/{YYMMDD}/{title-kebab-case}/architecture.md`
+- [HARD] 산출물: `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/architecture.md`
 - [HARD] Architecture 완료 전 Plan 진행 금지
 
 Architecture 에이전트 역할:

@@ -20,18 +20,18 @@ Analysis -> Architecture -> Plan -> Checklist -> Develop -> Test -> Report
 |-------|-------|---------|
 | Analysis | expert-analyst | Current system analysis, requirements (EARS+MoSCoW), tech comparison |
 | Architecture | expert-architect | Solution design, interfaces, implementation order |
-| Plan | manager-plan | Create plan document at `.do/jobs/{YYMMDD}/{title}/plan.md` |
+| Plan | manager-plan | Create plan document at `.do/jobs/{YY}/{MM}/{DD}/{title}/plan.md` |
 | Checklist | (orchestrator delegates) | Decompose plan into agent-sized items (1-3 files each) |
 | Develop | manager-ddd/tdd or experts | Implementation with living checklist updates |
 | Test | (within develop) | Verification per Test Strategy (unit/integration/E2E/pass) |
-| Report | (orchestrator delegates) | Final report at `.do/jobs/{YYMMDD}/{title}/report.md` |
+| Report | (orchestrator delegates) | Final report at `.do/jobs/{YY}/{MM}/{DD}/{title}/report.md` |
 
 ## Plan Phase
 
 Create plan using EARS+MoSCoW requirements format.
 
 Output:
-- Plan document at `.do/jobs/{YYMMDD}/{title-kebab-case}/plan.md`
+- Plan document at `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/plan.md`
 - EARS format requirements with MoSCoW priority (MUST/SHOULD/COULD/WON'T)
 - Acceptance criteria
 - Technical approach
@@ -56,8 +56,8 @@ Rules:
 - Checklist is a living document — evolves during implementation
 
 Output:
-- Main checklist: `.do/jobs/{YYMMDD}/{title}/checklist.md`
-- Sub-checklists: `.do/jobs/{YYMMDD}/{title}/checklists/{order}_{agent-topic}.md`
+- Main checklist: `.do/jobs/{YY}/{MM}/{DD}/{title}/checklist.md`
+- Sub-checklists: `.do/jobs/{YY}/{MM}/{DD}/{title}/checklists/{order}_{agent-topic}.md`
 
 ## Develop Phase
 
@@ -105,7 +105,7 @@ For non-testable changes (CSS, config, docs, hooks):
 Generate completion report after all checklist items are done.
 
 Output:
-- Report at `.do/jobs/{YYMMDD}/{title}/report.md`
+- Report at `.do/jobs/{YY}/{MM}/{DD}/{title}/report.md`
 - Execution summary, plan deviations, test results, changed files, lessons learned
 
 ## Context Management

@@ -194,7 +194,7 @@ stdin JSON에서 session_id, tool_name, tool_input, tool_output 파싱
   |
   +---> [1. 플랜 파일 파이프라인]
   |       Write/Edit이고 plan.md인 경우:
-  |         .do/plans/에 쓴 경우 --> .do/jobs/{YYMMDD}/{slug}/plan.md로 이동
+  |         .do/plans/에 쓴 경우 --> .do/jobs/{YY}/{MM}/{DD}/{slug}/plan.md로 이동
   |         checklist.md stub 자동 생성
   |         checklists/ 서브디렉토리 생성
   |         리마인더: "체크리스트를 작성하라"
@@ -354,7 +354,7 @@ systemMessage 출력 (미커밋 WARNING 포함, 최근 커밋 수 포함)
 
   Case A: .do/plans/에 작성 (Claude Plan Mode)
     --> 파일 제목에서 slug 추출
-    --> .do/jobs/{YYMMDD}/{slug}/ 디렉토리 생성
+    --> .do/jobs/{YY}/{MM}/{DD}/{slug}/ 디렉토리 생성
     --> plan.md를 올바른 위치로 이동
     --> checklist.md stub 자동 생성 (6종 상태 범례 포함)
     --> checklists/ 서브디렉토리 생성
@@ -415,11 +415,11 @@ DB 연동의 설계 원칙은 네 가지다. 이 원칙들은 Do의 핵심 철�
 -- ================================================================
 -- 작업 단위 (job)
 -- ================================================================
--- .do/jobs/{YYMMDD}/{slug}/ 디렉토리 하나가 jobs 테이블의 한 행에 대응한다.
+-- .do/jobs/{YY}/{MM}/{DD}/{slug}/ 디렉토리 하나가 jobs 테이블의 한 행에 대응한다.
 CREATE TABLE jobs (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     title       TEXT NOT NULL,                    -- kebab-case 제목 (slug)
-    path        TEXT NOT NULL UNIQUE,             -- .do/jobs/260216/login-api/
+    path        TEXT NOT NULL UNIQUE,             -- .do/jobs/26/02/16/login-api/
     status      TEXT NOT NULL DEFAULT 'active',   -- active, completed, archived
     created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
 );

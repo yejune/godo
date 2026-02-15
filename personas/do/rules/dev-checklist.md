@@ -36,18 +36,18 @@
 
 ## 파일 구조 (jobs 디렉토리 통합) [HARD]
 - [HARD] 하나의 작업 = 하나의 폴더 — 모든 산출물이 같은 디렉토리에 위치:
-  - 분석: `.do/jobs/{YYMMDD}/{title-kebab-case}/analysis.md` (복잡한 작업만)
-  - 아키텍처: `.do/jobs/{YYMMDD}/{title-kebab-case}/architecture.md` (복잡한 작업만)
-  - 플랜: `.do/jobs/{YYMMDD}/{title-kebab-case}/plan.md`
-  - 체크리스트: `.do/jobs/{YYMMDD}/{title-kebab-case}/checklist.md`
-  - 완료 보고서: `.do/jobs/{YYMMDD}/{title-kebab-case}/report.md`
-  - 서브 파일: `.do/jobs/{YYMMDD}/{title-kebab-case}/checklists/{order}_{agent-topic}.md`
+  - 분석: `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/analysis.md` (복잡한 작업만)
+  - 아키텍처: `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/architecture.md` (복잡한 작업만)
+  - 플랜: `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/plan.md`
+  - 체크리스트: `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/checklist.md`
+  - 완료 보고서: `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/report.md`
+  - 서브 파일: `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/checklists/{order}_{agent-topic}.md`
 - [HARD] 서브 파일의 `{order}`는 두 자리 숫자: `01`, `02`, ... `99`
 - 디렉토리 없으면 자동 생성
 
 ### 예시 (복잡한 작업)
 ```
-.do/jobs/260211/queue-library-migration/
+.do/jobs/26/02/11/queue-library-migration/
   ├── analysis.md                    ← 현황 분석 (복잡한 작업)
   ├── architecture.md                ← 아키텍처 설계 (복잡한 작업)
   ├── plan.md                        ← 플랜
@@ -61,7 +61,7 @@
 
 ### 예시 (단순한 작업)
 ```
-.do/jobs/260211/login-api-security/
+.do/jobs/26/02/11/login-api-security/
   ├── plan.md                        ← 플랜
   ├── checklist.md                   ← 메인 체크리스트
   ├── report.md                      ← 완료 보고서
@@ -254,7 +254,7 @@
 
 ## Analysis 문서 템플릿 [HARD]
 
-복잡한 작업 시 `.do/jobs/{YYMMDD}/{title-kebab-case}/analysis.md`에 작성.
+복잡한 작업 시 `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/analysis.md`에 작성.
 dev-workflow.md의 복잡도 기준 참조.
 
 ```markdown
@@ -396,7 +396,7 @@ dev-workflow.md의 복잡도 기준 참조.
 
 ## Architecture 문서 템플릿 [HARD]
 
-복잡한 작업 시 `.do/jobs/{YYMMDD}/{title-kebab-case}/architecture.md`에 작성.
+복잡한 작업 시 `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/architecture.md`에 작성.
 analysis.md 완료 후 작성. dev-workflow.md의 복잡도 기준 참조.
 
 ```markdown
