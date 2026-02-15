@@ -2,11 +2,13 @@
 
 Development methodology reference for Do checklist workflow.
 
-For phase overview, token strategy, and transitions, see @spec-workflow.md
+> **Living Checklist**: The checklist evolves during implementation. Test Strategy is declared per-item before coding starts. AI agents judge each item's nature and choose the appropriate methodology (TDD/DDD/pass) — not all items follow the same methodology.
+
+For phase overview, token strategy, and transitions, see @do-development-workflow.md (formerly spec-workflow.md)
 
 ## Methodology Selection
 
-The Run Phase adapts its workflow based on `quality.development_mode` in `.do/config/sections/quality.yaml`:
+The Develop Phase adapts its workflow based on project analysis or user choice:
 
 | Mode | Workflow Cycle | Best For | Agent Strategy |
 |------|---------------|----------|----------------|
@@ -37,8 +39,9 @@ Success Criteria:
 - All checklist requirements implemented
 - Characterization tests passing
 - Behavior snapshots stable (no regression)
-- 85%+ code coverage achieved
-- TRUST 5 quality gates passed
+- 85%+ code coverage achieved (for testable code; CSS/config/docs use alternative verification)
+- Quality dimensions verified (Tested/Readable/Unified/Secured/Trackable)
+- Commit-as-proof: every [o] checklist item has a recorded commit hash
 
 ## TDD Mode
 
@@ -64,7 +67,8 @@ Success Criteria:
 - All tests passing (RED-GREEN-REFACTOR complete)
 - Minimum coverage per commit: 80% (configurable)
 - No test written after implementation code
-- TRUST 5 quality gates passed
+- Quality dimensions verified (Tested/Readable/Unified/Secured/Trackable)
+- Commit-as-proof: every [o] checklist item has a recorded commit hash
 
 ## Hybrid Mode
 
@@ -91,11 +95,12 @@ Success Criteria:
 - New code has TDD-level coverage (85%+)
 - Modified code has characterization tests
 - Overall coverage improvement trend
-- TRUST 5 quality gates passed
+- Quality dimensions verified (Tested/Readable/Unified/Secured/Trackable)
+- Commit-as-proof: every [o] checklist item has a recorded commit hash
 
 ## Methodology Selection Guide
 
-### Auto-Detection (via /do project or /do init)
+### Auto-Detection
 
 The system automatically recommends a methodology based on project analysis:
 
@@ -110,7 +115,7 @@ The system automatically recommends a methodology based on project analysis:
 
 Users can override the auto-detected methodology:
 - During init: Select in the wizard or use `--development-mode` flag
-- After init: Edit `quality.development_mode` in `.do/config/sections/quality.yaml`
+- Per project: Configure in project settings
 - Per session: Set `DO_DEVELOPMENT_MODE` environment variable
 
 ### Methodology Comparison
@@ -122,4 +127,4 @@ Users can override the auto-detected methodology:
 | Best for | Legacy refactoring only | Isolated modules (rare) | All development work |
 | Risk level | Low (preserves behavior) | Medium (requires discipline) | Medium |
 | Coverage exemptions | Allowed | Not allowed | Allowed for legacy only |
-| Run Phase cycle | ANALYZE-PRESERVE-IMPROVE | RED-GREEN-REFACTOR | Both (per change type) |
+| Develop Phase cycle | ANALYZE-PRESERVE-IMPROVE | RED-GREEN-REFACTOR | Both (per change type) |
