@@ -194,9 +194,20 @@ func (r *PatternRegistry) IsWholeFilePersonaSkill(name string) bool {
 // IsWholeFilePersonaSkillDir returns true if the given skill directory name
 // is a whole-directory persona skill dir. All files under skills/<dirName>/
 // (including subdirectories) should be moved entirely to persona output.
+//
+// Matching rules:
+//   - Exact match: dirName == entry (e.g., "moai" matches "moai")
+//   - Prefix match: dirName starts with entry + "-" (e.g., "moai-workflow-project" matches "moai")
+//
+// This ensures that skills like "moai-workflow-project", "moai-docs-generation",
+// etc. are all classified as persona when "moai" is in WholeFileSkillDirs.
 func (r *PatternRegistry) IsWholeFilePersonaSkillDir(dirName string) bool {
 	for _, d := range r.WholeFileSkillDirs {
 		if d == dirName {
+			return true
+		}
+		// Prefix match: "moai" matches "moai-workflow-project", "moai-docs-generation", etc.
+		if strings.HasPrefix(dirName, d+"-") {
 			return true
 		}
 	}
