@@ -1,7 +1,7 @@
 # Do vs MoAI: A Deep Philosophical and Architectural Comparison
 
-**Version**: 2.0.0
-**Date**: 2026-02-15
+**Version**: 2.1.0
+**Date**: 2026-02-16
 **Purpose**: Foundational reference for understanding the philosophical divergence between Do and MoAI
 
 ---
@@ -85,6 +85,25 @@ Do's workflow is: Plan -> Checklist -> Develop -> Test -> Report (simple) or Ana
 **MoAI** signals completion with XML markers: `<moai>DONE</moai>` and `<moai>COMPLETE</moai>`. These are in-session signals -- they exist only in the conversation context and disappear when the session ends.
 
 **Do** requires a git commit hash as proof of completion. A checklist item cannot transition to `[o]` (done) without a recorded commit hash. The commit is immutable, persisted, and traceable. The philosophy: if it wasn't committed, it wasn't done.
+
+### 1.5 Commit-Based Tracking as Core Philosophy
+
+The project owner articulated the deepest reason why commit-based tracking is superior to any in-session tracking:
+
+> "체크리스트 기반의 핵심은 커밋메세지 기록. 수정이 발생해도 커밋메세지를 추가기록으로 이어나가지 수정하지 않으므로 원자성과 멱등성, 추적성등에 월등하다. 이것은 완벽한 하나의 기록과 증명이 가능하다"
+> (The core of checklist-based tracking is the commit message record. Even when modifications occur, commit messages are appended as additional records, never modified -- so it is superior in atomicity, idempotency, and traceability. This enables a perfect, singular record and proof.)
+
+This is a fundamental architectural principle, not just a workflow preference:
+
+- **Append-only**: Commit messages are never rewritten (no `--amend`, no `--force`). Each commit is an immutable historical record.
+- **Atomicity**: One logical change = one commit. The commit boundary IS the work boundary.
+- **Idempotency**: The same sequence of commits always produces the same state. There is no hidden mutable state.
+- **Traceability**: The commit log is a complete audit trail. Every decision, every change, every rollback is recorded permanently.
+- **Proof**: A commit hash in a checklist item (`[o] 완료 (commit: a1b2c3d)`) is cryptographic proof that the work was done. No XML marker, no in-memory flag, no conversation context can provide this level of evidence.
+
+MoAI's `<moai>DONE</moai>` markers exist only in the conversation context. They cannot be audited after the session ends. Do's commit hashes exist in the git history forever. The append-only commit log is not just a tracking mechanism -- it is the **single source of truth** for all work performed.
+
+**Decision**: CORE PHILOSOPHY -- append-only commit log as perfect audit trail. This principle is non-negotiable and informs every aspect of Do's workflow design.
 
 ---
 
@@ -218,6 +237,13 @@ The checklist is not a static document. It is an **agent state persistence mecha
 | `[x]` | failed | Cannot proceed |
 
 Note: `[o]` means done (not `[x]`, which in Do means failed). This intentional divergence from standard markdown checkboxes (`[x]` = checked) prevents ambiguity in a system where failure and completion are different states.
+
+The project owner acknowledged the tension with standard markdown:
+
+> "위 모두가 중요하다. 표준 마크다운을 다르게 쓰게되어 고민이 많다. 다른 무언가의 독자적 방식이 필요한가?"
+> (All of these are important. I've worried a lot about using standard markdown differently. Do we need some other proprietary notation?)
+
+**Decision**: MAINTAIN the current 6-state notation. The checklist is not a markdown document meant for human reading -- it is an **agent state file** that happens to use markdown syntax. The six states (`[ ]`, `[~]`, `[*]`, `[!]`, `[o]`, `[x]`) encode machine-readable agent workflow states that standard markdown's binary checkbox (`[ ]`/`[x]`) cannot represent. The notation serves agents, not renderers.
 
 ### 3.3 Why Checklist Beats SPEC for Agent Continuity
 
@@ -445,7 +471,14 @@ Mode switching is enforced via the `godo` CLI: `godo mode set <mode>`. The statu
 
 ### 7.3 Current Status and Future Direction
 
-The project owner noted that Focus mode's necessity has weakened with the visibility improvements in Agent Teams. Focus mode may consolidate with Do mode in the future, resulting in a 2-mode system (Do/Team). Currently all three modes are maintained, but the trend is toward simplification as Agent Teams matures.
+The project owner explained the original rationale and current status of Focus mode:
+
+> "사실 서브에이전트는 뭐하는지를 모르니까 절차적 확인을 위해 위임하지 않는 모드를 만든것뿐. 에이전트 팀이 생기면서 에이전트가 하는것도 볼수있게 되어 사실 필요성이 약해진것 사실"
+> (The truth is, I created a non-delegating mode only for procedural verification since you can't see what subagents are doing. With Agent Teams, you can now see what agents do, so the necessity has actually weakened.)
+
+Focus mode was born from a visibility problem: subagent execution was opaque, so having a mode where the orchestrator writes code directly gave the user procedural transparency. Agent Teams solved this visibility problem at the infrastructure level, making Focus's original justification weaker.
+
+**Decision**: MAINTAIN all three modes for now, but Focus's necessity has weakened. The trend is toward simplification as Agent Teams matures, potentially consolidating into a 2-mode system (Do/Team).
 
 ---
 
@@ -492,6 +525,13 @@ This is a deliberate philosophical trade-off:
 **The trade-off**: Do pays a token cost for every tool invocation (the hook adds context). MoAI saves those tokens but cannot maintain persona-level consistency between write operations.
 
 Do's choice reflects its core value: **the persona is not a decoration -- it is a structural feature that must be maintained at all times.** Token efficiency is secondary to persona consistency.
+
+The project owner confirmed the priority but demanded optimization:
+
+> "페르소나는 중요하다. 만족하고있다. 하지만 정말 토큰을 소모하고있는지 체크하고 필요하다면 검색해서 더 효율적으로 할수있는법을 찾아라"
+> (The persona is important. I'm satisfied with it. But check whether it really consumes tokens, and if necessary, find a more efficient way.)
+
+**Decision**: KEEP the `.*` matcher for persona consistency, but OPTIMIZE the token overhead. The mandate is clear: persona consistency is non-negotiable, but the implementation must be as token-efficient as possible. This is an ongoing engineering task, not a settled design.
 
 ---
 
@@ -604,6 +644,26 @@ The five dimensions (Tested, Readable, Unified, Secured, Trackable) are all indi
 
 **Why rejected**: Do uses six individual `/do:*` commands. The design philosophy is that explicit, discoverable commands are better than a single entry point with hidden subcommands. A user who types `/do:` sees all six options. A user who types `/moai` must know the subcommand vocabulary.
 
+### 10.9 ADOPTED: Plan Manager Role (manager-plan)
+
+**What it is**: MoAI has `manager-spec`, an agent dedicated to creating SPEC documents during the Plan phase. Do's workflow uses a Plan step but had no dedicated agent role for it.
+
+**Why adopted**: The user confirmed that Do needs an equivalent plan management role. Creating plans, decomposing them into checklists, and maintaining plan-to-checklist consistency is a distinct responsibility that benefits from a dedicated agent.
+
+**What Do calls it**: `manager-plan` (renamed from MoAI's `manager-spec`). The name change reflects the philosophical difference: Do creates plans and checklists, not formal specifications. The agent's responsibility is plan creation, checklist generation, and plan-checklist consistency maintenance.
+
+**Decision**: ADOPT the role, RENAME to `manager-plan` to align with Do's plan-centric (not spec-centric) workflow.
+
+### 10.10 ADOPTED: Philosopher Framework as Independent Capability
+
+**What it is**: MoAI embeds philosophical reasoning (system design principles, architectural wisdom, trade-off analysis) within `manager-strategy`. Do's `do-foundation-philosopher` skill exists but was not positioned as an independent capability.
+
+**Why adopted**: The user confirmed that philosophical reasoning -- the ability to analyze trade-offs, articulate design principles, and reason about architectural decisions at a meta level -- should be an independent capability, not buried inside a strategy manager. This reflects the recognition that "why" questions (Why this architecture? Why this trade-off? Why this approach?) are fundamentally different from "how" questions (How do we implement this?).
+
+**How Do uses it**: The `do-foundation-philosopher` skill is elevated to a first-class capability that can be invoked independently by any agent or directly by the user. It is not gated behind `manager-strategy` or any other coordinator. Philosophical reasoning is a tool available to anyone in the system who needs to think about the "why."
+
+**Decision**: ADOPT as independent skill/agent -- not buried in strategy, but available as a standalone reasoning capability.
+
 ### Summary Table
 
 | MoAI Feature | Do Decision | Reason |
@@ -611,6 +671,8 @@ The five dimensions (Tested, Readable, Unified, Secured, Trackable) are all indi
 | Progressive Disclosure | **ADOPTED** | Universal token efficiency |
 | Error Type Routing | **ADOPTED** | Pragmatic error handling |
 | DDD/TDD/Hybrid | **ADOPTED** | Sound methodology (shared core) |
+| Plan Manager Role | **ADOPTED** | Renamed to manager-plan for plan-centric workflow |
+| Philosopher Framework | **ADOPTED** | Independent capability, not buried in strategy |
 | TRUST 5 Branding | **REJECTED** | Forced acronym, prefer embedded rules |
 | Fixed Phase Budgets | **REJECTED** | Development is not three phases |
 | EARS Format | **REJECTED** | MoSCoW is simpler and sufficient |
@@ -743,7 +805,7 @@ All `do-*` prefixed skills originate from the core:
 | `.moai/config/sections/*.yaml` | `settings.local.json` DO_* env | Configuration |
 | `.moai/learning/` | (none) | Yoda style learning directory |
 | Snapshot/Resume | Checklist state (persistent file) | Continuity mechanism |
-| `manager-spec` | Plan workflow | SPEC creation |
+| `manager-spec` | `manager-plan` | Plan/checklist creation (renamed to reflect plan-centric workflow) |
 | Completion Marker (XML) | Checklist status `[o]` | Task completion |
 | outputStyle: "MoAI" | outputStyle: "pair" | Default style |
 | moai.md (style) | pair.md + persona | Default behavior |
@@ -754,6 +816,8 @@ All `do-*` prefixed skills originate from the core:
 | (none) | File-Detection Triggers | Do unique |
 | (none) | `.*` PostToolUse matcher | Do unique |
 | (none) | Tri-mode (Focus/Do/Team) | Do unique |
+| (none) | Append-only commit log philosophy | Do unique -- core tracking mechanism |
+| `manager-strategy` (embedded) | `do-foundation-philosopher` (independent) | Elevated to standalone capability |
 
 ---
 
@@ -783,6 +847,6 @@ This is Do's deepest differentiator: not a feature that can be copied, but an id
 
 ---
 
-**Document Version**: 2.0.0
-**Date**: 2026-02-15
+**Document Version**: 2.1.0
+**Date**: 2026-02-16
 **Sources**: research-moai-philosophy.md, research-do-philosophy.md, CLAUDE.md, dev-testing.md, dev-workflow.md, dev-checklist.md, dev-environment.md
