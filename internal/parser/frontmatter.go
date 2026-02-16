@@ -128,6 +128,13 @@ func SerializeFrontmatter(fm *model.Frontmatter) (string, error) {
 		delete(out, "memory")
 	}
 
+	// Sync DependsOn structured field to raw map
+	if rawDep := dependsOnToRaw(fm.DependsOn); rawDep != nil {
+		out["depends_on"] = rawDep
+	} else {
+		delete(out, "depends_on")
+	}
+
 	data, err := yaml.Marshal(out)
 	if err != nil {
 		return "", err
@@ -148,6 +155,113 @@ func splitAndTrim(s string, sep string) []string {
 		}
 	}
 	return result
+}
+
+
+// dependsOnToRaw converts a DependsOn struct to a map[string]interface{} for YAML serialization.
+// Returns nil if DependsOn is nil or entirely empty (all fields nil/empty).
+func dependsOnToRaw(dep *model.DependsOn) map[string]interface{} {
+	if dep == nil {
+		return nil
+	}
+
+	out := make(map[string]interface{})
+
+	if len(dep.Phases) > 0 {
+		items := make([]interface{}, len(dep.Phases))
+		for i, p := range dep.Phases {
+			items[i] = p
+		}
+		out["phases"] = items
+	}
+
+	if len(dep.Artifacts) > 0 {
+		items := make([]interface{}, len(dep.Artifacts))
+		for i, a := range dep.Artifacts {
+			items[i] = artifactDepToRaw(a)
+		}
+		out["artifacts"] = items
+	}
+
+	if len(dep.Agents) > 0 {
+		items := make([]interface{}, len(dep.Agents))
+		for i, a := range dep.Agents {
+			items[i] = agentDepToRaw(a)
+		}
+		out["agents"] = items
+	}
+
+	if len(dep.Env) > 0 {
+		items := make([]interface{}, len(dep.Env))
+		for i, e := range dep.Env {
+			items[i] = e
+		}
+		out["env"] = items
+	}
+
+	if len(dep.Services) > 0 {
+		items := make([]interface{}, len(dep.Services))
+		for i, s := range dep.Services {
+			items[i] = serviceDepToRaw(s)
+		}
+		out["services"] = items
+	}
+
+	if len(dep.ChecklistItems) > 0 {
+		items := make([]interface{}, len(dep.ChecklistItems))
+		for i, c := range dep.ChecklistItems {
+			items[i] = c
+		}
+		out["checklist_items"] = items
+	}
+
+	if len(out) == 0 {
+		return nil
+	}
+	return out
+}
+
+// artifactDepToRaw converts an ArtifactDep to its YAML representation.
+// Scalar shorthand: Required=true -> just the path string.
+// Object form: Required=false -> map with path and required fields.
+func artifactDepToRaw(a model.ArtifactDep) interface{} {
+	if a.Required {
+		return a.Path
+	}
+	return map[string]interface{}{
+		"path":     a.Path,
+		"required": a.Required,
+	}
+}
+
+// agentDepToRaw converts an AgentDep to its YAML representation.
+// Scalar shorthand: no Items -> just the name string.
+// Object form: has Items -> map with name and items fields.
+func agentDepToRaw(a model.AgentDep) interface{} {
+	if len(a.Items) == 0 {
+		return a.Name
+	}
+	items := make([]interface{}, len(a.Items))
+	for i, item := range a.Items {
+		items[i] = item
+	}
+	return map[string]interface{}{
+		"name":  a.Name,
+		"items": items,
+	}
+}
+
+// serviceDepToRaw converts a ServiceDep to its YAML representation.
+// Scalar shorthand: Healthcheck=false -> just the name string.
+// Object form: Healthcheck=true -> map with name and healthcheck fields.
+func serviceDepToRaw(s model.ServiceDep) interface{} {
+	if !s.Healthcheck {
+		return s.Name
+	}
+	return map[string]interface{}{
+		"name":        s.Name,
+		"healthcheck": s.Healthcheck,
+	}
 }
 
 // PatchFrontmatterSkills modifies the skills field in raw YAML frontmatter text
