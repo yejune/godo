@@ -139,6 +139,50 @@ func (e *AgentExtractor) cloneFrontmatter(fm *model.Frontmatter) *model.Frontmat
 		copy(clone.Skills, fm.Skills)
 	}
 
+	// Deep copy DependsOn
+	if fm.DependsOn != nil {
+		orig := fm.DependsOn
+		dep := &model.DependsOn{}
+
+		if len(orig.Phases) > 0 {
+			dep.Phases = make([]string, len(orig.Phases))
+			copy(dep.Phases, orig.Phases)
+		}
+
+		if len(orig.Artifacts) > 0 {
+			dep.Artifacts = make([]model.ArtifactDep, len(orig.Artifacts))
+			copy(dep.Artifacts, orig.Artifacts)
+		}
+
+		if len(orig.Agents) > 0 {
+			dep.Agents = make([]model.AgentDep, len(orig.Agents))
+			for i, a := range orig.Agents {
+				dep.Agents[i] = model.AgentDep{Name: a.Name}
+				if len(a.Items) > 0 {
+					dep.Agents[i].Items = make([]string, len(a.Items))
+					copy(dep.Agents[i].Items, a.Items)
+				}
+			}
+		}
+
+		if len(orig.Env) > 0 {
+			dep.Env = make([]string, len(orig.Env))
+			copy(dep.Env, orig.Env)
+		}
+
+		if len(orig.Services) > 0 {
+			dep.Services = make([]model.ServiceDep, len(orig.Services))
+			copy(dep.Services, orig.Services)
+		}
+
+		if len(orig.ChecklistItems) > 0 {
+			dep.ChecklistItems = make([]string, len(orig.ChecklistItems))
+			copy(dep.ChecklistItems, orig.ChecklistItems)
+		}
+
+		clone.DependsOn = dep
+	}
+
 	// Copy raw map
 	if fm.Raw != nil {
 		clone.Raw = make(map[string]interface{}, len(fm.Raw))
