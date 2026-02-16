@@ -1,4 +1,4 @@
-# convert -- MoAI-ADK Persona Converter
+# convert -- Persona Converter for Claude Code
 
 A CLI tool that splits a `.claude/` directory into reusable **core templates** and a **persona layer**, then reassembles them with any persona to produce a complete, deployable `.claude/` directory.
 
@@ -102,9 +102,106 @@ convert assemble --core ./output/core --persona ./output/personas/moai/manifest.
 1. Copy core files to output, filling slot markers with persona content
 2. Apply agent patches (append/remove skills in frontmatter)
 3. Copy persona-only files (agents, skills, rules, commands, hooks)
-4. Apply skill name mappings across all agent files
-5. Merge settings.json (core base + persona overrides)
-6. Copy persona CLAUDE.md
+4. Copy persona characters, spinners, and output styles
+5. Apply skill name mappings across all agent files
+6. Merge settings.json (core base + persona overrides)
+7. Copy persona CLAUDE.md
+
+## Persona Package Structure
+
+A persona package lives under `personas/<name>/` and defines the complete identity, behavior, and tooling for a Claude Code persona. The Do persona (`personas/do/`) serves as the reference implementation.
+
+```
+personas/do/
+├── manifest.yaml              # Declares all persona assets and configuration
+├── CLAUDE.md                  # Top-level persona identity and execution directive
+├── settings.json              # Hook definitions, output style, plans directory
+├── agents/do/                 # Persona-only agent definitions (5 agents)
+├── skills/do/                 # Orchestrator skill + workflows + reference
+│   ├── SKILL.md               #   Intent/Mode Router, Execution Directive
+│   ├── workflows/             #   plan, run, test, report, do, team-do
+│   └── references/            #   Shared pattern reference
+├── rules/                     # Development rules (operational backbone)
+│   ├── dev-checklist.md       #   6-state checklist system
+│   ├── dev-workflow.md        #   Complexity gates, commit discipline
+│   ├── dev-testing.md         #   AI anti-patterns, Real DB only
+│   ├── dev-environment.md     #   Docker-first, .env prohibition
+│   ├── file-reading.md        #   Progressive file loading
+│   └── do/workflow/           #   Persona-specific workflow rules
+├── characters/                # 4 persona characters with YAML frontmatter
+│   ├── young-f.md             #   Energetic 20s female developer (default)
+│   ├── young-m.md             #   Confident 20s male developer
+│   ├── senior-f.md            #   Legendary 50s female developer
+│   └── senior-m.md            #   Senior 50s male architect
+├── spinners/                  # Spinner verb definitions per character (YAML)
+│   ├── young-f.yaml           #   Playful, emoji-rich spinner stems
+│   ├── young-m.yaml           #   Confident spinner stems
+│   ├── senior-f.yaml          #   Calm, professional spinner stems
+│   └── senior-m.yaml          #   Authoritative spinner stems
+├── styles/                    # 3 output styles
+│   ├── sprint.md              #   Minimal talk, immediate execution
+│   ├── pair.md                #   Collaborative pair programming (default)
+│   └── direct.md              #   No-nonsense expert answers
+├── commands/do/               # 6 persona slash commands
+│   ├── checklist.md, mode.md, plan.md, setup.md, style.md, check.md
+└── output-styles/do/          # Legacy output style location (being migrated)
+    ├── sprint.md, pair.md, direct.md
+```
+
+### Characters
+
+Each character file has YAML frontmatter defining structured metadata for programmatic access:
+
+```yaml
+---
+id: young-f
+name: "Do"
+honorific_template: "{{name}}선배"
+honorific_default: "선배"
+tone: "반말+존댓말 혼합 (~할게요, ~했어요, ~해볼까요?)"
+character_summary: "밝고 에너지 넘치는 20대 여성 천재 개발자."
+relationship: "후배가 선배에게 캐주얼한 존중"
+---
+```
+
+The body contains Identity, Personality, and Speech Pattern sections with mode-specific examples (Do/Focus/Team).
+
+### Spinners
+
+Spinner YAML files define the animated status messages shown during tool execution. Each file contains a list of stems (verb phrases) with optional emoji, plus a suffix pattern that cycles through variations:
+
+```yaml
+persona: young-f
+suffix_pattern:
+  cycle: 3
+  suffixes: ["중이에요!", "중이에요 선배!", "중!"]
+stems:
+  - stem: "열심히 일하는"
+    emoji: "🔥"
+  - stem: "뚝딱뚝딱 정성껏 만드는"
+    emoji: "🔨"
+```
+
+### Styles
+
+Styles control **how** the persona communicates, independent of **who** the persona is. Any character can use any style, producing 4 x 3 = 12 behavioral combinations from just 7 definition files.
+
+| Style | Behavior |
+|-------|----------|
+| `sprint` | Minimal talk, execute immediately, results only |
+| `pair` (default) | Collaborative tone, joint decision-making |
+| `direct` | No filler, expert answers only |
+
+## DO_PERSONA Environment Variable
+
+The `DO_PERSONA` environment variable (set in `.claude/settings.local.json`) selects which character is active. The `SessionStart` hook loads the chosen character file, and `PostToolUse` hooks reinforce the persona on every tool call.
+
+| Value | Character | Korean Honorific | Relationship Dynamic |
+|-------|-----------|-----------------|---------------------|
+| `young-f` (default) | Bright, energetic 20s female developer | {name}선배 | Junior showing casual respect to senior |
+| `young-m` | Confident 20s male developer | {name}선배님 | Junior showing formal respect to senior |
+| `senior-f` | Legendary 50s female developer | {name}님 | Senior showing polite respect to colleague |
+| `senior-m` | Industry-legend 50s male architect | {name}씨 | Senior showing warm authority to junior |
 
 ## Development Rules
 
@@ -119,6 +216,17 @@ The persona package includes 5 development rules (`dev-*.md` and `file-reading.m
 | `file-reading.md` | 4-tier progressive file loading by size, Grep-first strategy, token budget awareness |
 
 Without these rules, the persona's checklist system loses its state transition enforcement, the testing philosophy has no concrete prohibitions, and commit discipline becomes an unenforced suggestion. A persona package missing these files will produce a `.claude/` directory that declares a workflow but cannot enforce it.
+
+## Date Format Convention
+
+All date-based directory paths in the Do persona use the `{YY}/{MM}/{DD}` format with forward-slash separators:
+
+```
+.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/plan.md
+.do/jobs/26/02/16/feature-name/plan.md
+```
+
+This applies to jobs directories, plan files, checklist locations, and all date-stamped artifacts.
 
 ## Classification Rules
 
@@ -136,6 +244,9 @@ Files are classified as **core** (shared template) or **persona** (methodology-s
 | **Hooks** | All files under `hooks/` | Persona hook scripts |
 | **Settings** | `settings.json` at `.claude/` root | Persona-specific config fields |
 | **CLAUDE.md** | Project root `CLAUDE.md` | Top-level persona identity |
+| **Characters** | All files under `characters/` | Persona character definitions |
+| **Spinners** | All files under `spinners/` | Spinner verb definitions |
+| **Styles** | All files under `styles/` | Output style definitions |
 | **Headers** | Regex match on section titles | Sections titled "TRUST 5 Compliance", "TAG Chain" |
 | **Content** | Inline text patterns in body | References to "TRUST 5 quality gates" |
 
@@ -150,7 +261,7 @@ Files are classified as **core** (shared template) or **persona** (methodology-s
 
 Some files contain both core and persona content. During extraction:
 - Persona **sections** (matched by header patterns) are replaced with section slot markers
-- Persona **inline text** (matched by content patterns) is replaced with inline slot markers
+- Persona **inline text** (matched by content patterns) are replaced with inline slot markers
 - Persona **skill references** in agent frontmatter are recorded as agent patches
 - The rest of the file remains as a core template
 
@@ -204,6 +315,14 @@ internal/
   template/            Slot registry and slot operations
   model/               Shared types (Document, Section, PersonaManifest, Slot)
 ```
+
+## Related Documents
+
+| Document | Description |
+|----------|-------------|
+| `DO_PERSONA.md` | Do persona identity, philosophy, and design decisions |
+| `RUNBOOK.md` | Operational guide for extraction, assembly, and version upgrades |
+| `DO_MOAI_COMPARISON.md` | Detailed comparison between Do and MoAI philosophies |
 
 ## License
 
