@@ -19,5 +19,6 @@ type Frontmatter struct {
 	PermissionMode string                 `yaml:"permissionMode,omitempty"`
 	Skills         []string               `yaml:"skills,omitempty,flow"`
 	Memory         string                 `yaml:"memory,omitempty"`
+	DependsOn      *DependsOn             `yaml:"depends_on,omitempty"`
 	Raw            map[string]interface{} `yaml:"-"` // Full raw data for round-trip
 }
