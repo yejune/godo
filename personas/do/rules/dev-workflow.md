@@ -153,6 +153,16 @@ Architecture 에이전트 역할:
   - DO_AI_FOOTER=false (기본값): 푸터 없음
 - [HARD] 이 규칙은 개발 에이전트, manager-git 모두에 동일 적용 — Single Source of Truth
 
+### 병렬 에이전트 커밋 격리 [HARD]
+- [HARD] `git add` → `git diff --cached` → `git commit`은 **단일 Bash 호출로** 실행 — staging과 commit 사이에 다른 에이전트가 끼어들 여지 차단
+  - 올바른 예: `git add file1.go file2.go && git diff --cached --name-only && git commit -m "msg"`
+  - 금지: `git add file1.go` (별도 호출) → (시간 경과) → `git commit` (별도 호출)
+- [HARD] `git reset HEAD` 절대 금지 — 다른 에이전트가 staged한 파일을 unstage하면 해당 에이전트의 변경사항이 유실됨
+- [HARD] staging area에 본인 파일 외 다른 파일이 있어도 **절대 건드리지 않음** — 다른 에이전트 파일 unstage/reset/checkout 금지
+- [HARD] 커밋 실패 시 (충돌, staged 오염 등) **자체 해결 시도 금지** — 에러를 그대로 보고하고 오케스트레이터의 해결을 기다림
+  - 이유: 에이전트가 자체 복구를 시도하면 다른 에이전트의 작업을 파괴할 수 있음 — 차라리 충돌을 내는 것이 안전
+- [HARD] 오케스트레이터는 병렬 에이전트 투입 시 "staging + commit을 한 번에 실행하고, 다른 에이전트 파일은 절대 건드리지 마라" 지시 필수
+
 ## 버그 수정 워크플로우
 - [HARD] 재현 우선: 버그를 증명하는 실패 테스트 먼저 작성
 - [HARD] 테스트가 통과할 때까지 코드 수정
