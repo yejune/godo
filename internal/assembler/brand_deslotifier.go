@@ -133,3 +133,17 @@ func (d *BrandDeslotifier) RemapSkillPath(relPath string) string {
 	parts[1] = prefix + dirName
 	return strings.Join(parts, "/")
 }
+
+// RemapBrandDirInPath replaces the source brand directory segment with the target brand
+// directory in file paths. This handles core files under agents/moai/, rules/moai/ etc.
+// being remapped to agents/do/, rules/do/ when assembling for a different persona.
+//
+// Example (sourceBrand="moai", target brandDir="do"):
+//   agents/moai/expert-backend.md → agents/do/expert-backend.md
+//   rules/moai/workflow/spec.md → rules/do/workflow/spec.md
+func (d *BrandDeslotifier) RemapBrandDirInPath(relPath, sourceBrandDir string) string {
+	if d == nil || sourceBrandDir == "" || sourceBrandDir == d.brandDir {
+		return relPath
+	}
+	return strings.Replace(relPath, "/"+sourceBrandDir+"/", "/"+d.brandDir+"/", 1)
+}

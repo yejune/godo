@@ -68,6 +68,7 @@ func (m *Merger) MergeFile(relPath string) (*MergeResult, error) {
 
 	// Remap skill directory paths: add brand prefix back (e.g., skills/lang-python/ → skills/moai-lang-python/).
 	outRelPath := m.deslotifier.RemapSkillPath(relPath)
+	outRelPath = m.deslotifier.RemapBrandDirInPath(outRelPath, m.registry.Source)
 
 	result := &MergeResult{
 		FilesWritten:  1,
