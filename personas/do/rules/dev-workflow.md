@@ -83,6 +83,9 @@ Architecture 에이전트 역할:
   3. Docker 환경 정보 (컨테이너명, 서비스명, 도메인)
   4. **커밋 지시**: "작업 완료 후 반드시 `git add` + `git commit` 수행. 커밋 없이 종료하지 말 것."
   5. **체크리스트 갱신 지시**: "서브 체크리스트의 상태를 작업 진행에 맞춰 반드시 갱신하라. 체크리스트 미갱신 커밋은 미완료로 간주."
+  6. **jobs 문서 언어**: DO_JOBS_LANGUAGE 환경변수에 따라 jobs 문서(analysis.md, architecture.md, plan.md, checklist.md, report.md 등)를 해당 언어로 작성
+- [HARD] jobs 문서 작성 언어는 DO_JOBS_LANGUAGE 환경변수를 따름 — 미설정 시 기본값 "en"(영어)
+- [HARD] DO_LANGUAGE(대화 언어)와 DO_JOBS_LANGUAGE(문서 언어)는 독립적 — 대화는 한국어, 문서는 영어 가능
 
 ### 에이전트 실행 사이클 (멱등성 보장) [HARD]
 - [HARD] 에이전트의 작업은 다음 사이클을 반복하며, 몇 번을 실행해도 동일 결과를 보장해야 한다:

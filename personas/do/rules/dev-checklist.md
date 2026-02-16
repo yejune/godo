@@ -140,7 +140,7 @@
 
 ```markdown
 # {agent-topic}: {작업 제목}
-상태: [ ] | 담당: {에이전트}
+상태: [ ] | 담당: {에이전트} | 작성 언어: DO_JOBS_LANGUAGE 환경변수에 따름 (기본값: en)
 
 ## Problem Summary
 - 무엇을 해결하는가
