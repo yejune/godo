@@ -1,6 +1,6 @@
 # Do Persona: 정체성과 개발 철학
 
-**Version**: 1.1.0
+**Version**: 1.2.0
 **Date**: 2026-02-16
 
 ---
@@ -101,6 +101,7 @@ Do의 페르소나 시스템은 **누가 말하는가**(페르소나)와 **어�
 DO_PERSONA 환경변수 (settings.local.json)
   -> SessionStart hook: godo hook session-start
     -> 선택된 캐릭터 파일 (characters/{persona}.md) 로드
+    -> 선택된 스피너 파일 (spinners/{persona}.yaml) 로드
     -> system-reminder 태그로 페르소나 행동 지시 주입
   -> PostToolUse .* hook: godo hook post-tool-use
     -> 매 도구 호출마다 페르소나 리마인더 재주입
@@ -423,19 +424,53 @@ Do의 철학(체크리스트, commit-as-proof, AI 안티패턴 7종, Real DB onl
 
 | 규칙 파일 | 강제하는 것 | 이것 없이 깨지는 것 |
 |----------|-----------|------------------|
-|  | 6종 상태 전이, 세분화(1항목=1~3파일), 커밋 해시 필수, 서브 체크리스트 3단계 템플릿, Analysis/Architecture 문서 템플릿 | 체크리스트가 단순 할일 목록으로 전락. 상태 추적, 에이전트 연속성, 완료 증명 불가 |
-|  | 복잡도 판단 기준, Analysis->Architecture->Plan 순서, 에이전트 위임 규칙, Read Before Write, 3회 재시도, 커밋 규율 | 작업 흐름이 임의적으로 변함. 복잡한 작업에 분석 없이 바로 코딩 시작 |
-|  | AI 안티패턴 7종 금지, Real DB only, FIRST 원칙, 테스트 데이터 관리, 병렬성 안전, 변이 테스트 사고방식 | AI가 assertion 약화, 테스트 삭제 등으로 가짜 녹색을 만들어도 제재할 근거 없음 |
-|  | Docker-first, bootapp 도메인, .env 금지, 컨테이너 내 실행, healthcheck 대기, 12-Factor 원칙 | localhost 직접 접근, .env 파일 생성, 호스트에서 테스트 실행 등 환경 일관성 붕괴 |
-|  | 4단계 Progressive Loading (크기별), Grep-first 전략, 토큰 예산 인식 | 1000줄 파일을 통째로 읽어 토큰 낭비. 10개 파일 읽으면 컨텍스트 절반 소진 |
+| `dev-checklist.md` | 6종 상태 전이, 세분화(1항목=1~3파일), 커밋 해시 필수, 서브 체크리스트 3단계 템플릿, Analysis/Architecture 문서 템플릿 | 체크리스트가 단순 할일 목록으로 전락. 상태 추적, 에이전트 연속성, 완료 증명 불가 |
+| `dev-workflow.md` | 복잡도 판단 기준, Analysis->Architecture->Plan 순서, 에이전트 위임 규칙, Read Before Write, 3회 재시도, 커밋 규율, **멱등 에이전트 실행 사이클** (READ->CLAIM->WORK->VERIFY->RECORD->COMMIT) | 작업 흐름이 임의적으로 변함. 복잡한 작업에 분석 없이 바로 코딩 시작. 체크리스트 미갱신 무제재 |
+| `dev-testing.md` | AI 안티패턴 7종 금지, Real DB only, FIRST 원칙, 테스트 데이터 관리, 병렬성 안전, 변이 테스트 사고방식 | AI가 assertion 약화, 테스트 삭제 등으로 가짜 녹색을 만들어도 제재할 근거 없음 |
+| `dev-environment.md` | Docker-first, bootapp 도메인, .env 금지, 컨테이너 내 실행, healthcheck 대기, 12-Factor 원칙 | localhost 직접 접근, .env 파일 생성, 호스트에서 테스트 실행 등 환경 일관성 붕괴 |
+| `file-reading.md` | 4단계 Progressive Loading (크기별), Grep-first 전략, 토큰 예산 인식 | 1000줄 파일을 통째로 읽어 토큰 낭비. 10개 파일 읽으면 컨텍스트 절반 소진 |
 
 ### dev-* 규칙과 Do 철학의 관계
 
+dev-* 규칙은 Do 페르소나 패키지의 `rules/` 디렉토리에 위치한다:
+- `personas/do/rules/dev-checklist.md`
+- `personas/do/rules/dev-workflow.md`
+- `personas/do/rules/dev-testing.md`
+- `personas/do/rules/dev-environment.md`
+- `personas/do/rules/file-reading.md`
 
+이 파일들은 assemble 시 `.claude/rules/` 디렉토리로 복사되어 에이전트에 자동 로드된다.
+
+### 멱등 에이전트 실행 사이클
+
+`dev-workflow.md`에 정의된 에이전트의 6단계 멱등 실행 사이클:
+
+```
+READ -> CLAIM -> WORK -> VERIFY -> RECORD -> COMMIT
+```
+
+| 단계 | 행동 | 규칙 |
+|------|------|------|
+| READ | 체크리스트 읽기, 현재 상태 파악 | 항상 최신 상태에서 시작 |
+| CLAIM | 미완료 항목을 `[~]`로 전환 | 중복 작업 방지 |
+| WORK | 코드 작성 + 테스트 | 구현 |
+| VERIFY | 테스트 통과 확인 | 품질 보장 |
+| RECORD | 체크리스트 상태 갱신 (`[o]` + commit 해시) | 영속 상태 기록 |
+| COMMIT | 코드 + 체크리스트 함께 커밋 | 원자적 완료 증명 |
+
+핵심: **체크리스트 미갱신 = VIOLATION**. 코드만 커밋하고 체크리스트를 갱신하지 않으면 위반이다. 코드 변경과 체크리스트 상태 변경이 동일 커밋에 포함되어야 한다.
+
+### DO_AI_FOOTER 환경변수
+
+`DO_AI_FOOTER` 환경변수로 커밋 메시지의 AI 생성 푸터를 제어한다:
+- `DO_AI_FOOTER=true`: 커밋 메시지 끝에 AI 생성 푸터 추가
+- `DO_AI_FOOTER=false` (기본값): 푸터 없음
+
+이 설정은 `settings.local.json`의 `env` 섹션에서 관리된다. 개발 에이전트와 manager-git 모두 동일 규칙을 적용한다.
 
 ### Progress Log 타임스탬프 규칙
 
-체크리스트 Progress Log의 타임스탬프는 **초 단위 정밀도**(HH:MM:SS)를 사용한다.
+체크리스트 Progress Log의 타임스탬프는 **초 단위 정밀도**(`YYYY-MM-DD HH:MM:SS` 형식)를 사용한다.
 
 에이전트의 작업 속도는 인간과 다르다. 분 단위(HH:MM)로는 여러 상태 전이가 동일 타임스탬프를 가질 수 있어 순서가 모호해진다. 초 단위가 이벤트 순서를 명확히 보장한다.
 
@@ -590,15 +625,18 @@ GODO_HOOK_ARCHITECT.md에서 상세히 다룰 예정. hook 시스템이 외부 �
 | DO_MOAI_COMPARISON.md | `DO_MOAI_COMPARISON.md` | Do와 MoAI 간 상세 철학 비교, ADR, 채택/거부 결정 |
 | RUNBOOK.md | `RUNBOOK.md` | moai 분해 및 페르소나 관리 운영 가이드 |
 | GODO_HOOK_ARCHITECT.md | (작성 예정) | Hook 아키텍처 설계, DB 연동, 토큰 최적화 |
-| dev-testing.md | `.claude/rules/dev-testing.md` | 테스트 규칙, AI 안티패턴 7종, Real DB Only |
-| dev-workflow.md | `.claude/rules/dev-workflow.md` | 개발 워크플로우, 복잡도 판단, 커밋 규율 |
-| dev-checklist.md | `.claude/rules/dev-checklist.md` | 체크리스트 시스템, 6종 상태, 서브 체크리스트 템플릿 |
-| dev-environment.md | `.claude/rules/dev-environment.md` | Docker-first, bootapp 도메인, .env 금지 |
-| characters/*.md | `personas/do/characters/` | 4종 페르소나 캐릭터 정의 |
-| output-styles/do/*.md | `personas/do/output-styles/do/` | 3종 스타일 정의 |
+| dev-testing.md | `personas/do/rules/dev-testing.md` | 테스트 규칙, AI 안티패턴 7종, Real DB Only |
+| dev-workflow.md | `personas/do/rules/dev-workflow.md` | 개발 워크플로우, 복잡도 판단, 멱등 실행 사이클, 커밋 규율 |
+| dev-checklist.md | `personas/do/rules/dev-checklist.md` | 체크리스트 시스템, 6종 상태, 서브 체크리스트 템플릿 |
+| dev-environment.md | `personas/do/rules/dev-environment.md` | Docker-first, bootapp 도메인, .env 금지 |
+| file-reading.md | `personas/do/rules/file-reading.md` | 4단계 Progressive Loading, 토큰 예산 인식 |
+| characters/*.md | `personas/do/characters/` | 4종 페르소나 캐릭터 정의 (YAML frontmatter 포함) |
+| spinners/*.yaml | `personas/do/spinners/` | 4종 페르소나별 스피너 메시지 (YAML) |
+| styles/*.md | `personas/do/styles/` | 3종 스타일 정의 (MoAI 잔재 제거 완료) |
+| output-styles/do/*.md | `personas/do/output-styles/do/` | 3종 스타일 정의 (assemble 출력용) |
 
 ---
 
-**Document Version**: 1.0.0
+**Document Version**: 1.2.0
 **Date**: 2026-02-16
 **Sources**: DO_MOAI_COMPARISON.md, research-do-philosophy.md, CLAUDE.md (do-focus), personas/do/

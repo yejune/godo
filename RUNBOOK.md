@@ -211,7 +211,7 @@ mv ./personas/do/rules/moai ./personas/do/rules/do
 | `moai-` (skill prefix) | `do-` | 스킬명 |
 | `MoAI` | `Do` | 브랜드명 |
 | `SPEC-XXX` | checklist 기반 | 워크플로우 |
-| `YYMMDD` | `YY/MM/DD` | 날짜 형식 |
+| `YYMMDD` | `YY/MM/DD` | 날짜 형식 (flat -> nested 디렉토리) |
 
 파일별 변환 내용:
 
@@ -592,15 +592,20 @@ Do 페르소나 패키지에는 dev-* 개발 규칙 파일들이 포함된다. �
 
 | 규칙 파일 | 강제하는 Do 철학 | moai 대응 |
 |----------|----------------|----------|
-| `dev-checklist.md` | 6종 상태 전이, 커밋 해시 필수, 서브 체크리스트 템플릿, Analysis/Architecture 템플릿 | moai는 SPEC 문서 + TRUST 5로 대체 |
-| `dev-workflow.md` | 복잡도 판단, Analysis->Architecture->Plan 순서, 에이전트 위임, 커밋 규율 | moai는 SPEC workflow (Plan/Run/Sync)로 대체 |
+| `dev-checklist.md` | 6종 상태 전이, 커밋 해시 필수, 서브 체크리스트 템플릿, Analysis/Architecture 템플릿, **날짜 형식 `YY/MM/DD` nested** | moai는 SPEC 문서 + TRUST 5로 대체 |
+| `dev-workflow.md` | 복잡도 판단, Analysis->Architecture->Plan 순서, 에이전트 위임, 커밋 규율, **멱등 에이전트 실행 사이클** (READ->CLAIM->WORK->VERIFY->RECORD->COMMIT), **DO_AI_FOOTER** 커밋 푸터 제어 | moai는 SPEC workflow (Plan/Run/Sync)로 대체 |
 | `dev-testing.md` | AI 안티패턴 7종 금지, Real DB only, FIRST 원칙, 변이 테스트 사고방식 | moai는 TRUST 5 Tested 기둥으로 부분 대응 |
 | `dev-environment.md` | Docker-first, bootapp 도메인, .env 금지, 12-Factor 원칙 | 양쪽 공유 (core 규칙) |
 | `file-reading.md` | 4단계 Progressive Loading, 토큰 예산 인식 | 양쪽 공유 (core 규칙) |
 
-**Progress Log 타임스탬프**: Do의 체크리스트 Progress Log는 **초 단위 정밀도**(HH:MM:SS)를 사용한다. 에이전트 작업 속도는 인간과 달라 분 단위로는 이벤트 순서가 모호해지기 때문이다.
+**Progress Log 타임스탬프**: Do의 체크리스트 Progress Log는 **초 단위 정밀도**(`YYYY-MM-DD HH:MM:SS` 형식)를 사용한다. 에이전트 작업 속도는 인간과 달라 분 단위로는 이벤트 순서가 모호해지기 때문이다.
 
-**버전업 시 주의**: moai가 core rules(dev-environment.md, file-reading.md)를 변경하면 자동 반영되지만, Do 전용 규칙(dev-checklist.md, dev-workflow.md, dev-testing.md)은 Do 페르소나의 정체성 경계에 속하므로 수동 검토가 필요하다. 특히 `dev-checklist.md`의 상태 전이 규칙과 `dev-testing.md`의 AI 안티패턴 7종은 Do 고유 철학이므로 moai 변경에 의해 덮어씌워져서는 안 된다.
+**버전업 시 주의**: moai가 core rules(dev-environment.md, file-reading.md)를 변경하면 자동 반영되지만, Do 전용 규칙(dev-checklist.md, dev-workflow.md, dev-testing.md)은 Do 페르소나의 정체성 경계에 속하므로 수동 검토가 필요하다. 특히:
+- `dev-checklist.md`의 상태 전이 규칙과 날짜 형식(`YY/MM/DD` nested)
+- `dev-workflow.md`의 멱등 에이전트 실행 사이클(READ->CLAIM->WORK->VERIFY->RECORD->COMMIT)과 DO_AI_FOOTER 규칙
+- `dev-testing.md`의 AI 안티패턴 7종
+
+이들은 Do 고유 철학이므로 moai 변경에 의해 덮어씌워져서는 안 된다.
 
 ### 5.3 기타 Persona 파일 매핑
 
@@ -1009,13 +1014,13 @@ moai-adk가 업데이트될 때마다 아래 항목을 순서대로 확인한다
 |------------|----------|----------|-------------|
 | 삼원 실행 구조 (Do/Focus/Team) | CRITICAL | `grep "나는 Do다" personas/do/CLAUDE.md` | 절대 변경 금지. moai 변경 무시. |
 | 체크리스트 시스템 (`[o][~][*][!][x]`) | CRITICAL | `grep "\[o\]" personas/do/skills/do/workflows/run.md` | 절대 변경 금지. |
-| 페르소나 4종 캐릭터 | HIGH | `ls personas/do/characters/` (4개 파일) | moai에 캐릭터 추가돼도 Do 캐릭터는 독립. |
-| 스타일 3종 (sprint/pair/direct) | HIGH | `ls personas/do/output-styles/do/` (3개 파일) | moai 스타일 변경과 무관. |
+| 페르소나 4종 캐릭터 | HIGH | `ls personas/do/characters/` (4개 파일, YAML frontmatter 포함) | moai에 캐릭터 추가돼도 Do 캐릭터는 독립. |
+| 스타일 3종 (sprint/pair/direct) | HIGH | `ls personas/do/output-styles/do/` + `ls personas/do/styles/` (각 3개 파일) | moai 스타일 변경과 무관. MoAI 잔재 제거 완료. |
 | godo 직접 호출 패턴 | HIGH | `grep "godo hook" personas/do/settings.json` | shell wrapper 도입 금지. |
 | 한국어 선언문 | HIGH | `grep "말하면 한다" personas/do/CLAUDE.md` | 영어로 대체 금지. |
 | 6개 개별 커맨드 | MEDIUM | `ls personas/do/commands/do/` (6개 파일) | `/moai` 통합 진입점으로 전환 금지. |
 | Jobs 디렉토리 경로 | MEDIUM | `grep "plansDirectory" personas/do/settings.json` | `.moai/specs/` 패턴 도입 금지. |
-| DO_* 환경변수 체계 | MEDIUM | `grep "DO_MODE" personas/do/` | `.moai/config/*.yaml` 방식으로 전환 금지. |
+| DO_* 환경변수 체계 | MEDIUM | `grep "DO_MODE" personas/do/`; `grep "DO_AI_FOOTER" personas/do/` | `.moai/config/*.yaml` 방식으로 전환 금지. DO_AI_FOOTER 포함. |
 
 #### Step 2: moai 변경이 Do에 미치는 영향 분류
 
@@ -1146,7 +1151,12 @@ grep -r "<moai>" ${PERSONA}/ 2>/dev/null
 | 5 | 스타일이 sprint/pair/direct | `ls output-styles/do/` | 3개 파일 |
 | 6 | 커맨드가 /do:* 개별 방식 | `ls commands/do/` | 6개 파일 |
 | 7 | Jobs 경로가 `.do/jobs/` | `grep plansDirectory settings.json` | `.do/jobs` |
-| 8 | 페르소나 캐릭터 4종 | `ls characters/` | 4개 파일 |
+| 8 | 페르소나 캐릭터 4종 | `ls characters/` | 4개 파일 (YAML frontmatter) |
+| 9 | 스피너 4종 | `ls spinners/` | 4개 YAML 파일 |
+| 10 | 스타일 3종 (MoAI 잔재 제거) | `ls styles/` | 3개 파일 (pair/sprint/direct) |
+| 11 | 날짜 형식 nested | `grep "YY/MM/DD" rules/dev-checklist.md` | `{YY}/{MM}/{DD}/{title}/` 형식 |
+| 12 | 멱등 실행 사이클 | `grep "READ.*CLAIM" rules/dev-workflow.md` | 6단계 사이클 존재 |
+| 13 | DO_AI_FOOTER | `grep "DO_AI_FOOTER" rules/dev-workflow.md` | 환경변수 제어 존재 |
 
 ### 9.4 변환 워크플로우
 
