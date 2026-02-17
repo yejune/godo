@@ -57,6 +57,7 @@ func runClaude(cmd *cobra.Command, args []string) error {
 	chrome := getString("DO_CLAUDE_CHROME") == "true"
 	cont := getString("DO_CLAUDE_CONTINUE") == "true"
 	autoSync := getString("DO_CLAUDE_AUTO_SYNC") == "true"
+	model := getString("DO_CLAUDE_MODEL")
 
 	var passThrough []string
 	for _, arg := range filteredArgs {
@@ -94,6 +95,9 @@ func runClaude(cmd *cobra.Command, args []string) error {
 	}
 	if cont {
 		claudeArgs = append(claudeArgs, "--continue")
+	}
+	if model != "" {
+		claudeArgs = append(claudeArgs, "--model", model)
 	}
 	claudeArgs = append(claudeArgs, passThrough...)
 
