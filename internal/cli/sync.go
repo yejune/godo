@@ -53,13 +53,28 @@ func runSync(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("create .claude: %w", err)
 	}
 
-	// Copy directories
-	dirs := []string{"agents", "commands", "rules", "skills", "styles", "characters", "spinners"}
+	// Copy framework directories to .claude/
+	dirs := []string{"agents", "commands", "rules", "skills", "styles"}
 	for _, dir := range dirs {
 		src := filepath.Join(distDir, dir)
 		if info, err := os.Stat(src); err == nil && info.IsDir() {
 			if err := copyDir(src, filepath.Join(".claude", dir)); err != nil {
 				return fmt.Errorf("copy %s: %w", dir, err)
+			}
+		}
+	}
+
+	// Copy persona files to .claude/personas/do/ (where persona.ResolveDir() expects them)
+	personaDirs := []string{"characters", "spinners"}
+	personaOut := filepath.Join(".claude", "personas", "do")
+	if err := os.MkdirAll(personaOut, 0755); err != nil {
+		return fmt.Errorf("create personas dir: %w", err)
+	}
+	for _, dir := range personaDirs {
+		src := filepath.Join(distDir, dir)
+		if info, err := os.Stat(src); err == nil && info.IsDir() {
+			if err := copyDir(src, filepath.Join(personaOut, dir)); err != nil {
+				return fmt.Errorf("copy persona %s: %w", dir, err)
 			}
 		}
 	}

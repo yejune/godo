@@ -24,9 +24,14 @@ clean:
 dev: build
 	rm -rf .claude
 	mkdir -p .claude
-	@# Copy all assembled dirs/files into .claude/
-	@for item in agents commands rules skills styles characters spinners; do \
+	@# Copy framework dirs into .claude/
+	@for item in agents commands rules skills styles; do \
 		[ -d $(DIST)/$$item ] && cp -r $(DIST)/$$item .claude/ || true; \
+	done
+	@# Copy persona files to .claude/personas/do/ (where persona.ResolveDir expects them)
+	@mkdir -p .claude/personas/do
+	@for item in characters spinners; do \
+		[ -d $(DIST)/$$item ] && cp -r $(DIST)/$$item .claude/personas/do/ || true; \
 	done
 	@[ -f $(DIST)/settings.json ] && cp $(DIST)/settings.json .claude/ || true
 	@[ -f $(DIST)/registry.yaml ] && cp $(DIST)/registry.yaml .claude/ || true
