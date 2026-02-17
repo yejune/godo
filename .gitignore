@@ -7,3 +7,4 @@ godo
 # Do runtime
 .do/.latest-version
 .do/memory/
+godo.rb

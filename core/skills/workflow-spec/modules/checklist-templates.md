@@ -6,6 +6,10 @@ Each sub file (`{order}_{agent-topic}.md`) must include the following sections:
 # {agent-topic}: {task title}
 Status: [ ] | Owner: {agent} | Language: per DO_JOBS_LANGUAGE env var (default: en)
 
+**State Legend**: [ ] pending | [~] in progress | [*] testing | [!] blocked | [o] done | [x] failed
+
+> **Token Budget Warning**: Check file size before reading — never read 500+ line files in full (use Grep for relevant sections only). At ~10% tokens remaining, record current state in checklist and report to super agent.
+
 ## Problem Summary
 - What is being solved
 - Why this work is needed
@@ -17,7 +21,7 @@ Status: [ ] | Owner: {agent} | Language: per DO_JOBS_LANGUAGE env var (default: 
 - [ ] Verification complete (one of the following):
   - Test required: `path/to/file_test.go` written and passing
   - Test not required: verification method specified (build check, manual check, etc.)
-- [ ] Committed
+- [ ] Committed (commit: {hash}, files: {modified file list})
 
 ## Solution Approach
 - Chosen approach

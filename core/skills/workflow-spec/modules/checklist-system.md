@@ -135,3 +135,63 @@
 - [ ] #3 Frontend login form (depends on: #2)
 - [!] #4 Social login integration (depends on: #2, blocker: OAuth key not issued)
 ```
+
+## [~] Start Enforcement [HARD]
+- [HARD] Main checklist Phase/item must be set to `[~]` before sub-checklist work can begin
+- [HARD] Sub-checklist item must be set to `[~]` before actual coding work can begin
+- [HARD] No completion without start — `[ ] → [o]` direct transition is VIOLATION
+- [HARD] Agent must update main checklist item to `[~]` first when starting work
+- [HARD] This rule guarantees real-time tracking of progress
+
+## Individual Item Tracking [HARD]
+- [HARD] Items must transition state individually — batch completion is VIOLATION
+- [HARD] Complete one item → update checklist state → start next item
+- [HARD] Marking multiple items as `[o]` simultaneously is VIOLATION
+
+## Progress Summary Table Update [HARD]
+- [HARD] Main checklist.md progress summary table must be updated on every state change
+- [HARD] When agent completes sub-checklist item, also update main checklist summary table
+- [HARD] User must be able to see full progress status by reading main checklist.md alone
+
+## Sub-Checklist Split Threshold [HARD]
+- [HARD] Review splitting when sub-checklist has more than 5 items
+- [HARD] Mandatory split when sub-checklist has more than 10 items — create additional agents
+- [HARD] Each split sub-checklist must be independently completable
+
+## Project Git Protection [HARD]
+
+Destructive git commands that overwrite/delete files are forbidden project-wide.
+
+- [HARD] Banned commands:
+  - `git checkout .` / `git checkout -- <path>` — overwrites working content
+  - `git reset --hard` — destroys committed changes
+  - `git reset HEAD <path>` — unstaging causes commit omission
+  - `git clean -f` / `git clean -fd` — deletes untracked files
+  - `git stash` — risk of loss during temporary storage
+  - `git restore .` / `git restore <path>` — same as checkout overwrite
+  - `git rebase` (with squash/drop) — alters commit history
+  - `git push --force` / `git push -f` — destroys remote history
+  - `rm -rf` — direct deletion
+- [HARD] Fix mistakes by `git add` → `git commit` — preserve history
+- [HARD] Exception only when user explicitly instructs with full risk acknowledgment
+
+## Checklist Path Tracing [HARD]
+- [HARD] Include related sub-checklist path in commit message when committing code changes
+- [HARD] Commit message format: `ref: .do/jobs/{path}/checklists/{NN}_{agent}.md`
+- [HARD] Also include checklist path as comments in modified source code where possible
+  - Example: `// ref: .do/jobs/26/02/17/login-api/checklists/01_expert-backend.md`
+  - Use language-appropriate comment syntax (Go: `//`, Python: `#`, JS/TS: `//`)
+  - Place near file top or changed function
+- [HARD] Same format for subsequent modifications via add/commit — enables traceability
+
+## Agent Token Exhaustion Protocol [HARD]
+- [HARD] When agent reaches ~10% remaining tokens, self-assess:
+  - If completable: finish the work
+  - If not: record current state in checklist → report to super agent
+- [HARD] Super agent creates new agent to continue work on report
+- [HARD] Checklist is the sole handoff mechanism — never depend on message passing
+
+## Agent Prompt Token Optimization [HARD]
+- [HARD] Never instruct agent to read entire large files (500+ lines)
+- [HARD] Extract only relevant sections and inject directly into prompt
+- [HARD] For large artifacts (architecture.md, analysis.md), provide only the relevant Phase excerpt
