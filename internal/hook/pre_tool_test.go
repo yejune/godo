@@ -181,3 +181,109 @@ func TestExtractCommand_NoCommandField(t *testing.T) {
 		t.Errorf("expected empty string when no command field, got %q", result)
 	}
 }
+
+func TestHandlePreTool_AsksForDangerousBashCommand(t *testing.T) {
+	input := &Input{
+		ToolName:  "Bash",
+		ToolInput: json.RawMessage(`{"command": "git push --force"}`),
+	}
+	output := HandlePreTool(input)
+
+	if output.HookSpecificOutput == nil {
+		t.Fatal("expected HookSpecificOutput to be non-nil")
+	}
+	if output.HookSpecificOutput.PermissionDecision != DecisionAsk {
+		t.Errorf("expected decision %q for git push --force, got %q", DecisionAsk, output.HookSpecificOutput.PermissionDecision)
+	}
+}
+
+func TestHandlePreTool_AllowsSafeBashCommand(t *testing.T) {
+	input := &Input{
+		ToolName:  "Bash",
+		ToolInput: json.RawMessage(`{"command": "go test ./..."}`),
+	}
+	output := HandlePreTool(input)
+
+	if output.HookSpecificOutput == nil {
+		t.Fatal("expected HookSpecificOutput to be non-nil")
+	}
+	if output.HookSpecificOutput.PermissionDecision != DecisionAllow {
+		t.Errorf("expected decision %q for safe command, got %q", DecisionAllow, output.HookSpecificOutput.PermissionDecision)
+	}
+}
+
+func TestHandlePreTool_EmptyBashCommand(t *testing.T) {
+	input := &Input{
+		ToolName:  "Bash",
+		ToolInput: json.RawMessage(`{"command": ""}`),
+	}
+	output := HandlePreTool(input)
+
+	if output.HookSpecificOutput == nil {
+		t.Fatal("expected HookSpecificOutput to be non-nil")
+	}
+	if output.HookSpecificOutput.PermissionDecision != DecisionAllow {
+		t.Errorf("expected decision %q for empty command, got %q", DecisionAllow, output.HookSpecificOutput.PermissionDecision)
+	}
+}
+
+func TestHandlePreTool_EditDeniesSSHKey(t *testing.T) {
+	input := &Input{
+		ToolName:  "Edit",
+		ToolInput: json.RawMessage(`{"file_path": "/home/user/.ssh/id_rsa"}`),
+	}
+	output := HandlePreTool(input)
+
+	if output.HookSpecificOutput == nil {
+		t.Fatal("expected HookSpecificOutput to be non-nil")
+	}
+	if output.HookSpecificOutput.PermissionDecision != DecisionDeny {
+		t.Errorf("expected decision %q, got %q", DecisionDeny, output.HookSpecificOutput.PermissionDecision)
+	}
+}
+
+func TestHandlePreTool_EditAsksForLockFile(t *testing.T) {
+	input := &Input{
+		ToolName:  "Edit",
+		ToolInput: json.RawMessage(`{"file_path": "/project/package-lock.json"}`),
+	}
+	output := HandlePreTool(input)
+
+	if output.HookSpecificOutput == nil {
+		t.Fatal("expected HookSpecificOutput to be non-nil")
+	}
+	if output.HookSpecificOutput.PermissionDecision != DecisionAsk {
+		t.Errorf("expected decision %q for Edit on lock file, got %q", DecisionAsk, output.HookSpecificOutput.PermissionDecision)
+	}
+}
+
+func TestHandlePreTool_GlobAllowsNormalPath(t *testing.T) {
+	input := &Input{
+		ToolName:  "Glob",
+		ToolInput: json.RawMessage(`{"file_path": "/home/user/project/src"}`),
+	}
+	output := HandlePreTool(input)
+
+	if output.HookSpecificOutput == nil {
+		t.Fatal("expected HookSpecificOutput to be non-nil")
+	}
+	if output.HookSpecificOutput.PermissionDecision != DecisionAllow {
+		t.Errorf("expected decision %q, got %q", DecisionAllow, output.HookSpecificOutput.PermissionDecision)
+	}
+}
+
+func TestHandlePreTool_WriteEmptyInput(t *testing.T) {
+	input := &Input{
+		ToolName:  "Write",
+		ToolInput: json.RawMessage(`{}`),
+	}
+	output := HandlePreTool(input)
+
+	if output.HookSpecificOutput == nil {
+		t.Fatal("expected HookSpecificOutput to be non-nil")
+	}
+	// Empty file path should allow
+	if output.HookSpecificOutput.PermissionDecision != DecisionAllow {
+		t.Errorf("expected decision %q for empty input, got %q", DecisionAllow, output.HookSpecificOutput.PermissionDecision)
+	}
+}

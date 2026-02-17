@@ -181,3 +181,16 @@ func Test_NewPostToolBlockOutput_empty_context(t *testing.T) {
 		t.Error("expected HookSpecificOutput to be nil when context is empty")
 	}
 }
+
+func Test_NewBlockOutput(t *testing.T) {
+	out := NewBlockOutput("reason")
+	if out.HookSpecificOutput == nil {
+		t.Fatal("expected non-nil HookSpecificOutput")
+	}
+	if out.HookSpecificOutput.PermissionDecision != DecisionDeny {
+		t.Errorf("decision: got %q, want %q", out.HookSpecificOutput.PermissionDecision, DecisionDeny)
+	}
+	if out.HookSpecificOutput.PermissionDecisionReason != "reason" {
+		t.Errorf("reason: got %q, want %q", out.HookSpecificOutput.PermissionDecisionReason, "reason")
+	}
+}

@@ -1,6 +1,10 @@
 package hook
 
-import "testing"
+import (
+	"os"
+	"path/filepath"
+	"testing"
+)
 
 func Test_ParseChecklistContent_all_statuses(t *testing.T) {
 	content := `# Checklist
@@ -149,4 +153,135 @@ func containsSubstring(s, sub string) bool {
 		}
 	}
 	return false
+}
+
+func Test_ParseChecklistFile_valid_file(t *testing.T) {
+	f, err := os.CreateTemp("", "checklist-test-*.md")
+	if err != nil {
+		t.Fatalf("failed to create temp file: %v", err)
+	}
+	defer os.Remove(f.Name())
+
+	content := `# Test Checklist
+- [ ] pending task
+- [~] in progress task
+- [o] done task
+`
+	if _, err := f.WriteString(content); err != nil {
+		t.Fatalf("failed to write: %v", err)
+	}
+	f.Close()
+
+	stats, err := ParseChecklistFile(f.Name())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if stats.Total != 3 {
+		t.Errorf("Total: got %d, want 3", stats.Total)
+	}
+	if stats.Pending != 1 {
+		t.Errorf("Pending: got %d, want 1", stats.Pending)
+	}
+	if stats.InProgress != 1 {
+		t.Errorf("InProgress: got %d, want 1", stats.InProgress)
+	}
+	if stats.Done != 1 {
+		t.Errorf("Done: got %d, want 1", stats.Done)
+	}
+}
+
+func Test_ParseChecklistFile_nonexistent_file(t *testing.T) {
+	_, err := ParseChecklistFile("/nonexistent/path/checklist.md")
+	if err == nil {
+		t.Fatal("expected error for non-existent file")
+	}
+}
+
+func Test_ParseChecklistFile_empty_file(t *testing.T) {
+	f, err := os.CreateTemp("", "checklist-test-*.md")
+	if err != nil {
+		t.Fatalf("failed to create temp file: %v", err)
+	}
+	defer os.Remove(f.Name())
+	f.Close()
+
+	stats, err := ParseChecklistFile(f.Name())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if stats.Total != 0 {
+		t.Errorf("Total: got %d, want 0", stats.Total)
+	}
+}
+
+func Test_FindLatestChecklist_no_jobs_dir(t *testing.T) {
+	// Save current directory
+	origDir, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get cwd: %v", err)
+	}
+
+	// Work in a temp dir with no .do/jobs/
+	tmpDir := t.TempDir()
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("failed to chdir: %v", err)
+	}
+	defer os.Chdir(origDir)
+
+	result := FindLatestChecklist()
+	if result != "" {
+		t.Errorf("expected empty string when no .do/jobs/, got %q", result)
+	}
+}
+
+func Test_FindLatestChecklist_with_checklist_file(t *testing.T) {
+	origDir, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get cwd: %v", err)
+	}
+
+	tmpDir := t.TempDir()
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("failed to chdir: %v", err)
+	}
+	defer os.Chdir(origDir)
+
+	// Create .do/jobs/26/02/18/test-task/checklist.md
+	checklistDir := filepath.Join(tmpDir, ".do", "jobs", "26", "02", "18", "test-task")
+	if err := os.MkdirAll(checklistDir, 0755); err != nil {
+		t.Fatalf("failed to create dirs: %v", err)
+	}
+	checklistPath := filepath.Join(checklistDir, "checklist.md")
+	if err := os.WriteFile(checklistPath, []byte("- [ ] task 1\n- [o] task 2\n"), 0644); err != nil {
+		t.Fatalf("failed to write checklist: %v", err)
+	}
+
+	result := FindLatestChecklist()
+	if result == "" {
+		t.Fatal("expected non-empty checklist path")
+	}
+}
+
+func Test_ChecklistStats_HasIncomplete_with_testing(t *testing.T) {
+	// Testing status alone does not count as incomplete
+	stats := &ChecklistStats{Total: 2, Testing: 1, Done: 1}
+	if stats.HasIncomplete() {
+		t.Error("expected HasIncomplete=false when only testing items (no in-progress or blocked)")
+	}
+}
+
+func Test_ChecklistStats_Summary_with_testing(t *testing.T) {
+	stats := &ChecklistStats{Total: 1, Testing: 1}
+	got := stats.Summary()
+	if got != "[*]1" {
+		t.Errorf("Summary: got %q, want %q", got, "[*]1")
+	}
+}
+
+func Test_ChecklistStats_Summary_with_blocked(t *testing.T) {
+	stats := &ChecklistStats{Total: 1, Blocked: 1}
+	got := stats.Summary()
+	if got != "[!]1" {
+		t.Errorf("Summary: got %q, want %q", got, "[!]1")
+	}
 }

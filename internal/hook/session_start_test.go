@@ -1,6 +1,9 @@
 package hook
 
-import "testing"
+import (
+	"os"
+	"testing"
+)
 
 func Test_HandleSessionStart_returns_continue(t *testing.T) {
 	input := &Input{SessionID: "test-session"}
@@ -31,5 +34,48 @@ func Test_HandleSessionStart_contains_mode_info(t *testing.T) {
 	// Mode info should reference the execution mode prefix pattern
 	if !containsSubstring(output.SystemMessage, "실행 모드") {
 		t.Errorf("SystemMessage should contain mode info, got: %q", output.SystemMessage)
+	}
+}
+
+func Test_HandleSessionStart_no_persona_dir(t *testing.T) {
+	// Ensure persona dir is not found by working from a temp directory
+	origDir, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get cwd: %v", err)
+	}
+
+	tmpDir := t.TempDir()
+	origProjectDir := os.Getenv("CLAUDE_PROJECT_DIR")
+	os.Setenv("CLAUDE_PROJECT_DIR", tmpDir)
+	defer func() {
+		os.Chdir(origDir)
+		if origProjectDir == "" {
+			os.Unsetenv("CLAUDE_PROJECT_DIR")
+		} else {
+			os.Setenv("CLAUDE_PROJECT_DIR", origProjectDir)
+		}
+	}()
+
+	input := &Input{SessionID: "test-session"}
+	output := HandleSessionStart(input)
+
+	if !output.Continue {
+		t.Error("expected Continue=true even without persona dir")
+	}
+	if output.SystemMessage == "" {
+		t.Error("expected non-empty SystemMessage even without persona dir")
+	}
+	// Should still contain mode info
+	if !containsSubstring(output.SystemMessage, "실행 모드") {
+		t.Errorf("SystemMessage should contain mode info, got: %q", output.SystemMessage)
+	}
+}
+
+func Test_HandleSessionStart_output_is_not_nil(t *testing.T) {
+	input := &Input{}
+	output := HandleSessionStart(input)
+
+	if output == nil {
+		t.Fatal("expected non-nil output")
 	}
 }
