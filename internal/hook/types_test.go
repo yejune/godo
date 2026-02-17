@@ -23,6 +23,7 @@ func Test_ValidEventTypes_completeness(t *testing.T) {
 	expected := []EventType{
 		EventSessionStart, EventPreToolUse, EventPostToolUse,
 		EventSessionEnd, EventStop, EventSubagentStop, EventPreCompact,
+		EventUserPromptSubmit,
 	}
 	got := ValidEventTypes()
 	if len(got) != len(expected) {
