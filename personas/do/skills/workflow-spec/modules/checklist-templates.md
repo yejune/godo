@@ -10,6 +10,33 @@ Status: [ ] | Owner: {agent} | Language: per DO_JOBS_LANGUAGE env var (default: 
 
 > **Token Budget Warning**: Check file size before reading — never read 500+ line files in full (use Grep for relevant sections only). At ~10% tokens remaining, record current state in checklist and report to super agent.
 
+## Prompt (RESTART INSTRUCTION)
+> **이 섹션은 재실행 시 에이전트가 정확히 무엇을 해야 하는지 명시합니다.**
+> 새 에이전트가 이 체크리스트를 받으면 이 프롬프트만 읽고도 작업을 이어갈 수 있어야 합니다.
+
+```
+Task: {간결한 작업 요약}
+
+Context:
+- Previous work: {이전에 완료된 작업}
+- Current state: {현재 상태 - [~], [*], 등}
+- Remaining: {남은 작업}
+
+Exact commands to run:
+1. {정확한 명령어 또는 작업 단계}
+2. ...
+
+Files to modify:
+- {파일 경로}: {수정 내용}
+
+Verification:
+- Run: {테스트 명령어}
+- Expected: {예상 결과}
+
+Commit when done:
+git add {files} && git commit -m "..."
+```
+
 ## Agent Instructions
 > This section contains the exact orchestrator prompt for this task.
 > A new agent receiving this sub-checklist should execute based on these instructions alone.
@@ -29,6 +56,7 @@ Status: [ ] | Owner: {agent} | Language: per DO_JOBS_LANGUAGE env var (default: 
 > Mark `[ ]` → `[o]` on completion. `[x]` means "failure" — never use for completion.
 - [ ] Measurable completion condition 1
 - [ ] Measurable completion condition 2
+- [ ] **TEST REQUIRED**: `go test ./...` or `pytest` must pass (NO EXCEPTIONS for code changes)
 - [ ] Verification complete (one of the following):
   - Test required: `path/to/file_test.go` written and passing
   - Test not required: verification method specified (build check, manual check, etc.)
@@ -54,11 +82,13 @@ Status: [ ] | Owner: {agent} | Language: per DO_JOBS_LANGUAGE env var (default: 
 - 2026-02-11 16:30:10 [o] All tests passed, committed (commit: a1b2c3d)
 
 ## FINAL STEP: Commit (never skip)
+- [ ] `go test ./...` or equivalent — ALL tests must pass before commit
 - [ ] `git add` — stage only changed files
 - [ ] `git diff --cached` — verify only intended changes included
 - [ ] `git commit` — include WHY in commit message
 - [ ] Record commit hash in Progress Log
 ⚠️ Work is incomplete if this section is not completed
+⚠️ NEVER commit without running tests first
 
 ## Lessons Learned (write on completion)
 - What went well:
@@ -67,9 +97,11 @@ Status: [ ] | Owner: {agent} | Language: per DO_JOBS_LANGUAGE env var (default: 
 ```
 
 ## Template Mandatory Rules
+- [HARD] **Prompt 섹션 필수**: 재실행 시 정확히 무엇을 해야 하는지 명시 — 새 에이전트가 이것만 읽고 작업 가능해야 함
 - [HARD] Problem Summary, Acceptance Criteria, Critical Files must be written before starting work
 - [HARD] Acceptance Criteria must specify verification method — test file path or alternative verification
-- [HARD] Agent workflow is: write code → verify (test/build) → pass → commit — never just write code and stop
+- [HARD] **테스트 필수**: 코드 변경 시 반드시 `go test ./...` 또는 equivalent 실행 — 테스트 없이 커밋 금지
+- [HARD] Agent workflow is: write code → **run tests** → pass → commit — never just write code and stop
 - [HARD] Must record commit hash in Progress Log after commit — e.g., `[o] Done (commit: a1b2c3d)`
 - [HARD] No `[o]` completion without commit hash — the commit is proof of completion
 - [HARD] Solution Approach written at implementation start (mention at least 1 alternative)

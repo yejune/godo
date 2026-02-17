@@ -9,6 +9,7 @@
 - [HARD] Items must be granular enough for an agent to complete without token exhaustion
 - [HARD] One item = 1-3 file changes + verification — split if exceeding this scope
 - [HARD] Specify verification method per item: testable → unit/integration test, not testable → build check/manual check/`docker compose config` etc.
+- [HARD] **Prompt 섹션 필수**: 각 sub-checklist에 재실행 시 정확히 무엇을 해야 하는지 명시
 
 ### Decomposition Procedure [HARD]
 - [HARD] Step 1: Estimate how many files each item touches
@@ -102,6 +103,13 @@
   ```
 - [HARD] Forbidden transitions: `[ ] → [o]` (cannot complete without testing), `[ ] → [x]` (cannot fail without working), `[ ] → [*]` (cannot test without working)
 - [HARD] Record history on state changes (never overwrite)
+
+## Test Enforcement [HARD]
+- [HARD] **코드 변경 시 테스트 필수**: 모든 코드 변경 후 반드시 `go test ./...` 또는 equivalent 실행
+- [HARD] 테스트 없이 `[o]` 상태로 전환 금지 — 테스트 통과가 완료의 전제 조건
+- [HARD] 테스트 실패 시 `[~]`로 회귀하여 수정 후 재테스트
+- [HARD] Acceptance Criteria에 "TEST REQUIRED" 항목 명시 필수
+- [HARD] 테스트 불가능한 변경(CSS, config, docs)은 별도 verification method 명시
 
 ### Blocker Recording Rules [HARD]
 - [HARD] On `[!]` transition, must record 3 things:
