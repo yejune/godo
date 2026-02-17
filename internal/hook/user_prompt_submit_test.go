@@ -1,6 +1,9 @@
 package hook
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func Test_HandleUserPromptSubmit_returns_output(t *testing.T) {
 	input := &Input{SessionID: "test-session"}
@@ -46,5 +49,19 @@ func Test_HandleUserPromptSubmit_contains_mode_info(t *testing.T) {
 	}
 	if !containsSubstring(output.HookSpecificOutput.AdditionalContext, "실행 모드") {
 		t.Errorf("AdditionalContext should contain mode info, got: %q", output.HookSpecificOutput.AdditionalContext)
+	}
+}
+
+func Test_HandleUserPromptSubmit_with_persona(t *testing.T) {
+	cleanup := setupTestPersona(t)
+	defer cleanup()
+
+	out := HandleUserPromptSubmit(&Input{})
+	if out.HookSpecificOutput == nil {
+		t.Fatal("expected HookSpecificOutput")
+	}
+	ctx := out.HookSpecificOutput.AdditionalContext
+	if !strings.Contains(ctx, "testusersunbae") {
+		t.Errorf("expected persona reminder in context, got: %s", ctx)
 	}
 }

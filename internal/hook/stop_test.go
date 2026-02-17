@@ -116,6 +116,36 @@ func Test_HandleStop_allows_when_all_done(t *testing.T) {
 	}
 }
 
+func Test_HandleStop_empty_checklist_file(t *testing.T) {
+	origDir, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get cwd: %v", err)
+	}
+
+	tmpDir := t.TempDir()
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("failed to chdir: %v", err)
+	}
+	defer os.Chdir(origDir)
+
+	// Create a checklist file with no items (only header text, no checkboxes)
+	checklistDir := filepath.Join(tmpDir, ".do", "jobs", "26", "02", "18", "test-empty")
+	if err := os.MkdirAll(checklistDir, 0755); err != nil {
+		t.Fatalf("failed to create dirs: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(checklistDir, "checklist.md"), []byte("# Empty Checklist\nNo items here.\n"), 0644); err != nil {
+		t.Fatalf("failed to write checklist: %v", err)
+	}
+
+	input := &Input{}
+	output := HandleStop(input)
+
+	// stats.Total == 0, so should allow stop (no block)
+	if output.Decision == DecisionBlock {
+		t.Error("should not block when checklist has no items")
+	}
+}
+
 func Test_HandleStop_blocks_with_blocked_items(t *testing.T) {
 	origDir, err := os.Getwd()
 	if err != nil {

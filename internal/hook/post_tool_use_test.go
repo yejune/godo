@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -121,5 +122,99 @@ func TestHandlePostToolUse_WithPersonaDirReturnsContext(t *testing.T) {
 	}
 	if output.HookSpecificOutput.AdditionalContext == "" {
 		t.Error("expected non-empty AdditionalContext when persona is available")
+	}
+}
+
+func TestHandlePostToolUse_PersonaDirExistsButLoadFails(t *testing.T) {
+	// Create a persona dir that exists but has no valid character file
+	tmpDir := t.TempDir()
+	charDir := filepath.Join(tmpDir, "personas", "do", "characters")
+	if err := os.MkdirAll(charDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	// Write an invalid character file (no frontmatter)
+	if err := os.WriteFile(filepath.Join(charDir, "young-f.md"), []byte("no frontmatter here"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	origProjectDir := os.Getenv("CLAUDE_PROJECT_DIR")
+	os.Setenv("CLAUDE_PROJECT_DIR", tmpDir)
+	defer func() {
+		if origProjectDir == "" {
+			os.Unsetenv("CLAUDE_PROJECT_DIR")
+		} else {
+			os.Setenv("CLAUDE_PROJECT_DIR", origProjectDir)
+		}
+	}()
+
+	out := HandlePostToolUse(&Input{ToolName: "Write"})
+	// LoadCharacter fails, should return empty output
+	if out.HookSpecificOutput != nil {
+		t.Error("expected nil HookSpecificOutput when LoadCharacter fails")
+	}
+}
+
+func TestHandlePostToolUse_EmptyReminder(t *testing.T) {
+	// Create a persona with empty honorific and tone to produce empty reminder
+	tmpDir := t.TempDir()
+	charDir := filepath.Join(tmpDir, "personas", "do", "characters")
+	if err := os.MkdirAll(charDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	charContent := []byte(`---
+id: young-f
+name: EmptyPersona
+honorific_template: ""
+honorific_default: ""
+tone: ""
+character_summary: ""
+relationship: ""
+---
+Body content.
+`)
+	if err := os.WriteFile(filepath.Join(charDir, "young-f.md"), charContent, 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	origProjectDir := os.Getenv("CLAUDE_PROJECT_DIR")
+	origUserName := os.Getenv("DO_USER_NAME")
+	os.Setenv("CLAUDE_PROJECT_DIR", tmpDir)
+	os.Setenv("DO_USER_NAME", "")
+	defer func() {
+		if origProjectDir == "" {
+			os.Unsetenv("CLAUDE_PROJECT_DIR")
+		} else {
+			os.Setenv("CLAUDE_PROJECT_DIR", origProjectDir)
+		}
+		if origUserName == "" {
+			os.Unsetenv("DO_USER_NAME")
+		} else {
+			os.Setenv("DO_USER_NAME", origUserName)
+		}
+	}()
+
+	out := HandlePostToolUse(&Input{ToolName: "Write"})
+	// BuildReminder returns "" because honorific is empty
+	if out.HookSpecificOutput != nil {
+		t.Error("expected nil HookSpecificOutput when reminder is empty")
+	}
+}
+
+func TestHandlePostToolUse_WithTempPersonaFixture(t *testing.T) {
+	cleanup := setupTestPersona(t)
+	defer cleanup()
+
+	out := HandlePostToolUse(&Input{ToolName: "Write"})
+	if out.HookSpecificOutput == nil {
+		t.Fatal("expected HookSpecificOutput with persona reminder")
+	}
+	if out.HookSpecificOutput.AdditionalContext == "" {
+		t.Error("expected non-empty additionalContext")
+	}
+	if !strings.Contains(out.HookSpecificOutput.AdditionalContext, "testusersunbae") {
+		t.Errorf("expected persona honorific in context, got: %s", out.HookSpecificOutput.AdditionalContext)
+	}
+	if out.HookSpecificOutput.HookEventName != "PostToolUse" {
+		t.Errorf("HookEventName: got %q, want %q", out.HookSpecificOutput.HookEventName, "PostToolUse")
 	}
 }

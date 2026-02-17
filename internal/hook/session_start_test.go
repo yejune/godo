@@ -2,6 +2,7 @@ package hook
 
 import (
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -77,5 +78,24 @@ func Test_HandleSessionStart_output_is_not_nil(t *testing.T) {
 
 	if output == nil {
 		t.Fatal("expected non-nil output")
+	}
+}
+
+func Test_HandleSessionStart_with_persona(t *testing.T) {
+	cleanup := setupTestPersona(t)
+	defer cleanup()
+
+	out := HandleSessionStart(&Input{})
+	if !out.Continue {
+		t.Error("expected Continue=true")
+	}
+	if !strings.Contains(out.SystemMessage, "TestPersona") {
+		t.Errorf("expected SystemMessage to contain persona name, got: %s", out.SystemMessage)
+	}
+	if !strings.Contains(out.SystemMessage, "testusersunbae") {
+		t.Errorf("expected SystemMessage to contain honorific, got: %s", out.SystemMessage)
+	}
+	if !strings.Contains(out.SystemMessage, "full persona content") {
+		t.Errorf("expected SystemMessage to contain full content, got: %s", out.SystemMessage)
 	}
 }
