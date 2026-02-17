@@ -6,6 +6,54 @@
 
 ---
 
+## 0. Working Directories (Critical)
+
+Three directories are involved. Each is a separate git repo.
+
+```
+~/Work/do-focus.workspace/do-focus/     ← do-focus (LEGACY, will be deprecated)
+│  ├── cmd/godo/                        ← godo source code (41 files, 9,796 lines)
+│  ├── .claude/rules/do/development/    ← current DO rules (dev-*.md)
+│  ├── .claude/rules/do/workflow/       ← current workflow rules
+│  ├── .claude/skills/                  ← current DO skills
+│  └── CLAUDE.md                        ← current DO identity
+│
+~/Work/new/convert/                     ← convert project (FUTURE, absorbs godo)
+│  ├── cmd/convert/main.go             ← CLI entry (to become cmd/godo/)
+│  ├── internal/                        ← Go packages (assembler, extractor, etc.)
+│  ├── core/                            ← extracted core templates (396 files)
+│  ├── personas/                        ← extracted personas (do, do-ko, moai, moai-ko)
+│  │   ├── do/                          ← DO persona (82 files, TO BE RESTRUCTURED)
+│  │   ├── do-ko/                       ← Korean DO persona
+│  │   ├── moai/                        ← MoAI persona (61 files)
+│  │   └── moai-ko/                     ← Korean MoAI persona
+│  └── .do/jobs/26/02/17/convert-godo-integration/  ← THIS JOB's documents
+│
+~/Work/moai-adk/                        ← MoAI ADK (ORIGINAL SOURCE for extraction)
+   └── (423 core + 20 persona files)
+```
+
+### Key Relationships
+- **godo source** lives in do-focus but will MOVE to convert
+- **convert** reads from moai-adk (extract) and outputs assembled .claude/
+- **do-focus rules** (dev-*.md) contain content that must be DECOMPOSED into convert's core/ skills
+- **Job documents** (handoff, research, architecture, plan) live in convert's .do/jobs/
+- **Commits go to BOTH repos**: rule changes → do-focus, restructuring → convert
+
+### Which Repo for What
+| Change Type | Target Repo | Example |
+|-------------|-------------|---------|
+| Rule additions/fixes | do-focus | workflow.md agent delegation rules |
+| Core skill restructuring | convert (core/) | decomposed dev-*.md content |
+| Persona workflow creation | convert (personas/do/) | 5 thin workflow files |
+| godo feature migration | convert (internal/) | hook, mode, lint packages |
+| Job documents | convert (.do/jobs/) | handoff.md, architecture.md |
+
+### WARNING: do-focus ↔ convert Sync
+Currently both repos have copies of the same files. When do-focus rules are modified, convert personas must also be updated. This sync problem GOES AWAY after restructuring — convert becomes the single source of truth.
+
+---
+
 ## 1. Project Goal
 
 Merge godo CLI (do-focus/cmd/godo/) into the convert project (~/Work/new/convert/).
