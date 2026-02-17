@@ -1,9 +1,9 @@
 ---
 name: do-lang-kotlin
 description: >
-  Kotlin 2.0+ development specialist covering Ktor, coroutines, Compose
-  Multiplatform, and Kotlin-idiomatic patterns. Use when building Kotlin
-  server apps, Android apps, or multiplatform projects.
+  Kotlin 2.0+ 개발 전문가 - Ktor, coroutines, Compose Multiplatform,
+  Kotlin-idiomatic 패턴涵盖. Kotlin 서버 앱, Android 앱, 멀티플랫폼
+  프로젝트 구축 시 사용하세요.
 license: Apache-2.0
 compatibility: Designed for Claude Code
 user-invocable: false
@@ -29,50 +29,64 @@ triggers:
   languages: ["kotlin"]
 ---
 
-## Quick Reference (30 seconds)
+## Quick Reference (30초 요약)
 
-Kotlin 2.0+ Expert - K2 compiler, coroutines, Ktor, Compose Multiplatform with Context7 integration.
+K2 컴파일러, coroutines, Ktor, Compose Multiplatform이 포함된 Kotlin 2.0+ 전문가.
 
-Auto-Triggers: Kotlin files (`.kt`, `.kts`), Gradle Kotlin DSL (`build.gradle.kts`, `settings.gradle.kts`)
+자동 트리거: Kotlin 파일 (.kt, .kts), Gradle Kotlin DSL (build.gradle.kts, settings.gradle.kts)
 
-Core Capabilities:
+핵심 기능:
 
-- Kotlin 2.0: K2 compiler, coroutines, Flow, sealed classes, value classes
-- Ktor 3.0: Async HTTP server/client, WebSocket, JWT authentication
-- Exposed 0.55: Kotlin SQL framework with coroutines support
-- Spring Boot (Kotlin): Kotlin-idiomatic Spring with WebFlux
+- Kotlin 2.0: K2 컴파일러, coroutines, Flow, sealed classes, value classes
+- Ktor 3.0: Async HTTP server/client, WebSocket, JWT 인증
+- Exposed 0.55: coroutines 지원이 있는 Kotlin SQL 프레임워크
+- Spring Boot (Kotlin): Kotlin-idiomatic Spring과 WebFlux
 - Compose Multiplatform: Desktop, iOS, Web, Android UI
-- Testing: JUnit 5, MockK, Kotest, Turbine for Flow testing
+- 테스트: JUnit 5, MockK, Kotest, Flow 테스트용 Turbine
 
 ---
 
-## Implementation Guide (5 minutes)
+## Implementation Guide (5분 가이드)
 
-### Kotlin 2.0 Features
+### Kotlin 2.0 기능
 
-Coroutines and Flow: Use coroutineScope with async for parallel operations. Create deferred values with async, then call await on each to get results. Combine results into data classes. For reactive streams, create flow blocks with emit calls inside while loops. Use delay for intervals and flowOn to specify dispatcher.
+Coroutines 및 Flow:
 
-Sealed Classes and Value Classes: Define sealed interface with generic type parameter. Create data class implementations for success and data object for stateless cases like Loading. Use @JvmInline annotation with value class wrapping a primitive. Add init blocks with require for validation.
+parallel 작업을 위해 coroutineScope와 async를 사용하세요. async로 deferred 값을 생성한 다음 각각을 await하여 결과를 가져오세요. data class로 결과를 결합하세요. reactive 스트림의 경우 while 루프 내에서 emit 호출이 포함된 flow 블록을 생성하세요. 간격은 delay를 사용하고 flowOn으로 디스패처를 지정하세요.
+
+Sealed Classes 및 Value Classes:
+
+generic 타입 파라미터가 있는 sealed interface를 정의하세요. success를 위한 data class 구현, 상태 없는 케이스(예: Loading)를 위한 data object를 생성하세요. @JvmInline과 원시 타입을 래핑하는 value class를 사용하세요. init 블록에서 검증을 위해 require를 사용하세요.
 
 ### Ktor 3.0 Server
 
-Application Setup: Call embeddedServer with Netty, port, and host parameters. Inside the lambda, call configuration functions for Koin, security, routing, and content negotiation. Call start with wait equals true.
+Application Setup:
 
-For Koin configuration, install Koin plugin and define modules with single declarations for singletons. For security, install Authentication plugin and configure JWT with realm, verifier, and validate callback. For content negotiation, install ContentNegotiation with json configuration.
+Netty, port, host 파라미터와 함께 embeddedServer를 호출하세요. 람다 내에서 Koin, security, routing, content negotiation 구성 함수를 호출하세요. wait이 true인 start를 호출하세요.
 
-Routing with Authentication: Define routing function on Application. Inside routing block, use route for path prefixes. Create unauthenticated endpoints with post and call.receive for request body. Use authenticate block with verifier name for protected routes. Inside route blocks, define get endpoints with call.parameters for path/query params. Use call.respond with status code and response body.
+Koin 구성의 경우 Koin 플러그인을 설치하고 single 선언으로 싱글톤을 위한 모듈을 정의하세요. security의 경우 Authentication 플러그인을 설치하고 realm, verifier, validate 콜백으로 JWT를 구성하세요. content negotiation의 경우 json 구성과 함께 ContentNegotiation 플러그인을 설치하세요.
+
+인증과 함께 Routing:
+
+Application에서 routing 함수를 정의하세요. routing 블록 내에서 route를 경로 접두사로 사용하세요. create 엔드포인트를 정의하기 위해 call.receive로 요청 본문을 받는 post를 사용하세요. verifier 이름과 함께 authenticate 블록으로 보호된 경로를 정의하세요. route 블록 내에서 get 엔드포인트를 정의하고 call.parameters로 경로/쿼리 파라미터를 가져옵니다. call.respond와 함께 상태 코드 및 응답 본문을 반환하세요.
 
 ### Exposed SQL Framework
 
-Table and Entity: Define object extending LongIdTable with table name. Declare columns with varchar, enumerationByName, and timestamp functions. Use uniqueIndex() and defaultExpression for defaults.
+Table 및 Entity:
 
-Create entity class extending LongEntity with companion object extending LongEntityClass. Declare properties with by syntax using table column references. Create toModel function to map entity to domain model.
+LongIdTable을 확장하고 테이블 이름을 가진 object를 정의하세요. varchar, enumerationByName, timestamp 함수로 열을 선언하세요. uniqueIndex()와 defaultExpression을 기본값으로 사용하세요.
 
-Repository with Coroutines: Create repository implementation taking Database parameter. Implement suspend functions wrapping Exposed operations in dbQuery helper. Use findById for single entity lookup. Use Entity.new for inserts. Define private dbQuery function using newSuspendedTransaction with IO dispatcher.
+LongEntity와 LongEntityClass를 확장하는 entity class를 생성하세요. 테이블 열 참조를 사용하는 by 구문으로 속성을 선언하세요. entity를 도메인 모델로 매핑하는 toModel 함수를 생성하세요.
 
-### Spring Boot with Kotlin
+Coroutines와 함께 Repository:
 
-WebFlux Controller: Annotate class with @RestController and @RequestMapping. Create suspend functions for endpoints with @GetMapping and @PostMapping. Return Flow for collections using map to convert entities. Return ResponseEntity with status codes. Use @Valid for request validation.
+Database 파라미터를 받는 repository 구현을 생성하세요. dbQuery 헬퍼로 래핑된 Exposed 작업을 래핑하는 suspend 함수를 구현하세요. findById는 단일 엔티티 조회를 사용하세요. Entity.new는 삽입을 위해 사용하세요. IO 디스패처를 사용하는 newSuspendedTransaction으로 private dbQuery 함수를 정의하세요.
+
+### Spring Boot와 함께 Kotlin
+
+WebFlux Controller:
+
+@RestController와 @RequestMapping로 클래스에 어노테이션을 적용하세요. @GetMapping과 @PostMapping이 있는 suspend 함수로 엔드포인트를 정의하세요. map으로 엔티티를 변환하는 Flow를 반환하기 위해 collect을 사용하세요. 상태 코드와 함께 ResponseEntity를 반환하세요. 요청 검증을 위해 @Valid를 사용하세요.
 
 ---
 
@@ -80,81 +94,83 @@ WebFlux Controller: Annotate class with @RestController and @RequestMapping. Cre
 
 ### Compose Multiplatform
 
-Shared UI Component: Create @Composable function taking ViewModel and callback parameters. Collect uiState as state with collectAsState. Use when expression on sealed state to show different composables for Loading, Success, and Error.
+공유 UI 컴포넌트:
 
-For list items, create Card composables with Modifier.fillMaxWidth and clickable. Use Row with padding, AsyncImage for avatars with CircleShape clip, and Column for text content with MaterialTheme.typography.
+ViewModel과 콜백 파라미터를 받는 @Composable 함수를 생성하세요. collectAsState로 uiState를 상태로 수집하세요. sealed 상태에서 when 식을 사용하여 Loading, Success, Error에 대해 다른 composable를 표시합니다.
 
-### Testing with MockK
+목록 항목의 경우 Modifier.fillMaxWidth와 clickable이 있는 Card composable를 생성하세요. 패딩이 있는 Row, CircleShape로 클립된 AsyncImage for avatar, MaterialTheme.typography로 텍스트 내용을 위한 Column을 사용하세요.
 
-Create test class with mockk for dependencies. Initialize service with mock in declaration. Use @Test with runTest for coroutine tests. Use coEvery with coAnswers for async mocking with delay. Use assertThat for assertions. For Flow testing, use toList to collect emissions and assert on size and content.
+### MockK와 함께 테스트
+
+mockk로 의존성을 위한 테스트 클래스를 생성하세요. 선언에서 mock으로 mock을 초기화하고 서비스를 생성하세요. coroutine 테스트를 위해 runTest와 @Test를 사용하세요. async mocking을 위해 coEvery와 coAnswers를 delay와 함께 사용하세요. assertions를 위해 assertThat를 사용하세요. Flow 테스트의 경우 toList로 방출을 수집하고 크기와 내용을 assert하세요.
 
 ### Gradle Build Configuration
 
-Use plugins block with kotlin("jvm") and kotlin("plugin.serialization") with version strings. Add id for ktor.plugin. Configure kotlin block with jvmToolchain. In dependencies block, add ktor server modules, kotlinx coroutines, exposed modules, and postgresql driver. Add test dependencies for mockk, coroutines-test, and turbine.
+kotlin("jvm")과 kotlin("plugin.serialization") 버전 문자열과 함께 plugins 블록을 사용하세요. ktor.plugin id를 추가하세요. kotlin 블록에 jvmToolchain을 구성하세요. dependencies 블록에 ktor server 모듈, kotlinx coroutines, exposed 모듈, postgresql driver를 위한 implementation dependencies를 추가하세요. mockk, coroutines-test, turbine을 위한 test dependencies를 추가하세요.
 
 ---
 
-## Context7 Integration
+## Context7 통합
 
-Library mappings for latest documentation:
+최신 문서를 위한 라이브러리 매핑:
 
-- `/ktorio/ktor` - Ktor 3.0 server/client documentation
-- `/jetbrains/exposed` - Exposed SQL framework
-- `/JetBrains/kotlin` - Kotlin 2.0 language reference
-- `/Kotlin/kotlinx.coroutines` - Coroutines library
+- `/ktorio/ktor` - Ktor 3.0 server/client 문서
+- `/jetbrains/exposed` - Exposed SQL 프레임워크
+- `/JetBrains/kotlin` - Kotlin 2.0 언어 참조
+- `/Kotlin/kotlinx.coroutines` - Coroutines 라이브러리
 - `/jetbrains/compose-multiplatform` - Compose Multiplatform
-- `/arrow-kt/arrow` - Arrow functional programming
+- `/arrow-kt/arrow` - Arrow 함수형 프로그래밍
 
-Usage: Call mcp__context7__get_library_docs with context7CompatibleLibraryID, topic string for specific areas, and tokens parameter for response size.
+사용법: context7CompatibleLibraryID, 특정 영역을 위한 topic 문자열, 응답 크기를 파라미터로 mcp__context7__get_library_docs를 호출하세요.
 
 ---
 
-## When to Use Kotlin
+## Kotlin을 언제 사용할까요
 
-Use Kotlin When:
+다음의 경우 Kotlin을 사용하세요:
 
-- Developing Android applications (official language)
-- Building modern server applications with Ktor
-- Preferring concise, expressive syntax
-- Building reactive services with coroutines and Flow
-- Creating multiplatform applications (iOS, Desktop, Web)
-- Full Java interoperability required
+- Android 애플리케이션 개발 (공식 언어)
+- Ktor로 모던 서버 애플리케이션 구축
+- 간결하고 표현적인 구문을 선호
+- coroutines와 Flow로 반응형 서비스 구축
+- iOS, Desktop, Web을 위한 멀티플랫폼 애플리케이션 생성
+- 완전한 Java 상호 운용성 필요
 
-Consider Alternatives When:
+대안을 고려해야 할 때:
 
-- Legacy Java codebase requiring minimal changes
-- Big data pipelines (prefer Scala with Spark)
+- 최소 변경을 필요로 하는 레거시 Java 코드베이스
+- 빅 데이터 파이프라인 (Scala with Spark를 선호)
 
 ---
 
 ## Works Well With
 
-- `do-lang-java` - Java interoperability and Spring Boot patterns
-- `do-domain-backend` - REST API, GraphQL, microservices architecture
-- `do-domain-database` - JPA, Exposed, R2DBC patterns
-- `do-quality-testing` - JUnit 5, MockK, TestContainers integration
-- `do-infra-docker` - JVM container optimization
+- `do-lang-java` - Java 상호 운용성 및 Spring Boot 패턴
+- `do-domain-backend` - REST API, GraphQL, 마이크로서비스 아키텍처
+- `do-domain-database` - JPA, Exposed, R2DBC 패턴
+- `do-quality-testing` - JUnit 5, MockK, TestContainers 통합
+- `do-infra-docker` - JVM 컨테이너 최적화
 
 ---
 
 ## Troubleshooting
 
-K2 Compiler: Add kotlin.experimental.tryK2=true to gradle.properties. Clear .gradle directory for full rebuild.
+K2 컴파일러: gradle.properties에 kotlin.experimental.tryK2=true를 추가하세요. 전체 재빌드를 위해 .gradle 디렉토리를 지우세요.
 
-Coroutines: Avoid runBlocking in suspend contexts. Use Dispatchers.IO for blocking operations.
+Coroutines: suspend 컨텍스트에서 runBlocking을 피하세요. blocking 작업에는 Dispatchers.IO를 사용하세요.
 
-Ktor: Ensure ContentNegotiation is installed. Check JWT verifier configuration. Verify routing hierarchy.
+Ktor: ContentNegotiation이 설치되어 있는지 확인하세요. JWT verifier 구성을 확인하세요. 라우팅� 계층 구조를 확인하세요.
 
-Exposed: Ensure all DB operations run within transaction context. Be aware of lazy entity loading outside transactions.
+Exposed: 모든 DB 작업이 트랜잭션 컨텍스트 내에서 실행되는지 확인하세요. 트랜잭션 외부에서 lazy entity 로딩을 주의하세요.
 
 ---
 
 ## Advanced Documentation
 
-For comprehensive reference materials:
+포괄적인 참조 자료:
 
-- [reference.md](reference.md) - Complete ecosystem, Context7 mappings, testing patterns, performance
-- [examples.md](examples.md) - Production-ready code examples, Ktor, Compose, Android patterns
+- [reference.md](reference.md) - 완전한 에코시스템, Context7 매핑, 테스트 패턴, 성능
+- [examples.md](examples.md) - 프로덕션 준비 코드 예제, Ktor, Compose, Android 패턴
 
 ---
 

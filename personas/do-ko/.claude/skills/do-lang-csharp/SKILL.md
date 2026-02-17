@@ -1,7 +1,8 @@
 ---
 name: do-lang-csharp
 description: >
-  C# 12 / .NET 8 development specialist covering ASP.NET Core, Entity Framework, Blazor, and modern C# patterns. Use when developing .NET APIs, web applications, or enterprise solutions.
+  C# 12 / .NET 8 개발 전문가 - ASP.NET Core, Entity Framework, Blazor, 모던 C# 패턴涵盖.
+  .NET API, 웹 애플리케이션, 엔터프라이즈 솔루션 개발 시 사용하세요.
 license: Apache-2.0
 compatibility: Designed for Claude Code
 allowed-tools: Read Grep Glob mcp__context7__resolve-library-id mcp__context7__get-library-docs
@@ -27,60 +28,60 @@ triggers:
   languages: ["csharp", "c#"]
 ---
 
-# C# 12 / .NET 8 Development Specialist
+# C# 12 / .NET 8 개발 전문가
 
-Modern C# development with ASP.NET Core, Entity Framework Core, Blazor, and enterprise patterns.
+ASP.NET Core, Entity Framework Core, Blazor, 엔터프라이즈 패턴과 모던 C# 개발.
 
 ## Quick Reference
 
-Auto-Triggers: `.cs`, `.csproj`, `.sln` files, C# projects, .NET solutions, ASP.NET Core applications
+자동 트리거: .cs, .csproj, .sln 파일, C# 프로젝트, .NET 솔루션, ASP.NET Core 애플리케이션
 
-Core Stack:
+핵심 스택:
 
-- C# 12: Primary constructors, collection expressions, alias any type, default lambda parameters
-- .NET 8: Minimal APIs, Native AOT, improved performance, WebSockets
-- ASP.NET Core 8: Controllers, Endpoints, Middleware, Authentication
-- Entity Framework Core 8: DbContext, migrations, LINQ, query optimization
-- Blazor: Server/WASM components, InteractiveServer, InteractiveWebAssembly
-- Testing: xUnit, NUnit, FluentAssertions, Moq
+- C# 12: 기본 생성자, 컬렉션 식, 별칭 any 타입, 기본 lambda 파라미터
+- .NET 8: Minimal API, 네이티브 AOT, 향상된 성능, WebSocket
+- ASP.NET Core 8: Controller, 엔드포인트, 미들웨어, 인증
+- Entity Framework Core 8: DbContext, 마이그레이션, LINQ, 쿼리 최적화
+- Blazor: Server/WASM 컴포넌트, InteractiveServer, InteractiveWebAssembly
+- 테스트: xUnit, NUnit, FluentAssertions, Moq
 
-Quick Commands:
+빠른 명령어:
 
-To create a new .NET 8 Web API project, run dotnet new webapi with -n flag for project name and --framework net8.0.
+새 .NET 8 웹 API 프로젝트를 생성하려면 dotnet new webapi -n 프로젝트이름 --framework net8.0을 실행하세요.
 
-To create a Blazor Web App, run dotnet new blazor with -n flag for project name and --interactivity Auto.
+Blazor 웹 앱을 생성하려면 dotnet new blazor -n 프로젝트이름 --interactivity Auto를 실행하세요.
 
-To add Entity Framework Core, run dotnet add package Microsoft.EntityFrameworkCore.SqlServer followed by Microsoft.EntityFrameworkCore.Design.
+Entity Framework Core를 추가하려면 dotnet add package Microsoft.EntityFrameworkCore.SqlServer 다음에 Microsoft.EntityFrameworkCore.Design을 실행하세요.
 
-To add FluentValidation and MediatR, run dotnet add package FluentValidation.AspNetCore and dotnet add package MediatR.
+FluentValidation과 MediatR을 추가하려면 dotnet add package FluentValidation.AspNetCore 다음에 dotnet add package MediatR을 실행하세요.
 
 ---
 
 ## Module Index
 
-This skill uses progressive disclosure with specialized modules for deep coverage:
+이 스킬은 전문涵盖을 위해 점진적 공개를 사용하는 특수화된 모듈을 사용합니다.
 
 ### Language Features
 
-- [C# 12 Features](modules/csharp12-features.md) - Primary constructors, collection expressions, type aliases, default lambdas
+- [C# 12 Features](modules/csharp12-features.md) - 기본 생성자, 컬렉션 식, 타입 별칭, 기본 lambda
 
 ### Web Development
 
-- [ASP.NET Core 8](modules/aspnet-core.md) - Minimal API, Controllers, Middleware, Authentication
-- [Blazor Components](modules/blazor-components.md) - Server, WASM, InteractiveServer, Components
+- [ASP.NET Core 8](modules/aspnet-core.md) - Minimal API, Controller, 미들웨어, 인증
+- [Blazor Components](modules/blazor-components.md) - Server, WASM, InteractiveServer, 컴포넌트
 
 ### Data Access
 
-- [Entity Framework Core 8](modules/efcore-patterns.md) - DbContext, Repository pattern, Migrations, Query optimization
+- [Entity Framework Core 8](modules/efcore-patterns.md) - DbContext, 리포지토리 패턴, 마이그레이션, 쿼리 최적화
 
 ### Architecture Patterns
 
-- [CQRS and Validation](modules/cqrs-validation.md) - MediatR CQRS, FluentValidation, Handler patterns
+- [CQRS and Validation](modules/cqrs-validation.md) - MediatR CQRS, FluentValidation, 핸들러 패턴
 
 ### Reference Materials
 
-- [API Reference](reference.md) - Complete API reference, Context7 library mappings
-- [Code Examples](examples.md) - Production-ready examples, testing templates
+- [API Reference](reference.md) - 완전한 API 참조, Context7 라이브러리 매핑
+- [Code Examples](examples.md) - 프로덕션 준비 예제, 테스트 템플릿
 
 ---
 
@@ -88,46 +89,46 @@ This skill uses progressive disclosure with specialized modules for deep coverag
 
 ### Project Structure (Clean Architecture)
 
-Organize projects in a src folder with four main projects. MyApp.Api contains the ASP.NET Core Web API layer with Controllers folder for API Controllers, Endpoints folder for Minimal API endpoints, and Program.cs as the application entry point. MyApp.Application contains business logic including Commands folder for CQRS Commands, Queries folder for CQRS Queries, and Validators folder for FluentValidation. MyApp.Domain contains domain entities including Entities folder for domain models and Interfaces folder for repository interfaces. MyApp.Infrastructure contains data access including Data folder for DbContext and Repositories folder for repository implementations.
+src 폴더에 4개의 주요 프로젝트로 프로젝트를 구성하세요. MyApp.Api는 ASP.NET Core 웹 API 레이어를 포함합니다: API Controller용 Controllers 폴더, Minimal API 엔드포인트용 Endpoints 폴더, 애플리케이션 진입점인 Program.cs. MyApp.Application은 비즈니스 로직을 포함합니다: CQRS Commands용 Commands 폴더, CQRS Queries용 Queries 폴더, FluentValidation용 Validators 폴더. MyApp.Domain은 도메인 엔티티를 포함합니다: 도메인 모델용 Entities 폴더, 리포지토리 인터페이스용 Interfaces 폴더. MyApp.Infrastructure는 데이터 액세스를 포함합니다: DbContext용 Data 폴더, 리포지토리 구현용 Repositories 폴더.
 
 ### Essential Patterns
 
-Primary Constructor with DI: Define a public class UserService with constructor parameters for IUserRepository and ILogger of UserService. Create async methods like GetByIdAsync that take Guid id, log information using the logger with structured logging for UserId, and return the result from repository.FindByIdAsync.
+DI와 함께 기본 생성자: IUserRepository와 ILogger<UserService>를 위한 생성자 파라미터로 public class UserService를 정의하세요. GetByIdAsync(Guid id)와 같은 async 메서드를 생성하고 UserId로 구조화된 로깅과 함께 logger를 사용하여 정보를 기록하며 repository.FindByIdAsync에서 결과를 반환하세요.
 
-Minimal API Endpoint: Use app.MapGet with route pattern like "/api/users/{id:guid}" and an async lambda taking Guid id and IUserService. Call the service method, check for null result, and return Results.Ok for found entities or Results.NotFound otherwise. Chain WithName for route naming and WithOpenApi for OpenAPI documentation.
+Minimal API 엔드포인트: "/api/users/{id:guid}"와 같은 경로 패턴과 Guid id 및 IUserService를 받는 async lambda로 app.MapGet을 사용하세요. 서비스 메서드를 호출하고 null 결과인 경우 Results.Ok를, 찾은 엔티티인 경우 Results.NotFound를 반환하세요. 경로 명명을 위해 WithName을 체이닝하고 OpenAPI 문서를 위해 WithOpenApi를 체이닝하세요.
 
-Entity Configuration: Create a class implementing IEntityTypeConfiguration of your entity type. In the Configure method taking EntityTypeBuilder, call HasKey to set the primary key, use Property to configure fields with HasMaxLength and IsRequired, and use HasIndex with IsUnique for unique constraints.
+엔티티 구성: 엔티티 타입을 위한 IEntityTypeConfiguration<T>를 구현하는 클래스를 생성하세요. EntityTypeBuilder<T>를 받는 Configure 메서드에서 기본 키를 설정하기 위해 HasKey를 호출하고, HasMaxLength와 IsRequired로 필드를 구성하기 위해 Property를 사용하며, 고유 제약 조건을 위해 HasIndex와 IsUnique를 사용하세요.
 
 ---
 
 ## Context7 Integration
 
-For latest documentation, use Context7 MCP tools.
+최신 문서의 경우 Context7 MCP 도구를 사용하세요.
 
-For ASP.NET Core documentation, first resolve the library ID using mcp__context7__resolve-library-id with "aspnetcore", then fetch docs using mcp__context7__get-library-docs with the resolved library ID and topic like "minimal-apis middleware".
+ASP.NET Core 문서의 경우 "aspnetcore"로 mcp__context7__resolve-library-id를 사용하여 라이브러리 ID를 확인한 다음 "minimal-apis middleware"와 같은 주제와 확인된 라이브러리 ID로 mcp__context7__get-library-docs를 호출하세요.
 
-For Entity Framework Core documentation, resolve with "efcore" and fetch with topics like "dbcontext migrations".
+Entity Framework Core 문서의 경우 "efcore"로 확인하고 "dbcontext migrations"와 같은 주제로 가져오세요.
 
-For .NET Runtime documentation, resolve with "dotnet runtime" and fetch with topics like "collections threading".
+.NET Runtime 문서의 경우 "dotnet runtime"으로 확인하고 "collections threading"과 같은 주제로 가져오세요.
 
 ---
 
 ## Quick Troubleshooting
 
-Build and Runtime: Run dotnet build with --verbosity detailed for detailed output. Run dotnet run with --launch-profile https for HTTPS profile. Run dotnet ef database update to apply EF migrations. Run dotnet ef migrations add with migration name to create new migrations.
+빌드 및 런타임: 상세한 출력을 위해 dotnet build --verbosity detailed를 실행하세요. HTTPS 프로필로 실행하려면 dotnet run --launch-profile https를 실행하세요. EF 마이그레이션을 적용하려면 dotnet ef database update를 실행하세요. 새 마이그레이션을 생성하려면 dotnet ef migrations add 마이그레이션이름을 실행하세요.
 
-Common Patterns:
+일반적인 패턴:
 
-For null reference handling, use ArgumentNullException.ThrowIfNull with the variable and nameof expression after fetching from context.
+null 참조 처리의 경우 컨텍스트에서 가져온 후 ArgumentNullException.ThrowIfNull을 변수와 nameof 표현식과 함께 사용하세요.
 
-For async enumerable streaming, create async methods returning IAsyncEnumerable of your type. Add EnumeratorCancellation attribute to the CancellationToken parameter. Use await foreach with AsAsyncEnumerable and WithCancellation to iterate, yielding each item.
+async enumerable 스트리밍의 경우 IAsyncEnumerable<T>를 반환하는 async 메서드를 생성하세요. CancellationToken 파라미터에 EnumeratorCancellation 속성을 추가하세요. AsAsyncEnumerable와 WithCancellation이 있는 await foreach를 사용하여 반복하고 각 항목을 yield하세요.
 
 ---
 
 ## Works Well With
 
-- `do-domain-backend` - API design, database integration patterns
-- `do-platform-deploy` - Azure, Docker, Kubernetes deployment
-- `do-workflow-testing` - Testing strategies and patterns
-- `do-foundation-quality` - Code quality standards
-- `do-essentials-debug` - Debugging .NET applications
+- `do-domain-backend` - API 설계, 데이터베이스 통합 패턴
+- `do-platform-deploy` - Azure, Docker, Kubernetes 배포
+- `do-workflow-testing` - 테스트 전략 및 패턴
+- `do-foundation-quality` - 코드 품질 표준
+- `do-essentials-debug` - .NET 애플리케이션 디버깅

@@ -1,7 +1,9 @@
 ---
 name: do-lang-typescript
 description: >
-  TypeScript 5.9+ development specialist covering React 19, Next.js 16 App Router, type-safe APIs with tRPC, Zod validation, and modern TypeScript patterns. Use when developing TypeScript applications, React components, Next.js pages, or type-safe APIs.
+  TypeScript 5.9+ 개발 전문가 - React 19, Next.js 16 App Router, tRPC로 타입 안전한
+  API, Zod 검증, 모던 TypeScript 패턴涵盖. TypeScript 애플리케이션,
+  React 컴포넌트, Next.js 페이지, 타입 안전한 API 개발 시 사용하세요.
 license: Apache-2.0
 compatibility: Designed for Claude Code
 allowed-tools: Read Grep Glob mcp__context7__resolve-library-id mcp__context7__get-library-docs
@@ -26,143 +28,143 @@ triggers:
   languages: ["typescript", "tsx"]
 ---
 
-## Quick Reference (30 seconds)
+## Quick Reference (30초 요약)
 
-TypeScript 5.9+ Development Specialist - Modern TypeScript with React 19, Next.js 16, and type-safe API patterns.
+TypeScript 5.9+ 개발 전문가 - React 19, Next.js 16, 타입 안전한 API 패턴과 모던 TypeScript.
 
-Auto-Triggers: Files with .ts, .tsx, .mts, or .cts extensions, TypeScript configurations, React or Next.js projects
+자동 트리거: .ts, .tsx, .mts, .cts 확장자 파일, TypeScript 구성, React 또는 Next.js 프로젝트
 
-Core Stack:
+핵심 스택:
 
-- TypeScript 5.9: Deferred module evaluation, decorators, satisfies operator
-- React 19: Server Components, use hook, Actions, concurrent features
-- Next.js 16: App Router, Server Actions, middleware, ISR/SSG/SSR
-- Type-Safe APIs: tRPC 11, Zod 3.23, tanstack-query
-- Testing: Vitest, React Testing Library, Playwright
+- TypeScript 5.9: 지연된 모듈 평가, 데코레이터, satisfies 연산자
+- React 19: Server Components, use 훅, Actions, 동시성 기능
+- Next.js 16: App Router, Server Actions, 미들웨어, ISR/SSG/SSR
+- 타입 안전한 API: tRPC 11, Zod 3.23, tanstack-query
+- 테스트: Vitest, React Testing Library, Playwright
 
-Quick Commands:
+빠른 명령어:
 
-Create Next.js 16 project using npx create-next-app with latest, typescript, tailwind, and app flags. Install type-safe API stack with npm install for trpc server, client, react-query, zod, and tanstack react-query. Install testing stack with npm install D flag for vitest, testing-library react, and playwright test.
+npx create-next-app으로 Next.js 16 프로젝트를 생성하세요. latest, typescript, tailwind, app 플래그를 사용하세요. npm install로 타입 안전한 API 스택을 설치하세요: trpc server, client, react-query, zod, tanstack react-query. npm install -D로 테스트 스택을 설치하세요: vitest, testing-library/react, playwright/test.
 
 ---
 
-## Implementation Guide (5 minutes)
+## Implementation Guide (5분 가이드)
 
-### TypeScript 5.9 Key Features
+### TypeScript 5.9 핵심 기능
 
-Satisfies Operator for Type Checking Without Widening:
+타입 확장 없이 타입 검증하는 satisfies 연산자:
 
-Define Colors type as union of red, green, and blue string literals. Create palette object with red as number array, green as hex string, and blue as number array. Apply satisfies operator with Record of Colors to string or number array. Now palette.red can use map method because it is inferred as number array, and palette.green can use toUpperCase because it is inferred as string.
+red, green, blue 문자열 리터럴의 합집합인 Colors 타입을 정의하세요. palette 객체를 red를 숫자 배열, green을 16진수 문자열, blue를 숫자 배열로 생성하세요. Record<Colors, string | number[]>와 함께 satisfies 연산자를 적용하세요. 이제 palette.red는 숫자 배열로 유추되어 map 메서드를 사용할 수 있고, palette.green은 문자열로 유추되어 toUpperCase를 사용할 수 있습니다.
 
-Deferred Module Evaluation:
+지연된 모듈 평가:
 
-Use import defer with asterisk as namespace from heavy module path. In function that needs the module, access namespace property which loads module on first use.
+heavy/module/path에서 import defer * as namespace를 사용하세요. 모듈이 필요한 함수에서 namespace 속성에 접근하면 첫 번째 사용 시 모듈이 로드됩니다.
 
-Modern Decorators Stage 3:
+모던 데코레이터 Stage 3:
 
-Create logged function decorator that takes target function and ClassMethodDecoratorContext. Return function that logs method name then calls target with apply. Apply logged decorator to class method that fetches data.
+target 함수와 ClassMethodDecoratorContext를 받는 logged 함수 데코레이터를 생성하세요. 메서드 이름을 로깅한 다음 apply로 target을 호출하는 함수를 반환하세요. 데이터를 가져오는 클래스 메서드에 logged 데코레이터를 적용하세요.
 
-### React 19 Patterns
+### React 19 패턴
 
-Server Components Default in App Router:
+App Router의 기본 Server Components:
 
-For page component in app/users/[id]/page.tsx, define PageProps interface with params as Promise of object containing id string. Create async default function that awaits params, queries database for user, calls notFound if not found, and returns main element with user name.
+app/users/[id]/page.tsx의 페이지 컴포넌트 경우, params를 Promise<{id: string}>으로 가진 PageProps 인터페이스를 정의하세요. params를 await하는 async default 함수를 생성하고, 사용자를 위해 DB를 쿼리하고, 찾지 못하면 notFound를 호출하고, 사용자 이름을 가진 main 요소를 반환하세요.
 
-use Hook for Unwrapping Promises and Context:
+Promise와 Context를 언래핑하는 use 훅:
 
-In client component marked with use client directive, import use from react. Create UserProfile component that takes userPromise prop as Promise of User type. Call use hook with the promise to suspend until resolved. Return div with user name.
+use client 지시어로 표시된 클라이언트 컴포넌트에서 react에서 use를 임포트하세요. userPromise prop을 Promise<User> 타입으로 받는 UserProfile 컴포넌트를 생성하세요. 프라미스에 use 훅을 호출하여 해결될 때까지 일시 중단하세요. 사용자 이름이 포함된 div를 반환하세요.
 
-Actions for Form Handling with Server Functions:
+서버 함수와 함께 폼 처리하는 Actions:
 
-In server actions file marked with use server directive, import revalidatePath. Define CreateUserSchema with zod for name and email validation. Create async createUser function that takes FormData, parses with schema, creates user in database, and revalidates path.
+use server 지시어로 표시된 server actions 파일에서 revalidatePath를 임포트하세요. name과 email 검증을 위해 zod로 CreateUserSchema를 정의하세요. FormData를 받는 async createUser 함수를 생성하세요. 스키마로 파싱하고, DB에 사용자를 생성하고, 경로를 재검증하세요.
 
-useActionState for Form Status:
+폼 상태를 위한 useActionState:
 
-In client component, import useActionState. Create form component that destructures state, action, and isPending from useActionState called with createUser action. Return form with action prop, input disabled when pending, button with dynamic text, and error message from state.
+클라이언트 컴포넌트에서 useActionState를 임포트하세요. createUser action과 함께 useActionState를 호출하여 state, action, isPending을 분해하는 form 컴포넌트를 생성하세요. action prop, pending일 때 비활성화된 input, 동적 텍스트가 있는 버튼, state에서의 에러 메시지가 있는 form을 반환하세요.
 
 ### Next.js 16 App Router
 
-Route Structure:
+경로 구조:
 
-The app directory contains layout.tsx for root layout, page.tsx for home route, loading.tsx for loading UI, error.tsx for error boundary, and api/route.ts for API routes. Subdirectories like users contain page.tsx for list and [id]/page.tsx for dynamic routes. Route groups use parentheses like (marketing)/about/page.tsx.
+app 디렉토리는 루트 레이아웃을 위한 layout.tsx, 홈 경로를 위한 page.tsx, 로딩 UI를 위한 loading.tsx, 에러 경계를 위한 error.tsx, API 경로를 위한 api/route.ts를 포함합니다. users와 같은 하위 디렉토리는 목록을 위한 page.tsx와 동적 경로를 위한 [id]/page.tsx를 포함합니다. 경로 그룹은 (marketing)/about/page.tsx와 같은 괄호를 사용합니다.
 
 Metadata API:
 
-Import Metadata type. Export metadata object with title as object containing default and template, and description string. Export async generateMetadata function that takes params, awaits params, fetches user, and returns object with title set to user name.
+Metadata 타입을 임포트하세요. default와 template을 포함하는 객체를 가진 title, description 문자열로 metadata 객체를 내보내세요. params를 받고 params를 await하고 사용자를 가져오며 title을 사용자 이름으로 설정하는 객체를 반환하는 async generateMetadata 함수를 내보내세요.
 
-Server Actions with Validation:
+검증과 함께 Server Actions:
 
-In server file, import zod, revalidatePath, and redirect. Define UpdateUserSchema with id, name, and email validation. Create async updateUser function taking prevState and formData. Parse with safeParse, return errors if failed, update database, revalidate path, and redirect.
+server 파일에서 zod, revalidatePath, redirect를 임포트하세요. id, name, email 검증으로 UpdateUserSchema를 정의하세요. prevState와 formData를 받는 async updateUser 함수를 생성하세요. safeParse로 파싱하고 실패하면 에러를 반환하고, DB를 업데이트하고, 경로를 재검증하고, 리디렉션하세요.
 
-### Type-Safe APIs with tRPC
+### tRPC와 타입 안전한 API
 
-Server Setup:
+서버 설정:
 
-Import initTRPC and TRPCError from trpc server. Create t by calling initTRPC.context with Context type then create. Export router, publicProcedure, and protectedProcedure from t. The protectedProcedure uses middleware that checks session user and throws UNAUTHORIZED error if missing.
+trpc/server에서 initTRPC와 TRPCError를 임포트하세요. initTRPC.context<Context>().create()를 호출하여 t를 생성하세요. router, publicProcedure, protectedProcedure를 t에서 내보내세요. protectedProcedure는 세션 사용자를 확인하고 누락된 경우 UNAUTHORIZED 에러를 발생시키는 미들웨어를 사용합니다.
 
-Router Definition:
+라우터 정의:
 
-Import zod. Create userRouter with router function. Define getById procedure using publicProcedure with input schema for id as uuid string, and query that finds user by id. Define create procedure using protectedProcedure with input schema for name and email, and mutation that creates user.
+zod를 임포트하세요. router 함수로 userRouter를 생성하세요. publicProcedure와 input 스키마로 id를 uuid 문자열로 사용하여 getById 프로시저를 정의하고 id로 사용자를 찾는 쿼리를 정의하세요. protectedProcedure와 input 스키마로 name과 email을 사용하여 create 프로시저를 정의하고 사용자를 생성하는 뮤테이션을 정의하세요.
 
-Client Usage:
+클라이언트 사용:
 
-In client component, create UserList function that calls trpc.user.list.useQuery with page parameter. Destructure data and isLoading. Create mutation with trpc.user.create.useMutation. Return loading state or list of users.
+클라이언트 컴포넌트에서 page 파라미터로 trpc.user.list.useQuery를 호출하는 UserList 함수를 생성하세요. data와 isLoading을 분해하세요. trpc.user.create.useMutation으로 뮤테이션을 생성하세요. 로딩 상태 또는 사용자 목록을 반환하세요.
 
-### Zod Schema Patterns
+### Zod 스키마 패턴
 
-Complex Validation:
+복잡한 검증:
 
-Create UserSchema with z.object containing id as uuid string, name with min and max length, email as email format, role as enum of admin, user, and guest, and createdAt with coerce.date. Apply strict method. Infer User type from schema. Create CreateUserSchema by omitting id and createdAt, extending with password and confirmPassword, and adding refine for password match validation with custom message and path.
+uuid 문자열 id, 최소/최대 길이 name, email 형식 email, admin/user/guest 열거 role, coerce.date createdAt을 가진 z.object로 UserSchema를 생성하세요. strict 메서드를 적용하세요. 스키마에서 User 타입을 유추하세요. CreateUserSchema를 생성할 때 id와 createdAt을 생략하고 password와 confirmPassword로 확장하며 커스텀 메시지와 경로로 password 일치 검증을 위한 refine을 추가하세요.
 
-### State Management
+### 상태 관리
 
-Zustand for Client State:
+클라이언트 상태를 위한 Zustand:
 
-Import create from zustand and middleware. Define AuthState interface with user as User or null, login method, and logout method. Create useAuthStore with create function wrapped in devtools and persist middleware. Set initial user to null, login sets user, logout sets user to null. Persist uses auth-storage name.
+zustand와 middleware에서 create를 임포트하세요. user를 User | null로, login 메서드, logout 메서드를 가진 AuthState 인터페이스를 정의하세요. devtools와 persist 미들웨어로 래핑된 create 함수로 useAuthStore를 생성하세요. 초기 user를 null로 설정하고 login은 user를 설정하고 logout은 user를 null로 설정하세요. persist는 auth-storage 이름을 사용합니다.
 
-Jotai for Atomic State:
+원자 상태를 위한 Jotai:
 
-Import atom from jotai and atomWithStorage from jotai/utils. Create countAtom with initial value 0. Create doubleCountAtom as derived atom that gets countAtom and multiplies by 2. Create themeAtom with atomWithStorage for light or dark theme persisted to storage.
+jotai에서 atom을, jotai/utils에서 atomWithStorage를 임포트하세요. 초기값 0으로 countAtom을 생성하세요. countAtom을 가져와 2를 곱하는 파생 atom으로 doubleCountAtom을 생성하세요. light/dark 테마를 저장에 지속하는 atomWithStorage로 themeAtom을 생성하세요.
 
 ---
 
 ## Advanced Patterns
 
-For comprehensive documentation including advanced TypeScript patterns, performance optimization, testing strategies, and deployment configurations, see:
+고급 TypeScript 패턴, 성능 최적화, 테스트 전략, 배포 구성에 대한 포괄적인 문서는 다음을 참조하세요:
 
-- reference.md for complete API reference, Context7 library mappings, and advanced type patterns
-- examples.md for production-ready code examples, full-stack patterns, and testing templates
+- reference.md 완전한 API 참조, Context7 라이브러리 매핑, 고급 타입 패턴
+- examples.md 프로덕션 준비 코드 예제, 풀스택 패턴, 테스트 템플릿
 
-### Context7 Integration
+### Context7 통합
 
-For TypeScript documentation, use microsoft/TypeScript with decorators satisfies topics. For React 19, use facebook/react with server-components use-hook. For Next.js 16, use vercel/next.js with app-router server-actions. For tRPC, use trpc/trpc with procedures middleware. For Zod, use colinhacks/zod with schema validation.
+TypeScript 문서의 경우 decorators satisfies 주제로 microsoft/TypeScript를 사용하세요. React 19의 경우 server-components use-hook 주제로 facebook/react를 사용하세요. Next.js 16의 경우 app-router server-actions 주제로 vercel/next.js를 사용하세요. tRPC의 경우 procedures middleware 주제로 trpc/trpc를 사용하세요. Zod의 경우 schema-validation 주제로 colinhacks/zod를 사용하세요.
 
 ---
 
 ## Works Well With
 
-- do-domain-frontend for UI components and styling patterns
-- do-domain-backend for API design and database integration
-- do-library-shadcn for component library integration
-- do-workflow-testing for testing strategies and patterns
-- do-foundation-quality for code quality standards
-- do-essentials-debug for debugging TypeScript applications
+- do-domain-frontend UI 컴포넌트 및 스타일링 패턴
+- do-domain-backend API 설계 및 데이터베이스 통합
+- do-library-shadcn 컴포넌트 라이브러리 통합
+- do-workflow-testing 테스트 전략 및 패턴
+- do-foundation-quality 코드 품질 표준
+- do-essentials-debug TypeScript 애플리케이션 디버깅
 
 ---
 
 ## Quick Troubleshooting
 
-TypeScript Errors:
+TypeScript 에러:
 
-Run npx tsc with noEmit flag for type check only. Run npx tsc with generateTrace flag and output directory for performance trace.
+타입 검사만을 위해 npx tsc --noEmit을 실행하세요. 성능 추적을 위해 npx tsc --generateTrace --output-directory를 실행하세요.
 
-React and Next.js Issues:
+React 및 Next.js 문제:
 
-Run npm run build to check for build errors. Run npx next lint for ESLint check. Delete .next directory and run npm run dev to clear cache.
+빌드 에러를 확인하기 위해 npm run build를 실행하세요. ESLint 검사를 위해 npx next lint를 실행하세요. 캐시를 지우기 위해 .next 디렉토리를 삭제하고 npm run dev를 실행하세요.
 
-Type Safety Patterns:
+타입 안전 패턴:
 
-Create assertNever function taking never type parameter that throws error for unexpected values, used in exhaustive switch statements. Create type guard function isUser that checks if value is object with id property and returns type predicate.
+예기치 않은 값에 대해 에러를 발생시키는 never 타입 파라미터를 가진 assertNever 함수를 생성하고, 포괄적인 switch 문에서 사용하세요. 값이 id 속성을 가진 객체인지 확인하고 타입 술어를 반환하는 isUser 타입 가드 함수를 생성하세요.
 
 ---
 

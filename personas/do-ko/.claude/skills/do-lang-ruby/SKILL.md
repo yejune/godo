@@ -1,9 +1,8 @@
 ---
 name: do-lang-ruby
 description: >
-  Ruby 3.3+ development specialist covering Rails 7.2, ActiveRecord,
-  Hotwire/Turbo, and modern Ruby patterns. Use when developing Ruby APIs,
-  web applications, or Rails projects.
+  Ruby 3.3+ 개발 전문가 - Rails 7.2, ActiveRecord, Hotwire/Turbo, 모던 Ruby 패턴涵盖.
+  Ruby API, 웹 애플리케이션, Rails 프로젝트 개발 시 사용하세요.
 license: Apache-2.0
 compatibility: Designed for Claude Code
 allowed-tools: Read Grep Glob Bash(ruby:*) Bash(gem:*) Bash(bundle:*) Bash(rake:*) Bash(rspec:*) Bash(rubocop:*) Bash(rails:*) mcp__context7__resolve-library-id mcp__context7__get-library-docs
@@ -28,165 +27,165 @@ triggers:
   languages: ["ruby"]
 ---
 
-## Quick Reference (30 seconds)
+## Quick Reference (30초 요약)
 
-Ruby 3.3+ Development Specialist - Rails 7.2, ActiveRecord, Hotwire/Turbo, RSpec, and modern Ruby patterns.
+Ruby 3.3+ 개발 전문가 - Rails 7.2, ActiveRecord, Hotwire/Turbo, RSpec, 모던 Ruby 패턴.
 
-Auto-Triggers: Files with .rb extension, Gemfile, Rakefile, config.ru, Rails or Ruby discussions
+자동 트리거: .rb 확장자 파일, Gemfile, Rakefile, config.ru, Rails 또는 Ruby 논의
 
-Core Capabilities:
+핵심 기능:
 
-- Ruby 3.3 Features: YJIT production-ready, pattern matching, Data class, endless methods
-- Web Framework: Rails 7.2 with Turbo, Stimulus, and ActiveRecord
-- Frontend: Hotwire including Turbo and Stimulus for SPA-like experiences
-- Testing: RSpec with factories, request specs, and system specs
-- Background Jobs: Sidekiq with ActiveJob
-- Package Management: Bundler with Gemfile
-- Code Quality: RuboCop with Rails cops
-- Database: ActiveRecord with migrations, associations, and scopes
+- Ruby 3.3 기능: YJIT 프로덕션 준비, pattern matching, Data class, endless methods
+- 웹 프레임워크: Turbo, Stimulus, ActiveRecord가 있는 Rails 7.2
+- 프론트엔드: SPA 같은 경험을 위한 Hotwire (Turbo 및 Stimulus)
+- 테스트: factories, request specs, system specs가 있는 RSpec
+- 백그라운드 작업: ActiveJob과 함께 Sidekiq
+- 패키지 관리: Gemfile과 함께 Bundler
+- 코드 품질: Rails cops가 있는 RuboCop
+- 데이터베이스: 마이그레이션, 연관, scopes가 있는 ActiveRecord
 
 ### Quick Patterns
 
-Rails Controller Pattern:
+Rails Controller 패턴:
 
-Create UsersController inheriting from ApplicationController. Add before_action for set_user calling only on show, edit, update, and destroy actions. Define index method assigning User.all to instance variable. Define create method creating new User with user_params. Use respond_to block with format.html redirecting on success or rendering new with unprocessable_entity status, and format.turbo_stream for Turbo responses. Add private set_user method finding by params id. Add user_params method requiring user and permitting name and email.
+ApplicationController를 상속받는 UsersController를 생성하세요. show, edit, update, destroy 액션에서만 호출되는 set_user를 위하여 before_action을 추가하세요. User.all을 인스턴스 변수에 할당하는 index 메서드를 정의하세요. user_params로 새 User를 생성하는 create 메서드를 정의하세요. 성공 시 redirect 또는 unprocessable_entity 상태로 new를 렌더링하는 format.html, Turbo 응답을 위한 format.turbo_stream을 사용하여 respond_to 블록을 사용하세요. params[:id]로 사용자를 찾는 private set_user 메서드를 추가하세요. user를 요구하고 name과 email을 허용하는 user_params 메서드를 추가하세요.
 
-ActiveRecord Model Pattern:
+ActiveRecord Model 패턴:
 
-Create User model inheriting from ApplicationRecord. Define has_many for posts with dependent destroy and has_one for profile with dependent destroy. Add validates for email with presence, uniqueness, and format using URI::MailTo::EMAIL_REGEXP. Add validates for name with presence and length minimum 2 maximum 100. Define active scope filtering where active is true. Define recent scope ordering by created_at descending. Create full_name method returning first_name and last_name joined with space and stripped.
+ApplicationRecord를 상속받는 User model을 생성하세요. dependent: destroy로 has_many :posts, dependent: destroy로 has_one :profile를 정의하세요. presence, uniqueness, URI::MailTo::EMAIL_REGEXP 형식으로 email을 검증합니다. presence와 length(minimum: 2, maximum: 100)으로 name을 검증합니다. active가 true인 것을 필터링하는 active scope를 정의하세요. created_at DESC로 정렬하는 recent scope를 정의하세요. first_name과 last_name을 공백으로 결합하고 제거하는 full_name 메서드를 정의하세요.
 
-RSpec Test Pattern:
+RSpec Test 패턴:
 
-Create RSpec.describe for User model type. In describe validations block, add expectations for validate_presence_of and validate_uniqueness_of for email. In describe full_name block, use let to build user with first_name John and last_name Doe. Add it block expecting user.full_name to eq John Doe.
+User model 타입에 RSpec.describe를 생성하세요. describe validations 블록에서 email에 validate_presence_of와 validate_uniqueness_of에 대한 expectation을 추가하세요. describe full_name 블록에서 first_name이 "John", last_name이 "Doe"인 user를 빌드하는 let을 사용하세요. user.full_name이 "John Doe"와 같은지 expect하는 it 블록을 추가하세요.
 
 ---
 
-## Implementation Guide (5 minutes)
+## Implementation Guide (5분 가이드)
 
-### Ruby 3.3 New Features
+### Ruby 3.3 새 기능
 
 YJIT Production-Ready:
 
-YJIT is enabled by default in Ruby 3.3 providing 15 to 20 percent performance improvement for Rails applications. Enable by running ruby with yjit flag or setting RUBY_YJIT_ENABLE environment variable to 1. Check status by calling RubyVM::YJIT.enabled? method.
+Ruby 3.3에서는 YJIT가 기본적으로 활성화되어 Rails 애플리케이션에 15~20% 성능 향상을 제공합니다. ruby --yjit 플래그로 ruby를 실행하거나 RUBY_YJIT_ENABLE 환경변수를 1로 설정하여 활성화하세요. RubyVM::YJIT.enabled? 메서드를 호출하여 상태를 확인하세요.
 
-Pattern Matching with case/in:
+case/in과 함께 Pattern Matching:
 
-Create process_response method taking response parameter. Use case with response and in for pattern matching. Match status ok with data extracting data variable and puts success message. Match status error with message extracting msg variable. Match status with guard condition checking pending or processing. Use else for unknown response.
+response 파라미터를 받는 process_response 메서드를 생성하세요. response에 case를 사용하고 패턴 매칭을 위해 in을 사용하세요. status가 ok이고 data를 추출하는 케이스에서 성공 메시지와 함께 data를 출력하세요. status가 error이고 msg를 추출하는 케이스에서 에러 메시지를 출력하세요. guard 조건으로 pending 또는 processing과 일치하는 status 케이스를 사용하세요. 알 수 없는 응답을 위한 else를 사용하세요.
 
-Data Class for Immutable Structs:
+Immutable Structs를 위한 Data Class:
 
-Create User using Data.define with name and email symbols. Add block defining greeting method returning hello message with name. Create user instance with keyword arguments. Access name property and call greeting method.
+Data.define을 사용하여 name과 email 심볼로 User를 생성하세요. greeting 메서드를 반환하는 블록을 추가하여 name이 포함된 hello 메시지를 반환하세요. 키워드 인자로 user 인스턴스를 생성하세요. name 속성에 접근하고 greeting 메서드를 호출하세요.
 
 Endless Method Definition:
 
-Create Calculator class with add, multiply, and positive? methods using equals sign syntax for single expression methods.
+add, multiply, positive? 메서드에 대해 equals 신택자 구문을 사용하는 Calculator 클래스를 생성하세요.
 
-### Rails 7.2 Patterns
+### Rails 7.2 패턴
 
-Application Setup in Gemfile:
+Gemfile의 Application Setup:
 
-Set source to rubygems.org. Add rails version constraint for 7.2, pg for 1.5, puma for 6.0 or later, turbo-rails, stimulus-rails, and sidekiq for 7.0. In development and test group add rspec-rails for 7.0, factory_bot_rails, faker, and rubocop-rails with require false. In test group add capybara and shoulda-matchers.
+rubygems.org로 source를 설정하세요. 7.2 버전 제약 조건이 있는 rails, 1.5인 pg, 6.0 이상인 puma, turbo-rails, stimulus-rails, 7.0인 sidekiq를 추가하세요. development 및 test 그룹에 7.0인 rspec-rails, factory_bot_rails, faker, require: false가 있는 rubocop-rails를 추가하세요. test 그룹에 capybara와 shoulda-matchers를 추가하세요.
 
-Model with Concerns:
+Concerns와 함께 Model:
 
-Create Sluggable module extending ActiveSupport::Concern. In included block add before_validation for generate_slug on create and validates for slug with presence and uniqueness. Define to_param returning slug. Add private generate_slug method setting slug from parameterized title if title present and slug blank. Create Post model including Sluggable with belongs_to user, has_many comments with dependent destroy, has_many_attached images. Add validations and published scope.
+ActiveSupport::Concern을 확장하는 Sluggable 모듈을 생성하세요. included 블록에서 create 시 generate_slug를 위한 before_validation과 slug에 presence와 uniqueness를 검증합니다. to_param을 반환하여 slug를 정의합니다. title이 존재하고 slug가 비어있으면 parameterized title에서 slug를 설정하는 private generate_slug 메서드를 추가하세요. belongs_to :user, dependent: destroy로 has_many :comments, has_many_attached :images를 포함하는 Post model에 Sluggable을 include하세요. 검증과 published scope를 추가하세요.
 
-Service Objects Pattern:
+Service Objects 패턴:
 
-Create UserRegistrationService with initialize accepting user_params. Define call method creating User, using ActiveRecord::Base.transaction to save user, create profile, and send welcome email. Return Result with success true and user. Rescue RecordInvalid returning Result with success false and errors. Add private methods for create_profile and send_welcome_email. Define Result as Data.define with success, user, and errors, adding success? and failure? predicate methods.
+user_params를 받는 initialize로 UserRegistrationService를 생성하세요. User를 생성하고 ActiveRecord::Base.transaction을 사용하여 사용자를 저장하고 프로필을 생성하고 환영 이메일을 보내는 call 메서드를 정의하세요. success가 true이고 user가 있는 Result를 반환합니다. RecordInvalid를 구조하여 success가 false이고 errors가 있는 Result를 반환합니다. create_profile과 send_welcome_email을 위한 private 메서드를 추가하세요. success, user, errors를 가진 Data.define으로 Result를 정의하고 success?와 failure? 술어 메서드를 추가하세요.
 
-### Hotwire Turbo and Stimulus
+### Hotwire Turbo와 Stimulus
 
-Turbo Frames Pattern:
+Turbo Frames 패턴:
 
-In index view, use turbo_frame_tag with posts id and iterate posts rendering each. In post partial, use turbo_frame_tag with dom_id for post, containing article with h2 link and truncated content paragraph.
+index 뷰에서 posts id로 turbo_frame_tag를 사용하고 각 post를 렌더링합니다. post 부분 분할에서 post의 dom_id로 turbo_frame_tag를 사용하여 h2 링크와 잘린 content 단락을 포함하는 article를 포함하세요.
 
-Turbo Streams Pattern:
+Turbo Streams 패턴:
 
-In controller create action, build post from current_user.posts. Use respond_to with format.turbo_stream and format.html for redirect or render based on save success. In create.turbo_stream.erb view, use turbo_stream.prepend for posts with post, and turbo_stream.update for new_post form partial.
+controller create 액션에서 current_user.posts에서 post를 빌드합니다. save 성공 여부에 따라 redirect 또는 render를 위한 format.html, format.turbo_stream과 함께 respond_to를 사용하세요. create.turbo_stream.erb 뷰에서 post로 posts에 turbo_stream.prepend를, new_post 폼 부분으로 turbo_stream.update를 사용하세요.
 
-Stimulus Controller Pattern:
+Stimulus Controller 패턴:
 
-In JavaScript controller file, import Controller from hotwired/stimulus. Export default class extending Controller with static targets array for input and submit. Define connect method calling validate. Define validate method checking all input targets have values and setting submit target disabled accordingly.
+JavaScript 컨트롤러 파일에서 hotwired/stimulus에서 Controller를 임포트하고 export하세요. static targets 배열이 있는 input과 submit을 가진 클래스를 default로 확장하세요. connect 메서드에서 validate를 호출합니다. validate 메서드에서 모든 input targets에 값이 있는지 확인하고 submit target을 그에 따라 비활성화합니다.
 
-### RSpec Testing Basics
+### RSpec 테스트 기본
 
-Factory Bot Patterns:
+Factory Bot 패턴:
 
-In factories file, define factory for user with sequence for email, Faker::Name.name for name, and password123 for password. Add admin trait setting role to admin symbol. Add with_posts trait with transient posts_count defaulting to 3, using after create callback to create_list posts for user.
-
----
-
-## Advanced Implementation (10+ minutes)
-
-For comprehensive coverage including:
-
-- Production deployment patterns for Docker and Kubernetes
-- Advanced ActiveRecord patterns including polymorphic, STI, and query objects
-- Action Cable real-time features
-- Performance optimization techniques
-- Security best practices
-- CI/CD integration patterns
-- Complete RSpec testing patterns
-
-See:
-
-- modules/advanced-patterns.md for production patterns and advanced features
-- modules/testing-patterns.md for complete RSpec testing guide
+factories 파일에서 email에 sequence, name에 Faker::Name.name, password에 password123을 가진 user factory를 정의하세요. role을 admin 심볼로 설정하는 admin trait를 추가하세요. posts_count가 3인 transient를 사용하고 after create 콜백으로 사용자를 위한 posts를 create_list하는 with_posts trait를 추가하세요.
 
 ---
 
-## Context7 Library Mappings
+## Advanced Implementation (10분 이상)
 
-- rails/rails for Ruby on Rails web framework
-- rspec/rspec for RSpec testing framework
-- hotwired/turbo-rails for Turbo for Rails
-- hotwired/stimulus-rails for Stimulus for Rails
-- sidekiq/sidekiq for background job processing
-- rubocop/rubocop for Ruby style guide enforcement
-- thoughtbot/factory_bot for test data factories
+포괄적인涵盖内容包括:
+
+- Docker 및 Kubernetes용 프로덕션 배포 패턴
+- 다형성, STI, 쿼리 객체를 포함한 고급 ActiveRecord 패턴
+- Action Cable 실시간 기능
+- 성능 최적화 기법
+- 보안 모범 사례
+- CI/CD 통합 패턴
+- 완전한 RSpec 테스트 패턴
+
+다음을 참조하세요:
+
+- modules/advanced-patterns.md 프로덕션 패턴 및 고급 기능
+- modules/testing-patterns.md 완전한 RSpec 테스트 가이드
+
+---
+
+## Context7 라이브러리 매핑
+
+- rails/rails Ruby on Rails 웹 프레임워크
+- rspec/rspec RSpec 테스팅 프레임워크
+- hotwired/turbo-rails Rails용 Turbo
+- hotwired/stimulus-rails Rails용 Stimulus
+- sidekiq/sidekiq 백그라운드 작업 처리
+- rubocop/rubocop Ruby 스타일 가이드 강제
+- thoughtbot/factory_bot 테스트 데이터 팩토리
 
 ---
 
 ## Works Well With
 
-- do-domain-backend for REST API and web application architecture
-- do-domain-database for SQL patterns and ActiveRecord optimization
-- do-workflow-testing for DDD and testing strategies
-- do-essentials-debug for AI-powered debugging
-- do-foundation-quality for TRUST 5 quality principles
+- do-domain-backend REST API 및 웹 애플리케이션 아키텍처
+- do-domain-database SQL 패턴 및 ActiveRecord 최적화
+- do-workflow-testing DDD 및 테스트 전략
+- do-essentials-debug AI 기반 디버깅
+- do-foundation-quality TRUST 5 품질 원칙
 
 ---
 
 ## Troubleshooting
 
-Common Issues:
+일반적인 문제:
 
-Ruby Version Check:
+Ruby 버전 확인:
 
-Run ruby with version flag for 3.3 or later. Check YJIT status by running ruby -e with puts RubyVM::YJIT.enabled? command.
+3.3 이상을 위해 ruby --version을 실행하세요. YJIT 상태를 확인하기 위해 ruby -e 'puts RubyVM::YJIT.enabled?'를 실행하세요.
 
-Rails Version Check:
+Rails 버전 확인:
 
-Run rails with version flag for 7.2 or later. Run bundle exec rails about for full environment information.
+7.2 이상을 위해 rails --version을 실행하세요. 전체 환경 정보를 위해 bundle exec rails about를 실행하세요.
 
-Database Connection Issues:
+데이터베이스 연결 문제:
 
-- Check config/database.yml configuration
-- Ensure PostgreSQL or MySQL service is running
-- Run rails db:create if database does not exist
+- config/database.yml 구성을 확인하세요
+- PostgreSQL 또는 MySQL 서비스가 실행 중인지 확인하세요
+- 데이터베이스가 존재하지 않으면 rails db:create를 실행하세요
 
-Asset Pipeline Issues:
+Asset Pipeline 문제:
 
-Run rails assets:precompile to compile assets. Run rails assets:clobber to clear compiled assets.
+assets를 컴파일하려면 rails assets:precompile을 실행하세요. 컴파일된 assets를 지우려면 rails assets:clobber를 실행하세요.
 
-RSpec Setup Issues:
+RSpec 설정 문제:
 
-Run rails generate rspec:install for initial setup. Run bundle exec rspec with specific file path for single spec. Run bundle exec rspec with format documentation for verbose output.
+초기 설정을 위해 rails generate rspec:install을 실행하세요. 단일 spec을 위해 bundle exec rspec spec 파일 경로를 실행하세요. 상세한 출력을 위해 bundle exec rspec --format documentation을 실행하세요.
 
-Turbo and Stimulus Issues:
+Turbo 및 Stimulus 문제:
 
-Run rails javascript:install:esbuild for JavaScript setup. Run rails turbo:install for Turbo installation.
+JavaScript 설정을 위해 rails javascript:install:esbuild를 실행하세요. Turbo 설치를 위해 rails turbo:install을 실행하세요.
 
 ---
 

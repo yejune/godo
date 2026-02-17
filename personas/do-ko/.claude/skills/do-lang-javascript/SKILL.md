@@ -1,7 +1,10 @@
 ---
 name: do-lang-javascript
 description: >
-  JavaScript ES2024+ development specialist covering Node.js 22 LTS, Bun 1.x (serve, SQLite, S3, shell, test), Deno 2.x, testing (Vitest, Jest), linting (ESLint 9, Biome), and backend frameworks (Express, Fastify, Hono). Use when developing JavaScript APIs, web applications, or Node.js projects.
+  JavaScript ES2024+ 개발 전문가 - Node.js 22 LTS, Bun 1.x (serve, SQLite, S3,
+  shell, test), Deno 2.x, 테스트 (Vitest, Jest), 린팅 (ESLint 9, Biome), 백엔드
+  프레임워크 (Express, Fastify, Hono)涵盖. JavaScript API, 웹 애플리케이션,
+  Node.js 프로젝트 개발 시 사용하세요.
 license: Apache-2.0
 compatibility: Designed for Claude Code
 allowed-tools: Read Grep Glob Bash(node:*) Bash(npm:*) Bash(npx:*) Bash(yarn:*) Bash(pnpm:*) Bash(bun:*) Bash(deno:*) Bash(jest:*) Bash(vitest:*) Bash(eslint:*) Bash(prettier:*) Bash(biome:*) mcp__context7__resolve-library-id mcp__context7__get-library-docs
@@ -26,151 +29,151 @@ triggers:
   languages: ["javascript", "js"]
 ---
 
-## Quick Reference (30 seconds)
+## Quick Reference (30초 요약)
 
-JavaScript ES2024+ Development Specialist - Modern JavaScript with Node.js 22 LTS, multiple runtimes, and contemporary tooling.
+JavaScript ES2024+ 개발 전문가 - Node.js 22 LTS, 여러 런타임, 현대 도구와 모던 JavaScript.
 
-Auto-Triggers: Files with .js, .mjs, or .cjs extensions, package.json, Node.js projects, JavaScript discussions
+자동 트리거: .js, .mjs, .cjs 확장자 파일, package.json, Node.js 프로젝트, JavaScript 논의
 
-Core Stack:
+핵심 스택:
 
-- ES2024+: Set methods, Promise.withResolvers, immutable arrays, import attributes
-- Node.js 22 LTS: Native TypeScript, built-in WebSocket, stable watch mode
-- Runtimes: Node.js 20 and 22 LTS, Deno 2.x, Bun 1.x
-- Testing: Vitest, Jest, Node.js test runner
-- Linting: ESLint 9 flat config, Biome
-- Bundlers: Vite, esbuild, Rollup
-- Frameworks: Express, Fastify, Hono, Koa
+- ES2024+: Set 메서드, Promise.withResolvers, 불변 배열, import 속성
+- Node.js 22 LTS: 네이티브 TypeScript, 내장 WebSocket, 안정적인 감시 모드
+- 런타임: Node.js 20 및 22 LTS, Deno 2.x, Bun 1.x
+- 테스트: Vitest, Jest, Node.js 테스트 러너
+- 린팅: ESLint 9 플랫 config, Biome
+- 번들러: Vite, esbuild, Rollup
+- 프레임워크: Express, Fastify, Hono, Koa
 
-Quick Commands:
+빠른 명령어:
 
-Create a Vite project using npm create vite with latest tag, project name, and vanilla template. Initialize with modern tooling using npm init and npm install with D flag for vitest, eslint, and eslint/js. Run with Node.js watch mode using node with watch flag. Run TypeScript directly in Node.js 22+ using node with experimental-strip-types flag.
+npm create vite@latest 프로젝트이름 --template vanilla로 Vite 프로젝트를 생성하세요. npm init와 npm install -D vitest eslint eslint/js로 모던 도구로 초기화하세요. node --watch로 Node.js 감시 모드로 실행하세요. node --experimental-strip-types로 Node.js 22+에서 TypeScript를 직접 실행하세요.
 
 ---
 
-## Implementation Guide (5 minutes)
+## Implementation Guide (5분 가이드)
 
-### ES2024 Key Features
+### ES2024 핵심 기능
 
-Set Operations:
+Set 연산:
 
-Create setA with values 1, 2, 3, 4 and setB with values 3, 4, 5, 6. Call setA.intersection with setB to get Set containing 3 and 4. Call setA.union with setB to get Set containing 1 through 6. Call setA.difference with setB to get Set containing 1 and 2. Call setA.symmetricDifference with setB to get Set containing 1, 2, 5, and 6. Call isSubsetOf, isSupersetOf, and isDisjointFrom methods for set comparisons.
+값 1, 2, 3, 4로 setA를, 값 3, 4, 5, 6으로 setB를 생성하세요. setA.intersection(setB)를 호출하여 3과 4를 포함하는 Set을 가져오세요. setA.union(setB)를 호출하여 1부터 6까지를 포함하는 Set을 가져오세요. setA.difference(setB)를 호출하여 1과 2를 포함하는 Set을 가져오세요. setA.symmetricDifference(setB)를 호출하여 1, 2, 5, 6을 포함하는 Set을 가져오세요. set 비교를 위해 isSubsetOf, isSupersetOf, isDisjointFrom 메서드를 호출하세요.
 
 Promise.withResolvers:
 
-Create a createDeferred function that destructures promise, resolve, and reject from Promise.withResolvers call. Return an object with these three properties. Create a deferred instance, set a timeout to resolve with done after 1000 milliseconds, and await the promise for the result.
+Promise.withResolvers() 호출에서 promise, resolve, reject를 분해하는 createDeferred 함수를 생성하세요. 이 세 가지 속성을 가진 객체를 반환하세요. deferred 인스턴스를 생성하고 1000밀리초 후에 done으로 확인하도록 timeout을 설정하고 결과를 위해 프라미스를 await하세요.
 
-Immutable Array Methods:
+불변 배열 메서드:
 
-Create original array with values 3, 1, 4, 1, 5. Call toSorted to get new sorted array without mutating original. Call toReversed to get new reversed array. Call toSpliced with index 1, delete count 2, and insert value 9. Call with method at index 2 with value 99 to get new array with replaced element. The original array remains unchanged.
+3, 1, 4, 1, 5 값으로 original 배열을 생성하세요. 원본을 수정하지 않고 정렬된 새 배열을 가져오려면 toSorted를 호출하세요. 새로운 역순 배열을 가져오려면 toReversed를 호출하세요. 인덱스 1, 삭제 수 2, 삽입 값 9로 toSpliced를 호출하세요. 인덱스 2에서 값 99와 함께 with를 호출하여 대체된 요소를 가진 새 배열을 가져오세요. 원본 배열은 변경되지 않습니다.
 
-Object.groupBy and Map.groupBy:
+Object.groupBy 및 Map.groupBy:
 
-Create items array with objects containing type and name properties. Call Object.groupBy with items and a function that returns item.type to get an object with arrays grouped by type. Call Map.groupBy with the same arguments to get a Map with type keys and array values.
+type과 name 속성을 가진 객체를 포함하는 items 배열을 생성하세요. items와 item.type을 반환하는 함수로 Object.groupBy를 호출하여 type으로 그룹화된 배열을 가진 객체를 가져오세요. 동일한 인자로 Map.groupBy를 호출하여 type 키와 배열 값을 가진 Map을 가져오세요.
 
-### ES2025 Features
+### ES2025 기능
 
-Import Attributes for JSON Modules:
+JSON 모듈을 위한 Import 속성:
 
-Import config from config.json with type attribute set to json. Import styles from styles.css with type attribute set to css. Access config.apiUrl property.
+type 속성을 json으로 설정하여 config.json에서 config를 임포트하세요. type 속성을 css로 설정하여 styles.css에서 styles를 임포트하세요. config.apiUrl 속성에 접근하세요.
 
 RegExp.escape:
 
-Create userInput string with special characters like parentheses. Call RegExp.escape with userInput to get escaped pattern string. Create new RegExp with the safe pattern.
+괄호와 같은 특수 문자를 포함하는 userInput 문자열을 생성하세요. userInput과 함께 RegExp.escape를 호출하여 이스케이프된 패턴 문자열을 가져오세요. 안전한 패턴으로 새 RegExp를 생성하세요.
 
-### Node.js 22 LTS Features
+### Node.js 22 LTS 기능
 
-Built-in WebSocket Client:
+내장 WebSocket 클라이언트:
 
-Create new WebSocket with wss URL. Add event listener for open event that sends JSON stringified message. Add event listener for message event that parses event.data as JSON and logs the received data.
+wss URL로 새 WebSocket을 생성하세요. JSON 문자열화된 메시지를 보내는 open 이벤트용 이벤트 리스너를 추가하세요. event.data를 JSON으로 파싱하고 받은 데이터를 로깅하는 message 이벤트용 이벤트 리스너를 추가하세요.
 
-Native TypeScript Support Experimental:
+네이티브 TypeScript 지원 실험적:
 
-Run .ts files directly in Node.js 22.6+ using node with experimental-strip-types flag. In Node.js 22.18+, type stripping is enabled by default so files can be run directly.
+node --experimental-strip-types 플래그와 함께 Node.js 22.6+에서 .ts 파일을 직접 실행하세요. Node.js 22.18+에서는 타입 제거가 기본적으로 활성화되어 파일을 직접 실행할 수 있습니다.
 
-Watch Mode Stable:
+안정적인 감시 모드:
 
-Use node with watch flag for auto-restart on file changes. Use watch-path flag multiple times to watch specific directories like src and config.
+파일 변경 시 자동 재시작을 위해 node --watch를 사용하세요. src 및 config와 같은 특정 디렉토리를 감시하려면 --watch-path 플래그를 여러 번 사용하세요.
 
-Permission Model:
+권한 모델:
 
-Use node with permission flag and allow-fs-read set to a specific path to restrict file system access. Use allow-net flag with domain name to restrict network access.
+파일 시스템 액세스를 제한하려면 node --permission --allow-fs-read를 특정 경로로 설정하여 사용하세요. 도메인 이름과 함께 --allow-net 플래그를 사용하여 네트워크 액세스를 제한하세요.
 
-### Backend Frameworks
+### 백엔드 프레임워크
 
-Express Traditional Pattern:
+Express 전통적 패턴:
 
-Import express. Create app by calling express function. Use express.json middleware. Create a get endpoint at api/users that awaits database query and responds with json. Create a post endpoint that creates a user and responds with status 201 and json. Call listen on port 3000 with callback logging server running.
+express를 임포트하세요. express() 함수를 호출하여 app을 생성하세요. express.json 미들웨어를 사용하세요. api/users에 DB 쿼리를 await하고 json으로 응답하는 get 엔드포인트를 생성하세요. 사용자를 생성하고 상태 201과 json으로 응답하는 post 엔드포인트를 생성하세요. 포트 3000에서 서버 실행을 로깅하는 콜백과 함께 listen을 호출하세요.
 
-Fastify High Performance Pattern:
+Fastify 고성능 패턴:
 
-Import Fastify. Create fastify instance with logger set to true. Define userSchema with body containing type object, required array with name and email, and properties with validation constraints. Create a post endpoint with schema option and async handler that creates user and returns with code 201. Call listen with port 3000.
+Fastify를 임포트하세요. logger를 true로 설정하여 fastify 인스턴스를 생성하세요. 바디에 type object, required에 name과 email 배열, validation 제약 조건이 있는 속성을 가진 userSchema를 정의하세요. schema 옵션과 사용자를 생성하고 code 201을 반환하는 async 핸들러로 post 엔드포인트를 생성하세요. 포트 3000으로 listen을 호출하세요.
 
-Hono Edge-First Pattern:
+Hono 엣지 퍼스트 패턴:
 
-Import Hono and middleware functions. Create app instance. Use logger middleware for all routes. Use cors middleware for api routes. Create get endpoint at api/users that awaits database query and returns c.json. Create post endpoint with validator middleware that checks for required fields, then creates user and returns c.json with status 201. Export app as default.
+Hono와 미들웨어 함수를 임포트하세요. app 인스턴스를 생성하세요. 모든 경로에 logger 미들웨어를 사용하세요. api 경로에 cors 미들웨어를 사용하세요. DB 쿼리를 await하고 c.json을 반환하는 api/users에 get 엔드포인트를 생성하세요. 필수 필드를 확인하는 validator 미들웨어가 있는 post 엔드포인트를 생성한 다음 사용자를 생성하고 상태 201로 c.json을 반환하세요. 기본값으로 app을 내보내세요.
 
-### Testing with Vitest
+### Vitest와 함께 테스트
 
-Configuration:
+구성:
 
-Create vitest.config.js with defineConfig. Set test object with globals true, environment node, and coverage with provider v8 and reporters for text, json, and html.
+defineConfig로 vitest.config.js를 생성하세요. globals true, environment node, v8 제공자와 text, json, html 리포터가 있는 coverage를 설정한 test 객체를 설정하세요.
 
-Test Example:
+테스트 예제:
 
-In test file, import describe, it, expect, vi, and beforeEach from vitest. Import functions to test. Create describe block for User Service. In beforeEach, call vi.clearAllMocks. Create it block for should create a user that awaits createUser and expects result to match object with name and email, and id to be defined. Create it block for should throw on invalid email that expects createUser to reject with Invalid email error.
+테스트 파일에서 describe, it, expect, vi, beforeEach를 vitest에서 임포트하세요. 테스트할 함수를 임포트하세요. User Service용 describe 블록을 생성하세요. beforeEach에서 vi.clearAllMocks를 호출하세요. createUser를 await하고 결과가 name과 email이 있는 객체와 일치하고 id가 정의되어 있는지 expect하는 "사용자를 생성해야 함" it 블록을 생성하세요. createUser가 Invalid email 에러로 reject할 것을 expect하는 "잘못된 이메일에서 throw해야 함" it 블록을 생성하세요.
 
-### ESLint 9 Flat Config
+### ESLint 9 플랫 Config
 
-Create eslint.config.js. Import js from eslint/js and globals. Export array with js.configs.recommended followed by object with languageOptions containing ecmaVersion 2025, sourceType module, and globals merged from globals.node and globals.es2025. Set rules for no-unused-vars with error and args ignore pattern, no-console with warn and allowed methods, prefer-const as error, and no-var as error.
+eslint.config.js를 생성하세요. eslint/js에서 js와 globals를 임포트하세요. js.configs.recommended 뒤에 ecmaVersion 2025, sourceType module, globals.node와 globals.es2025를 병합한 languageOptions를 포함하는 객체 배열을 내보내세요. args ignore 패턴이 있는 no-unused-vars, 허용된 메서드가 있는 no-console, error인 prefer-const, error인 no-var에 대한 규칙을 설정하세요.
 
-### Biome All-in-One
+### Biome 올인원
 
-Create biome.json with schema URL. Enable organizeImports. Set linter enabled with recommended rules. Set formatter enabled with indentStyle space and indentWidth 2. Under javascript.formatter, set quoteStyle to single and semicolons to always.
+schema URL로 biome.json을 생성하세요. organizeImports를 활성화하세요. 권장 규칙으로 linter를 활성화하세요. indentStyle space, indentWidth 2로 formatter를 활성화하세요. javascript.formatter에서 quoteStyle을 single로, semicolons를 always로 설정하세요.
 
 ---
 
 ## Advanced Patterns
 
-For comprehensive documentation including advanced async patterns, module system details, performance optimization, and production deployment configurations, see:
+고급 async 패턴, 모듈 시스템 세부 정보, 성능 최적화, 프로덕션 배포 구성에 대한 포괄적인 문서는 다음을 참조하세요:
 
-- reference.md for complete API reference, Context7 library mappings, and package manager comparison
-- examples.md for production-ready code examples, full-stack patterns, and testing templates
+- reference.md 완전한 API 참조, Context7 라이브러리 매핑, 패키지 관리자 비교
+- examples.md 프로덕션 준비 코드 예제, 풀스택 패턴, 테스트 템플릿
 
-### Context7 Integration
+### Context7 통합
 
-For Node.js documentation, use context7 get library docs with nodejs/node and topics like esm modules async. For Express, use expressjs/express with middleware routing. For Fastify, use fastify/fastify with plugins hooks. For Hono, use honojs/hono with middleware validators. For Vitest, use vitest-dev/vitest with mocking coverage.
+Node.js 문서의 경우 esm modules async 주제로 nodejs/node와 context7 get library docs를 사용하세요. Express의 경우 middleware routing 주제로 expressjs/express를 사용하세요. Fastify의 경우 plugins hooks 주제로 fastify/fastify를 사용하세요. Hono의 경우 middleware validators 주제로 honojs/hono를 사용하세요. Vitest의 경우 mocking coverage 주제로 vitest-dev/vitest를 사용하세요.
 
 ---
 
 ## Works Well With
 
-- do-lang-typescript for TypeScript integration and type checking with JSDoc
-- do-domain-backend for API design and microservices architecture
-- do-domain-database for database integration and ORM patterns
-- do-workflow-testing for DDD workflows and testing strategies
-- do-foundation-quality for code quality standards
-- do-essentials-debug for debugging JavaScript applications
+- do-lang-typescript JSDoc와 함께 TypeScript 통합 및 타입 검사
+- do-domain-backend API 설계 및 마이크로서비스 아키텍처
+- do-domain-database 데이터베이스 통합 및 ORM 패턴
+- do-workflow-testing DDD 워크플로우 및 테스트 전략
+- do-foundation-quality 코드 품질 표준
+- do-essentials-debug JavaScript 애플리케이션 디버깅
 
 ---
 
 ## Quick Troubleshooting
 
-Module System Issues:
+모듈 시스템 문제:
 
-Check package.json for type field. ESM uses type module with import and export. CommonJS uses type commonjs or omits the field and uses require and module.exports.
+type 필드를 위해 package.json을 확인하세요. ESM은 type module과 import/export를 사용합니다. CommonJS는 type commonjs 또는 필드 생략과 require/module.exports를 사용합니다.
 
-Node.js Version Check:
+Node.js 버전 확인:
 
-Run node with version flag for 20.x or 22.x LTS. Run npm with version flag for 10.x or later.
+20.x 또는 22.x LTS를 위해 node --version을 실행하세요. 10.x 이상을 위해 npm --version을 실행하세요.
 
-Common Fixes:
+일반적인 수정사항:
 
-Clear npm cache with npm cache clean using force flag. Delete node_modules and package-lock.json then run npm install. Fix permission issues by setting npm config prefix to home directory npm-global folder.
+npm cache clean --force로 npm 캐시를 지우세요. node_modules와 package-lock.json을 삭제한 다음 npm install을 실행하세요. npm config prefix를 홈 디렉토리 npm-global 폴더로 설정하여 권한 문제를 수정하세요.
 
-ESM and CommonJS Interop:
+ESM 및 CommonJS 상호 운용:
 
-To import CommonJS from ESM, import the default then destructure named exports from it. For dynamic import in CommonJS, use await import and destructure the default property.
+ESM에서 CommonJS를 임포트하려면 기본값을 임포트한 다음 거기서 named exports를 분해하세요. CommonJS에서 동적 임포트의 경우 await import를 사용하고 default 속성을 분해하세요.
 
 ---
 

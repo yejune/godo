@@ -1,7 +1,8 @@
 ---
 name: do-lang-rust
 description: >
-  Rust 1.92+ development specialist covering Axum, Tokio, SQLx, and memory-safe systems programming. Use when building high-performance, memory-safe applications or WebAssembly.
+  Rust 1.92+ 개발 전문가 - Axum, Tokio, SQLx, 메모리 안전 시스템 프로그래밍涵盖.
+  고성능, 메모리 안전 애플리케이션 또는 WebAssembly 구축 시 사용하세요.
 license: Apache-2.0
 compatibility: Designed for Claude Code
 allowed-tools: Read Grep Glob mcp__context7__resolve-library-id mcp__context7__get-library-docs
@@ -26,153 +27,153 @@ triggers:
   languages: ["rust"]
 ---
 
-## Quick Reference (30 seconds)
+## Quick Reference (30초 요약)
 
-Rust 1.92+ Development Specialist with deep patterns for high-performance, memory-safe applications.
+고성능, 메모리 안전 애플리케이션을 위한 Rust 1.92+ 개발 전문가입니다.
 
-Auto-Triggers: `.rs`, `Cargo.toml`, async/await, Tokio, Axum, SQLx, serde, lifetimes, traits
+자동 트리거: .rs, Cargo.toml, async/await, Tokio, Axum, SQLx, serde, 라이프타임, 트레이트
 
-Core Use Cases:
+핵심 사용 사례:
 
-- High-performance REST APIs and microservices
-- Memory-safe concurrent systems
-- CLI tools and system utilities
-- WebAssembly applications
-- Low-latency networking services
+- 고성능 REST API 및 마이크로서비스
+- 메모리 안전 동시 시스템
+- CLI 도구 및 시스템 유틸리티
+- WebAssembly 애플리케이션
+- 저지연시 네트워킹 서비스
 
-Quick Patterns:
+빠른 패턴:
 
-Axum REST API: Create Router with route macro chaining path and handler. Add with_state for shared state. Bind TcpListener with tokio::net and serve with axum::serve.
+Axum REST API: 경로와 핸들러를 연결하는 route 매크로 체이닝으로 Router를 생성하세요. 공유 상태를 위해 with_state를 추가하세요. tokio::net와 함께 TcpListener를 바인딩하고 axum::serve로 서비스하세요.
 
-Async Handler with SQLx: Define async handler function taking State extractor for AppState and Path extractor for id. Use sqlx::query_as! macro with SQL string and bind parameters. Call fetch_optional on pool, await, and use ok_or for error conversion. Return Json wrapped result.
+Async Handler와 SQLx: AppState를 위한 State extractor와 id를 위한 Path extractor를 받는 async handler 함수를 정의하세요. SQL 문자열과 바인드 파라미터로 sqlx::query_as! 매크로를 사용하세요. pool에서 fetch_optional을 호출하고 await한 다음 에러 변환을 위해 ok_or를 사용하세요. Json로 래핑된 결과를 반환하세요.
 
 ---
 
-## Implementation Guide (5 minutes)
+## Implementation Guide (5분 가이드)
 
-### Rust 1.92 Features
+### Rust 1.92 기능
 
-Modern Rust Features:
+모던 Rust 기능:
 
-- Rust 2024 Edition available (released with Rust 1.85)
-- Async traits in stable (no more async-trait crate needed)
-- Const generics for compile-time array sizing
-- let-else for pattern matching with early return
-- Improved borrow checker with polonius
+- Rust 2024 Edition 사용 가능 (Rust 1.85와 함께 출시)
+- 안정적인 async 트레이트 (async-trait 크레이트 더 이상 필요 없음)
+- 컴파일 시간 배열 크기를 위한 Const 제네릭
+- 초기 반환을 위한 let-else 패턴 매칭
+- polonius로 향상된 borrow checker
 
-Async Traits (Stable): Define trait with async fn signatures. Implement trait for concrete types with async fn implementations. Call sqlx macros directly in trait methods.
+안정적인 Async 트레이트: async fn 서명을 가진 트레이트를 정의하세요. async fn 구현으로 구체적 타입에 트레이트를 구현하세요. 트레이트 메서드에서 직접 sqlx 매크로를 호출하세요.
 
-Let-Else Pattern: Use let Some(value) = option else with return for early exit. Chain multiple let-else statements for sequential validation. Return error types in else blocks.
+Let-Else 패턴: return을 사용하여 초기 종료를 위해 let Some(value) = option else를 사용하세요. 순차적 검증을 위해 여러 let-else 문을 체이닝하세요. else 블록에서 에러 타입을 반환하세요.
 
-### Web Framework: Axum 0.8
+### 웹 프레임워크 Axum 0.8
 
-Installation: In Cargo.toml dependencies section, add axum version 0.8, tokio version 1.48 with full features, and tower-http version 0.6 with cors and trace features.
+설치: Cargo.toml dependencies 섹션에 axum 버전 0.8, full features가 있는 tokio 버전 1.48, cors와 trace features가 있는 tower-http 버전 0.6을 추가하세요.
 
-Complete API Setup: Import extractors from axum::extract and routing macros. Define Clone-derive AppState struct holding PgPool. In tokio::main async main, create pool with PgPoolOptions setting max_connections and connecting with DATABASE_URL from env. Build Router with route chains for paths and handlers, add CorsLayer, and call with_state. Bind TcpListener and call axum::serve.
+완전한 API 설정: axum::extract에서 extractor를, routing macros를 임포트하세요. PgPool을 보유하는 Clone-derive AppState 구조체를 정의하세요. tokio::main async main에서 DATABASE_URL에서 env와 함께 max_connections를 설정하여 PgPoolOptions로 pool을 생성하세요. 경로와 핸들러에 대한 route 체인, CorsLayer를 가진 Router를 빌드하고 with_state를 호출하세요. TcpListener를 바인딩하고 axum::serve를 호출하세요.
 
-Handler Patterns: Define async handlers taking State, Path, and Query extractors with appropriate types. Use sqlx::query_as! for type-safe queries with positional binds. Return Result with Json success and AppError failure.
+핸들러 패턴: State, Path, Query extractor를 적절한 타입과 함께 받는 async 핸들러를 정의하세요. 위치 바인드를 위한 타입 안전 쿼리로 sqlx::query_as!를 사용하세요. Json 성공과 AppError 실패를 가진 Result를 반환하세요.
 
-### Async Runtime: Tokio 1.48
+### Async 런타임 Tokio 1.48
 
-Task Spawning and Channels: Create mpsc channel with capacity. Spawn worker tasks with tokio::spawn that receive from channel in loop. For timeouts, use tokio::select! macro with operation branch and sleep branch, returning error on timeout.
+태스크 생성 및 채널: 용량으로 mpsc 채널을 생성하세요. 루프에서 채널에서 수신하는 worker 태스크를 생성하기 위해 tokio::spawn을 호출하세요. timeout의 경우 작업 분기와 sleep 분기가 있는 tokio::select! 매크로를 사용하고 timeout 시 에러를 반환하세요.
 
-### Database: SQLx 0.8
+### 데이터베이스 SQLx 0.8
 
-Type-Safe Queries: Derive sqlx::FromRow on structs for automatic mapping. Use query_as! macro for compile-time checked queries. Call fetch_one or fetch_optional on pool. For transactions, call pool.begin, execute queries on transaction reference, and call tx.commit.
+타입 안전 쿼리: 자동 매핑을 위해 구조체에 sqlx::FromRow를 파생하세요. 컴파일 시간 체크 쿼리로 query_as! 매크로를 사용하세요. pool에서 fetch_one 또는 fetch_optional을 호출하세요. 트랜잭션의 경우 pool.begin을 호출하고 트랜잭션 참조에서 쿼리를 실행한 다음 tx.commit을 호출하세요.
 
-### Serialization: Serde 1.0
+### 직렬화 Serde 1.0
 
-Derive Serialize and Deserialize on structs. Use serde attribute with rename_all for case conversion. Use rename attribute for field-specific naming. Use skip_serializing_if with Option::is_none. Use default attribute for default values.
+구조체에 Serialize와 Deserialize를 파생하세요. 대소문자 변환을 위해 rename_all이 있는 serde 속성을 사용하세요. 필드별 명명을 위해 rename 속성을 사용하세요. Option::is_none과 함께 skip_serializing_if를 사용하세요. 기본값을 위해 default 속성을 사용하세요.
 
-### Error Handling
+### 에러 처리
 
-thiserror: Derive Error on enum with error attribute for display messages. Use from attribute for automatic conversion from source errors. Implement IntoResponse by matching on variants and returning status code with Json body containing error message.
+thiserror: display 메시지를 위한 error 속성이 있는 enum에 Error를 파생하세요. 소스 에러에서 자동 변환을 위해 from 속성을 사용하세요. 변형에서 일치하여 상태 코드와 Json 본문이 포함된 에러 메시지를 반환하여 IntoResponse를 구현하세요.
 
-### CLI Development: clap
+### CLI 개발 clap
 
-Derive Parser on main Cli struct with command attributes for name, version, about. Use arg attribute for global flags. Derive Subcommand on enum for commands. Match on command in main to dispatch logic.
+command 속성으로 name, version, about를 가진 main Cli 구조체에 Parser를 파생하세요. 전역 플래그를 위해 arg 속성을 사용하세요. 명령을 위해 enum에 Subcommand를 파생하세요. main에서 명령과 일치하여 논리를 디스패치하세요.
 
-### Testing Patterns
+### 테스트 패턴
 
-Create test module with cfg(test) attribute. Define tokio::test async functions. Call setup helpers, invoke functions under test, and use assert! macros for verification.
+cfg(test) 속성으로 테스트 모듈을 생성하세요. tokio::test async 함수를 정의하세요. 설정 도우미를 호출하고 테스트할 함수를 호출한 다음 검증을 위해 assert! 매크로를 사용하세요.
 
 ---
 
 ## Advanced Patterns
 
-For comprehensive coverage including:
+포괄적인涵盖内容包括:
 
-- Advanced ownership patterns, lifetimes, and smart pointers
-- Trait design and generic programming
-- Performance optimization strategies and profiling
-- Engineering best practices and coding guidelines
-- Async patterns and concurrency
+- 고급 소유권 패턴, 라이프타임, 스마트 포인터
+- 트레이트 설계 및 제네릭 프로그래밍
+- 성능 최적화 전략 및 프로파일링
+- 엔지니어링 모범 사례 및 코딩 가이드라인
+- Async 패턴 및 동시성
 
-See: [reference/engineering.md](reference/engineering.md) for ownership and traits, [reference/performance.md](reference/performance.md) for optimization, [reference/guidelines.md](reference/guidelines.md) for coding standards
+다음을 참조하세요: 소유권 및 트레이트는 [reference/engineering.md](reference/engineering.md), 최적화는 [reference/performance.md](reference/performance.md), 코딩 표준은 [reference/guidelines.md](reference/guidelines.md)
 
-### Performance Optimization
+### 성능 최적화
 
-Release Build: In Cargo.toml profile.release section, enable lto, set codegen-units to 1, set panic to abort, and enable strip.
+릴리스 빌드: Cargo.toml profile.release 섹션에서 lto를 활성화하고, codegen-units를 1로 설정하고, panic을 abort로 설정하고, strip을 활성화하세요.
 
-### Deployment
+### 배포
 
-Minimal Container: Use multi-stage Dockerfile. First stage uses rust alpine image, copies Cargo files, creates dummy main for dependency caching, builds release, copies source, touches main.rs for rebuild, builds final release. Second stage uses alpine, copies binary from builder, exposes port, and sets CMD.
+최소 컨테이너: 멀티 스테이지 Dockerfile을 사용하세요. 첫 번째 스테이지는 rust alpine 이미지를 사용하고 Cargo 파일을 복사하고 의존성 캐싱을 위해 더미 main을 생성하고 릴리스를 빌드하고 소스를 복사하고 재빌드를 위해 main.rs를 touch하고 최종 릴리스를 빌드합니다. 두 번째 스테이지는 alpine을 사용하고 빌더에서 바이너리를 복사하고 포트를 노출하고 CMD를 설정합니다.
 
-### Concurrency
+### 동시성
 
-Rate-Limited Operations: Create Arc-wrapped Semaphore with max permits. Map over items spawning tasks that acquire permit, process, and return result. Use futures::future::join_all to collect results.
+속도 제한 작업: 최대 허가를 가진 Semaphore로 래핑된 Arc를 생성하세요. 항목을 매핑하여 permit을 획득하고 처리하고 결과를 반환하는 태스크를 생성합니다. futures::future::join_all을 사용하여 결과를 수집하세요.
 
 ---
 
-## Context7 Integration
+## Context7 통합
 
-Library Documentation Access:
+라이브러리 문서 액세스:
 
-- `/rust-lang/rust` - Rust language and stdlib
-- `/tokio-rs/tokio` - Tokio async runtime
-- `/tokio-rs/axum` - Axum web framework
+- `/rust-lang/rust` - Rust 언어 및 stdlib
+- `/tokio-rs/tokio` - Tokio async 런타임
+- `/tokio-rs/axum` - Axum 웹 프레임워크
 - `/launchbadge/sqlx` - SQLx async SQL
-- `/serde-rs/serde` - Serialization framework
-- `/dtolnay/thiserror` - Error derive
+- `/serde-rs/serde` - 직렬화 프레임워크
+- `/dtolnay/thiserror` - 에러 derive
 - `/clap-rs/clap` - CLI parser
 
 ---
 
 ## Works Well With
 
-- `do-lang-go` - Go systems programming patterns
-- `do-domain-backend` - REST API architecture and microservices patterns
-- `do-foundation-quality` - Security hardening for Rust applications
-- `do-workflow-testing` - Test-driven development workflows
+- `do-lang-go` - Go 시스템 프로그래밍 패턴
+- `do-domain-backend` - REST API 아키텍처 및 마이크로서비스 패턴
+- `do-foundation-quality` - Rust 애플리케이션 보안 강화
+- `do-workflow-testing` - 테스트 주도 개발 워크플로우
 
 ---
 
 ## Troubleshooting
 
-Common Issues:
+일반적인 문제:
 
-- Cargo errors: Run cargo clean followed by cargo build
-- Version check: Run rustc --version and cargo --version
-- Dependency issues: Run cargo update and cargo tree
-- Compile-time SQL check: Run cargo sqlx prepare
+- Cargo 에러: cargo clean 다음에 cargo build를 실행하세요
+- 버전 확인: rustc --version과 cargo --version을 실행하세요
+- 의존성 문제: cargo update와 cargo tree를 실행하세요
+- 컴파일 시간 SQL 체크: cargo sqlx prepare를 실행하세요
 
-Performance Characteristics:
+성능 특성:
 
-- Startup Time: 50-100ms
-- Memory Usage: 5-20MB base
-- Throughput: 100k-200k req/s
-- Latency: p99 less than 5ms
-- Container Size: 5-15MB (alpine)
+- 시작 시간: 50-100ms
+- 메모리 사용량: 5-20MB 기본
+- 처리량: 100k-200k req/s
+- 지연시간: p99 5ms 미만
+- 컨테이너 크기: 5-15MB (alpine)
 
 ---
 
 ## Additional Resources
 
-See reference/engineering.md for advanced ownership patterns and trait design.
+고급 소유권 패턴과 트레이트 설계는 reference/engineering.md를 참조하세요.
 
-See reference/performance.md for optimization strategies and profiling techniques.
+최적화 전략 및 프로파일링 기법은 reference/performance.md를 참조하세요.
 
-See reference/guidelines.md for Rust coding standards and best practices.
+Rust 코딩 표준 및 모범 사례는 reference/guidelines.md를 참조하세요.
 
 ---
 

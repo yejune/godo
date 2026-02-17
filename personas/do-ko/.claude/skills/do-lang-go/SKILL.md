@@ -1,7 +1,8 @@
 ---
 name: do-lang-go
 description: >
-  Go 1.23+ development specialist covering Fiber, Gin, GORM, and concurrent programming patterns. Use when building high-performance microservices, CLI tools, or cloud-native applications.
+  Go 1.23+ 개발 전문가 - Fiber, Gin, GORM, 동시성 프로그래밍 패턴涵盖.
+  고성능 마이크로서비스, CLI 도구, 클라우드 네이티브 애플리케이션 구축 시 사용하세요.
 license: Apache-2.0
 compatibility: Designed for Claude Code
 user-invocable: false
@@ -27,194 +28,194 @@ triggers:
   languages: ["go", "golang"]
 ---
 
-## Quick Reference (30 seconds)
+## Quick Reference (30초 요약)
 
-Go 1.23+ Development Expert for high-performance backend systems and CLI applications.
+고성능 백엔드 시스템 및 CLI 애플리케이션을 위한 Go 1.23+ 개발 전문가.
 
-Auto-Triggers: Files with .go extension, go.mod, go.sum, goroutines, channels, Fiber, Gin, GORM, Echo, Chi
+자동 트리거: .go 확장자 파일, go.mod, go.sum, goroutines, channels, Fiber, Gin, GORM, Echo, Chi
 
-Core Use Cases:
+핵심 사용 사례:
 
-- High-performance REST APIs and microservices
-- Concurrent and parallel processing systems
-- CLI tools and system utilities
-- Cloud-native containerized services
+- 고성능 REST API 및 마이크로서비스
+- 동시 및 병렬 처리 시스템
+- CLI 도구 및 시스템 유틸리티
+- 클라우드 네이티브 컨테이너화된 서비스
 
-Quick Patterns:
+빠른 패턴:
 
-Fiber API Pattern:
+Fiber API 패턴:
 
-Create app by calling fiber.New function. Define a get route at api/users/:id with handler function that takes fiber.Ctx and returns error. In the handler, call c.JSON with fiber.Map containing id from c.Params. Call app.Listen on port 3000.
+fiber.New() 함수를 호출하여 app를 생성하세요. fiber.Ctx를 받고 error를 반환하는 핸들러 함수로 api/users/:id에 get 경로를 정의하세요. 핸들러에서 c.Params에서 id를 가져와 fiber.Map과 함께 c.JSON을 호출하세요. 포트 3000으로 app.Listen을 호출하세요.
 
-Gin API Pattern:
+Gin API 패턴:
 
-Create r by calling gin.Default function. Define a GET route at api/users/:id with handler function taking gin.Context pointer. In handler, call c.JSON with status 200 and gin.H containing id from c.Param. Call r.Run on port 3000.
+gin.Default() 함수를 호출하여 r을 생성하세요. gin.Context 포인터를 받는 핸들러 함수로 api/users/:id에 GET 경로를 정의하세요. 핸들러에서 c.Param에서 id를 가져와 상태 200과 gin.H와 함께 c.JSON을 호출하세요. 포트 3000으로 r.Run을 호출하세요.
 
-Goroutine with Error Handling:
+에러 처리와 함께 Goroutine:
 
-Create g and ctx by calling errgroup.WithContext with context.Background. Call g.Go with function that returns processUsers with ctx. Call g.Go with function that returns processOrders with ctx. If err from g.Wait is not nil, call log.Fatal with error.
+context.Background()와 함께 errgroup.WithContext를 호출하여 g와 ctx를 생성하세요. processUsers(ctx)를 반환하는 함수로 g.Go를 호출하세요. processOrders(ctx)를 반환하는 함수로 g.Go를 호출하세요. g.Wait()에서 에러가 nil이 아니면 log.Fatal과 함께 에러를 호출하세요.
 
 ---
 
-## Implementation Guide (5 minutes)
+## Implementation Guide (5분 가이드)
 
-### Go 1.23 Language Features
+### Go 1.23 언어 기능
 
-New Features:
+새로운 기능:
 
-- Range over integers using for i range 10 syntax and print i
+- for i range 10 구문으로 정수 범위에서 i를 반복하고 i를 출력하세요
 - Profile-Guided Optimization PGO 2.0
-- Improved generics with better type inference
+- 더 나은 타입 추론으로 향상된 제네릭
 
-Generics Pattern:
+제네릭 패턴:
 
-Create generic Map function with type parameters T and U as any. Accept slice of T and function from T to U. Create result slice of U with same length. Iterate range slice setting result elements to function applied to values. Return result.
+T와 U를 any로 하는 타입 파라미터로 제네릭 Map 함수를 생성하세요. T 슬라이스와 T에서 U로의 함수를 받으세요. 동일한 길이의 U 슬라이스로 result를 생성하세요. values에 함수를 적용하여 result 요소를 설정하며 슬라이스를 반복하세요. result를 반환하세요.
 
-### Web Framework Fiber v3
+### 웹 프레임워크 Fiber v3
 
-Create app with fiber.New passing fiber.Config with ErrorHandler and Prefork true. Use recover.New, logger.New, and cors.New middleware. Create api group at api/v1 path. Define routes for listUsers, getUser with id parameter, createUser, updateUser with id, and deleteUser with id. Call app.Listen on port 3000.
+ErrorHandler와 Prefork를 true로 설정한 fiber.Config와 함께 fiber.New로 app를 생성하세요. recover.New, logger.New, cors.New 미들웨어를 사용하세요. api/v1 경로에 api 그룹을 생성하세요. listUsers, id 파라미터로 getUser, id로 updateUser, id로 deleteUser 경로를 정의하세요. 포트 3000으로 app.Listen을 호출하세요.
 
-### Web Framework Gin
+### 웹 프레임워크 Gin
 
-Create r with gin.Default. Use cors.Default middleware. Create api group at api/v1 path. Define GET for users calling listUsers, GET for users/:id calling getUser, POST for users calling createUser. Call r.Run on port 3000.
+gin.Default로 r을 생성하세요. cors.Default 미들웨어를 사용하세요. api/v1 경로에 api 그룹을 생성하세요. listUsers를 호출하는 GET users, getUser를 호출하는 GET users/:id, createUser를 호출하는 POST users를 정의하세요. 포트 3000으로 r.Run을 호출하세요.
 
-Request Binding Pattern:
+요청 바인딩 패턴:
 
-Define CreateUserRequest struct with Name and Email fields. Add json tags and binding tags for required, min length 2, and required email validation. In createUser handler, declare req variable, call c.ShouldBindJSON with pointer. If error, call c.JSON with 400 status and error. Otherwise call c.JSON with 201 and response data.
+Name과 Email 필드를 가진 CreateUserRequest 구조체를 정의하세요. json 태그와 required, min 길이 2, required email 검증을 위한 binding 태그를 추가하세요. createUser 핸들러에서 req 변수를 선언하고 포인터와 함께 c.ShouldBindJSON을 호출하세요. 에러가 있으면 상태 400과 에러와 함께 c.JSON을 호출하세요. 그렇지 않으면 201과 응답 데이터와 함께 c.JSON을 호출하세요.
 
-### Web Framework Echo
+### 웹 프레임워크 Echo
 
-Create e with echo.New. Use middleware.Logger, middleware.Recover, and middleware.CORS. Create api group at api/v1 path. Define GET for users and POST for users. Call e.Logger.Fatal with e.Start on port 3000.
+echo.New로 e를 생성하세요. middleware.Logger, middleware.Recover, middleware.CORS를 사용하세요. api/v1 경로에 api 그룹을 생성하세요. GET users와 POST users를 정의하세요. 포트 3000으로 e.Start와 함께 e.Logger.Fatal을 호출하세요.
 
-### Web Framework Chi
+### 웹 프레임워크 Chi
 
-Create r with chi.NewRouter. Use middleware.Logger and middleware.Recoverer. Call r.Route with api/v1 path and function. Inside, call r.Route with users path. Define Get for list, Post for create, Get with id parameter for single user. Call http.ListenAndServe on port 3000 with r.
+chi.NewRouter로 r을 생성하세요. middleware.Logger와 middleware.Recoverer를 사용하세요. api/v1 경로와 함수로 r.Route를 호출하세요. 내부에서 users 경로로 r.Route를 호출하세요. 목록을 위한 Get, 생성을 위한 Post, 단일 사용자를 위한 id 파라미터가 있는 Get을 정의하세요. 포트 3000으로 r과 함께 http.ListenAndServe를 호출하세요.
 
 ### ORM GORM 1.25
 
-Model Definition:
+모델 정의:
 
-Define User struct embedding gorm.Model. Add Name with uniqueIndex and not null tags, Email with uniqueIndex and not null, and Posts slice with foreignKey AuthorID tag.
+gorm.Model을 임베딩하는 User 구조체를 정의하세요. uniqueIndex와 not null 태그가 있는 Name, uniqueIndex와 not null이 있는 Email, foreignKey AuthorID 태그가 있는 Posts 슬라이스를 추가하세요.
 
-Query Patterns:
+쿼리 패턴:
 
-Call db.Preload with Posts and function that orders by created_at desc and limits to 10, then First with user and id 1. For transactions, call db.Transaction with function taking tx pointer. Inside, create user and profile, returning any errors.
+created_at desc로 정렬하고 10으로 제한하는 Posts로 db.Preload를 호출하고 id 1로 First를 호출하세요. 트랜잭션의 경우 tx 포인터를 받는 함수로 db.Transaction을 호출하세요. 내부에서 user와 profile을 생성하고 모든 에러를 반환하세요.
 
-### Type-Safe SQL with sqlc
+### sqlc와 함께 타입 안전 SQL
 
-Create sqlc.yaml with version 2, sql section with postgresql engine, queries and schema paths, and go generation settings for package name, output directory, and pgx v5 sql_package.
+sqlc 2 버전, postgresql 엔진이 있는 sql 섹션, 쿼리 및 스키마 경로, 패키지 이름, 출력 디렉토리, pgx v5 sql_package가 있는 go 생성 설정으로 sqlc.yaml을 생성하세요.
 
-In query.sql file, add name GetUser as one returning all columns where id matches parameter. Add name CreateUser as one inserting name and email values and returning all columns.
+query.sql 파일에서 id가 파라미터와 일치하는 곳에서 모든 열을 반환하는 GetUser를 이름으로 추가하세요. name과 email 값을 삽입하고 모든 열을 반환하는 CreateUser를 이름으로 추가하세요.
 
-### Concurrency Patterns
+### 동시성 패턴
 
-Errgroup Pattern:
+Errgroup 패턴:
 
-Create g and ctx with errgroup.WithContext. Call g.Go for fetchUsers that assigns to users variable. Call g.Go for fetchOrders that assigns to orders variable. If g.Wait returns error, return nil and error.
+errgroup.WithContext로 g와 ctx를 생성하세요. users 변수에 할당하는 fetchUsers를 위해 g.Go를 호출하세요. orders 변수에 할당하는 fetchOrders를 위해 g.Go를 호출하세요. g.Wait가 에러를 반환하면 nil과 에러를 반환하세요.
 
-Worker Pool Pattern:
+Worker Pool 패턴:
 
-Define workerPool function taking jobs receive-only channel, results send-only channel, and n worker count. Create WaitGroup. Loop n times, incrementing WaitGroup and spawning goroutine that defers Done, ranges over jobs, and sends processJob result to results. Wait then close results.
+jobs receive-only 채널, results send-only 채널, n worker count를 받는 workerPool 함수를 정의하세요. WaitGroup을 생성하세요. n번 반복하며 WaitGroup을 증가하고 Done을 지연시키며 jobs를 반복하고 processJob 결과를 results로 보내는 goroutine을 생성하세요. Wait한 다음 results를 닫으세요.
 
-Context with Timeout:
+Timeout과 함께 Context:
 
-Create ctx and cancel with context.WithTimeout for 5 seconds. Defer cancel call. Call fetchData with ctx. If error is context.DeadlineExceeded, respond with timeout and StatusGatewayTimeout.
+5초 동안 context.WithTimeout으로 ctx와 cancel을 생성하세요. defer로 cancel 호출하세요. fetchData와 함께 ctx를 호출하세요. 에러가 context.DeadlineExceeded이면 timeout과 StatusGatewayTimeout으로 응답하세요.
 
-### Testing Patterns
+### 테스트 패턴
 
-Table-Driven Tests:
+테이블 기반 테스트:
 
-Define tests slice with struct containing name string, input CreateUserInput, and wantErr bool. Add test cases for valid input and empty name. Range over tests calling t.Run with name and test function. Call service Create, check if wantErr is true and require.Error.
+name 문자열, input CreateUserInput, wantErr bool을 포함하는 구조체의 tests 슬라이스를 정의하세요. 유효한 입력과 빈 이름에 대한 테스트 케이스를 추가하세요. name과 테스트 함수로 t.Run을 호출하며 tests를 반복하세요. service Create를 호출하고 wantErr가 true인지 require.Error를 확인하세요.
 
-HTTP Testing:
+HTTP 테스트:
 
-Create app with fiber.New. Add GET route for users/:id calling getUser. Create request with httptest.NewRequest for GET at users/1. Call app.Test with request to get response. Assert 200 status code.
+fiber.New로 app를 생성하세요. users/:id에서 getUser를 호출하는 GET 경로를 추가하세요. GET at users/1으로 httptest.NewRequest로 요청을 생성하세요. app.Test와 요청을 호출하여 응답을 가져오세요. 200 상태 코드를 단언하세요.
 
-### CLI Cobra with Viper
+### Cobra와 Viper와 함께 CLI
 
-Define rootCmd as cobra.Command pointer with Use and Short fields. In init function, add PersistentFlags StringVar for cfgFile. Call viper.BindPFlag with config and lookup. Set viper.SetEnvPrefix to MYAPP and call viper.AutomaticEnv.
+Use와 Short 필드가 있는 cobra.Command 포인터로 rootCmd를 정의하세요. init 함수에서 cfgFile을 위한 PersistentFlags StringVar를 추가하세요. config와 lookup으로 viper.BindPFlag를 호출하세요. MYAPP으로 viper.SetEnvPrefix를 설정하고 viper.AutomaticEnv를 호출하세요.
 
 ---
 
 ## Advanced Patterns
 
-For comprehensive coverage including:
+포괄적인涵盖内容包括:
 
-- Advanced concurrency patterns (worker pools, rate limiting, errgroup)
-- Generics and type constraints
-- Interface design and composition
-- Comprehensive testing patterns (TDD, table-driven, benchmarks, fuzzing)
-- Performance optimization and profiling
+- 고급 동시성 패턴 (worker pools, rate limiting, errgroup)
+- 제네릭 및 타입 제약 조건
+- 인터페이스 설계 및 컴포지션
+- 포괄적인 테스트 패턴 (TDD, 테이블 기반, 벤치마크, 퍼징)
+- 성능 최적화 및 프로파일링
 
-See: [reference/advanced.md](reference/advanced.md) for advanced patterns, [reference/testing.md](reference/testing.md) for testing patterns
+다음을 참조하세요: 고급 패턴은 [reference/advanced.md](reference/advanced.md), 테스트 패턴은 [reference/testing.md](reference/testing.md)
 
-### Performance Optimization
+### 성능 최적화
 
-PGO Build:
+PGO 빌드:
 
-Run application with GODEBUG pgo enabled and cpuprofile output. Build with go build using pgo flag pointing to profile file.
+GODEBUG=pgo를 활성화하고 cpuprofile 출력으로 실행하세요. pgo 플래그를 프로필 파일을 가리키며 go build로 빌드하세요.
 
-Object Pooling:
+객체 풀링:
 
-Create bufferPool as sync.Pool with New function returning 4096 byte slice. Get buffer with type assertion, defer Put to return to pool.
+4096 바이트 슬라이스를 반환하는 New 함수를 가진 sync.Pool로 bufferPool을 생성하세요. 타입 어설션으로 버퍼를 가져오고, 풀로 반환하기 위해 Put을 지연하세요.
 
-### Container Deployment 10-20MB
+### 컨테이너 배포 10-20MB
 
-Multi-stage Dockerfile: First stage uses golang:1.23-alpine as builder, sets WORKDIR, copies go.mod and go.sum, runs go mod download, copies source, builds with CGO_ENABLED 0 and ldflags for stripped binary. Second stage uses scratch, copies binary, sets ENTRYPOINT.
+멀티 스테이지 Dockerfile: 첫 번째 스테이지는 golang:1.23-alpine을 builder로 사용하고, WORKDIR을 설정하고, go.mod와 go.sum을 복사하고, go mod download를 실행하고, 소스를 복사하고, CGO_ENABLED 0와 스트립된 바이너리를 위한 ldflags로 빌드합니다. 두 번째 스테이지는 scratch를 사용하고, 빌더에서 바이너리를 복사하고, ENTRYPOINT를 설정합니다.
 
-### Graceful Shutdown
+### 우아한 종료
 
-Spawn goroutine calling app.Listen. Create quit channel for os.Signal with buffer 1. Call signal.Notify for SIGINT and SIGTERM. Receive from quit then call app.Shutdown.
+app.Listen을 호출하는 goroutine을 생성하세요. 버퍼 1로 os.Signal용 quit 채널을 생성하세요. SIGINT 및 SIGTERM에 대해 signal.Notify를 호출하세요. quit에서 수신한 다음 app.Shutdown을 호출하세요.
 
 ---
 
-## Context7 Libraries
+## Context7 라이브러리
 
-- golang/go for Go language and stdlib
-- gofiber/fiber for Fiber web framework
-- gin-gonic/gin for Gin web framework
-- labstack/echo for Echo web framework
-- go-chi/chi for Chi router
-- go-gorm/gorm for GORM ORM
-- sqlc-dev/sqlc for type-safe SQL
-- jackc/pgx for PostgreSQL driver
-- spf13/cobra for CLI framework
-- spf13/viper for configuration
-- stretchr/testify for testing toolkit
+- golang/go Go 언어 및 stdlib
+- gofiber/fiber Fiber 웹 프레임워크
+- gin-gonic/gin Gin 웹 프레임워크
+- labstack/echo Echo 웹 프레임워크
+- go-chi/chi Chi 라우터
+- go-gorm/gorm GORM ORM
+- sqlc-dev/sqlc 타입 안전 SQL
+- jackc/pgx PostgreSQL 드라이버
+- spf13/cobra CLI 프레임워크
+- spf13/viper 구성
+- stretchr/testify 테스팅 툴킷
 
 ---
 
 ## Works Well With
 
-- do-domain-backend for REST API architecture and microservices
-- do-lang-rust for systems programming companion
-- do-quality-security for security hardening
-- do-essentials-debug for performance profiling
-- do-workflow-ddd for domain-driven development
+- do-domain-backend REST API 아키텍처 및 마이크로서비스
+- do-lang-rust 시스템 프로그래밍 동반자
+- do-quality-security 보안 강화
+- do-essentials-debug 성능 프로파일링
+- do-workflow-ddd 도메인 주도 개발
 
 ---
 
 ## Troubleshooting
 
-Common Issues:
+일반적인 문제:
 
-- Module errors: Run go mod tidy and go mod verify
-- Version check: Run go version and go env GOVERSION
-- Build issues: Run go clean -cache and go build -v
+- 모듈 에러: go mod tidy와 go mod verify를 실행하세요
+- 버전 확인: go version과 go env GOVERSION을 실행하세요
+- 빌드 문제: go clean -cache와 go build -v를 실행하세요
 
-Performance Diagnostics:
+성능 진단:
 
-- CPU profiling: Run go test -cpuprofile cpu.prof -bench .
-- Memory profiling: Run go test -memprofile mem.prof -bench .
-- Race detection: Run go test -race ./...
+- CPU 프로파일링: go test -cpuprofile cpu.prof -bench .를 실행하세요
+- 메모리 프로파일링: go test -memprofile mem.prof -bench .를 실행하세요
+- 경합 감지: go test -race ./...를 실행하세요
 
 ---
 
 ## Additional Resources
 
-See reference/advanced.md for advanced concurrency patterns, generics, and interface design.
+고급 동시성 패턴, 제네릭, 인터페이스 설계는 reference/advanced.md를 참조하세요.
 
-See reference/testing.md for comprehensive testing patterns including TDD, benchmarks, and fuzzing.
+TDD, 벤치마크, 퍼징을 포함한 포괄적인 테스트 패턴은 reference/testing.md를 참조하세요.
 
 ---
 
