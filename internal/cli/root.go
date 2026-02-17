@@ -5,10 +5,11 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "convert",
-	Short: "Extract and assemble .claude/ directory layers",
-	Long: `Convert extracts moai-adk's .claude/ directory into core (methodology-agnostic)
-and persona layers, then reassembles core + any persona into a deployable .claude/ output.`,
+	Use:   "godo",
+	Short: "Do framework CLI — extract, assemble, and manage .claude/ personas",
+	Long: `Godo is the Do framework CLI. It extracts moai-adk's .claude/ directory into
+core and persona layers, reassembles them into deployable output, and provides
+runtime utilities for hooks, mode switching, linting, scaffolding, and more.`,
 }
 
 // Execute runs the root command.
