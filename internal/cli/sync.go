@@ -18,7 +18,7 @@ Equivalent to 'make dev'. Also ensures settings.local.json exists.`,
 }
 
 func init() {
-	rootCmd.AddCommand(syncCmd)
+	moaiCmd.AddCommand(syncCmd)
 }
 
 func runSync(cmd *cobra.Command, args []string) error {
