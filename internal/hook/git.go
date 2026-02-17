@@ -18,7 +18,15 @@ var GitStatus = func() (bool, string) {
 	if output == "" {
 		return false, ""
 	}
-	// Count changed files
-	lines := strings.Split(output, "\n")
-	return true, strings.Join(lines, "\n")
+	// Filter out untracked files (??) — only report tracked file changes
+	var tracked []string
+	for _, line := range strings.Split(output, "\n") {
+		if !strings.HasPrefix(line, "?? ") {
+			tracked = append(tracked, line)
+		}
+	}
+	if len(tracked) == 0 {
+		return false, ""
+	}
+	return true, strings.Join(tracked, "\n")
 }

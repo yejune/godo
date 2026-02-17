@@ -77,6 +77,19 @@ func Test_GitStatus_not_a_git_repo(t *testing.T) {
 	}
 }
 
+func Test_GitStatus_ignores_untracked_files(t *testing.T) {
+	tmpDir, cleanup := setupGitRepo(t)
+	defer cleanup()
+
+	// Create an untracked file (not staged, not committed)
+	os.WriteFile(filepath.Join(tmpDir, "untracked.txt"), []byte("hello"), 0644)
+
+	hasChanges, _ := GitStatus()
+	if hasChanges {
+		t.Error("expected no changes when only untracked files exist")
+	}
+}
+
 func Test_GitStatus_mockable(t *testing.T) {
 	// Verify GitStatus is a var that can be overridden
 	original := GitStatus
