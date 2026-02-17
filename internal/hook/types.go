@@ -12,7 +12,8 @@ const (
 	EventSessionEnd   EventType = "SessionEnd"
 	EventStop         EventType = "Stop"
 	EventSubagentStop EventType = "SubagentStop"
-	EventPreCompact   EventType = "PreCompact"
+	EventPreCompact        EventType = "PreCompact"
+	EventUserPromptSubmit  EventType = "UserPromptSubmit"
 )
 
 // ValidEventTypes returns all valid event types.
@@ -25,6 +26,7 @@ func ValidEventTypes() []EventType {
 		EventStop,
 		EventSubagentStop,
 		EventPreCompact,
+		EventUserPromptSubmit,
 	}
 }
 

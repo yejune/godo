@@ -94,9 +94,9 @@ func SetupCredentials(apiKey string) error {
 func SetGLMEnv(apiKey string) {
 	os.Setenv("ANTHROPIC_AUTH_TOKEN", apiKey)
 	os.Setenv("ANTHROPIC_BASE_URL", "https://api.z.ai/api/anthropic")
-	os.Setenv("ANTHROPIC_DEFAULT_HAIKU_MODEL", "glm-4.7-flashx")
+	os.Setenv("ANTHROPIC_DEFAULT_HAIKU_MODEL", "glm-4.7-flash")
 	os.Setenv("ANTHROPIC_DEFAULT_SONNET_MODEL", "glm-4.7")
-	os.Setenv("ANTHROPIC_DEFAULT_OPUS_MODEL", "glm-5")
+	os.Setenv("ANTHROPIC_DEFAULT_OPUS_MODEL", "glm-5.0")
 }
 
 // MaskAPIKey masks an API key for display, showing only prefix and suffix.

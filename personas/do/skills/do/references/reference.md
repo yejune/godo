@@ -150,6 +150,7 @@ Set via `/do:setup`. Contains `env` block with DO_* variables.
     "DO_USER_NAME": "name",
     "DO_LANGUAGE": "ko",
     "DO_COMMIT_LANGUAGE": "en",
+    "DO_JOBS_LANGUAGE": "en",
     "DO_PERSONA": "young-f",
     "DO_STYLE": "pair",
     "DO_MODE": "do",
@@ -170,6 +171,7 @@ Hooks access these as environment variables: `$DO_USER_NAME`, `$DO_LANGUAGE`, et
 | `DO_USER_NAME` | User display name | "" | any string |
 | `DO_LANGUAGE` | Conversation language | "en" | en, ko, ja, etc. |
 | `DO_COMMIT_LANGUAGE` | Commit message language | "en" | en, ko |
+| `DO_JOBS_LANGUAGE` | Jobs message language | "en" | en, ko |
 | `DO_AI_FOOTER` | AI footer in commits | "false" | true, false |
 | `DO_PERSONA` | Persona character type | "young-f" | young-f, young-m, senior-f, senior-m |
 
@@ -181,6 +183,7 @@ All Do workflow artifacts are stored in `.do/jobs/`:
 
 | Artifact | Path |
 |----------|------|
+| Research | `.do/jobs/{YY}/{MM}/{DD}/{title}/research_{topic}.md` |
 | Analysis | `.do/jobs/{YY}/{MM}/{DD}/{title}/analysis.md` |
 | Architecture | `.do/jobs/{YY}/{MM}/{DD}/{title}/architecture.md` |
 | Plan | `.do/jobs/{YY}/{MM}/{DD}/{title}/plan.md` |
@@ -190,6 +193,7 @@ All Do workflow artifacts are stored in `.do/jobs/`:
 
 Date folder format: YY/MM/DD (e.g., 26/02/15 for 2026-02-15).
 Title format: kebab-case (e.g., `user-authentication-api`).
+Versioning: optionally add version postfix (e.g., analysis_v2.md)
 
 ---
 
