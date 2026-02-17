@@ -202,6 +202,8 @@
 
 **상태 범례**: [ ] 미시작 | [~] 진행중 | [*] 테스트중 | [!] 블로커 | [o] 완료 | [x] 실패
 
+> **토큰 예산 주의**: 작업 전 파일 크기를 확인하고 500줄+ 파일은 전체 읽기 금지 (Grep으로 필요 섹션만 읽기). 토큰 10% 이하 시 현재 상태를 체크리스트에 기록하고 슈퍼 에이전트에 보고할 것.
+
 ## Problem Summary
 - 무엇을 해결하는가
 - 왜 이 작업이 필요한가
@@ -294,18 +296,20 @@
 - [HARD] 테스트 결과에 실패가 있으면 완료 보고 금지 — 먼저 해결
 - [HARD] 변경 파일 요약은 `git diff --stat`과 일치해야 함
 
-## Jobs 폴더 Git 보호 [HARD]
+## 프로젝트 Git 보호 [HARD]
 
-`.do/jobs/`는 작업 히스토리의 원본이므로 덮어쓰기/삭제를 유발하는 모든 Git 명령 금지.
+프로젝트 전체에서 덮어쓰기/삭제를 유발하는 파괴적 Git 명령 금지.
 
 - [HARD] 금지 명령 목록:
-  - `git checkout .` / `git checkout -- .do/jobs/` — 작업 내용 덮어쓰기
-  - `git reset --hard` — 커밋된 jobs 변경사항 소실
-  - `git reset HEAD .do/jobs/` — 스테이징 해제로 커밋 누락 유발
-  - `git clean -f` / `git clean -fd` — untracked jobs 파일 삭제
-  - `git stash` (jobs 파일 포함 시) — 임시 저장 중 유실 위험
-  - `git restore .` / `git restore .do/jobs/` — checkout과 동일한 덮어쓰기
-  - `rm -rf .do/jobs/` — 직접 삭제
+  - `git checkout .` / `git checkout -- <path>` — 작업 내용 덮어쓰기
+  - `git reset --hard` — 커밋된 변경사항 소실
+  - `git reset HEAD <path>` — 스테이징 해제로 커밋 누락 유발
+  - `git clean -f` / `git clean -fd` — untracked 파일 삭제
+  - `git stash` — 임시 저장 중 유실 위험
+  - `git restore .` / `git restore <path>` — checkout과 동일한 덮어쓰기
+  - `git rebase` (squash/drop 포함) — 커밋 히스토리 변조
+  - `git push --force` / `git push -f` — 원격 히스토리 파괴
+  - `rm -rf` — 직접 삭제
 - [HARD] 잘못된 내용은 보완하여 `git add` → `git commit`으로 수정 — 히스토리 보존
 - [HARD] 사용자가 모든 위험을 감수하고 명시적으로 지시한 경우에만 예외 (동의 필수)
 
