@@ -42,7 +42,7 @@ AskUserQuestion으로 4개 질문:
 
 ## Step 2-2: 추가 설정 (두 번째 AskUserQuestion)
 
-AskUserQuestion으로 3개 질문:
+AskUserQuestion으로 4개 질문:
 
 1. **응답 스타일** (DO_STYLE)
    - Sprint: 말 최소화, 바로 실행, 결과만
@@ -57,6 +57,10 @@ AskUserQuestion으로 3개 질문:
    - focus: 코드를 직접 작성 (소규모 작업)
    - auto (기본값): 작업 규모에 따라 자동 선택
 
+4. **Jobs 폴더 언어** (DO_JOBS_LANGUAGE)
+   - en (기본값): 폴더명을 영어로 작성 (예: login-api-security)
+   - auto: 대화 언어(DO_LANGUAGE)와 동일하게 작성
+
 ## Step 3: 설정 저장
 
 `.claude/settings.local.json` 파일 업데이트:
@@ -70,7 +74,8 @@ AskUserQuestion으로 3개 질문:
     "DO_PERSONA": "{페르소나}",
     "DO_STYLE": "{스타일}",
     "DO_MODE": "{모드}",
-    "DO_AI_FOOTER": "{true/false}"
+    "DO_AI_FOOTER": "{true/false}",
+    "DO_JOBS_LANGUAGE": "{jobs언어}"
   }
 }
 ```
@@ -87,4 +92,5 @@ AskUserQuestion으로 3개 질문:
 - 스타일: {스타일}
 - 실행 모드: {모드}
 - AI 푸터: {예/아니오}
+- Jobs 폴더 언어: {jobs언어}
 - 에이전트 확인: {예/아니오}

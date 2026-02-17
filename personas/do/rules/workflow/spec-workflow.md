@@ -32,6 +32,7 @@ Create plan using EARS+MoSCoW requirements format.
 
 Output:
 - Plan document at `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/plan.md`
+- Title language controlled by `DO_JOBS_LANGUAGE` ("en" default, "auto" matches `DO_LANGUAGE`)
 - EARS format requirements with MoSCoW priority (MUST/SHOULD/COULD/WON'T)
 - Acceptance criteria
 - Technical approach

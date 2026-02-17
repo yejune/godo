@@ -34,6 +34,7 @@ triggers:
 Create comprehensive plan documents by assessing task complexity and running the appropriate pipeline. Simple tasks go directly to plan generation. Complex tasks go through Analysis -> Architecture -> Plan.
 
 All artifacts are stored at `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/`.
+The `{title-kebab-case}` language is determined by `DO_JOBS_LANGUAGE` env var ("en" default, "auto" to match `DO_LANGUAGE`).
 
 ## Scope
 

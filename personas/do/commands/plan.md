@@ -20,6 +20,10 @@ argument-hint: [플랜 제목 또는 빈칸]
 - 소문자로 통일
 - 특수문자 제거
 
+제목 언어 (DO_JOBS_LANGUAGE):
+- "en" (기본값): 제목을 영어 kebab-case로 작성 (예: login-api-security)
+- "auto": DO_LANGUAGE와 동일한 언어로 작성 (예: ko → 로그인-api-보안)
+
 ### Step 2: 복잡도 판단
 
 작업 복잡도를 평가하여 워크플로우를 결정:
