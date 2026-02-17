@@ -30,6 +30,7 @@ agents:
 
 # Orchestrator skill + workflows + reference
 skills:
+    # Do orchestrator skill + workflows
     - skills/do/SKILL.md
     - skills/do/workflows/plan.md
     - skills/do/workflows/run.md
@@ -38,6 +39,28 @@ skills:
     - skills/do/workflows/do.md
     - skills/do/workflows/team-do.md
     - skills/do/references/reference.md
+    # Do-specific modules merged into core skills
+    - skills/foundation-core/modules/agent-delegation.md
+    - skills/foundation-core/modules/agent-execution-cycle.md
+    - skills/foundation-core/modules/agent-research.md
+    - skills/foundation-quality/modules/coding-discipline.md
+    - skills/foundation-quality/modules/commit-discipline.md
+    - skills/foundation-quality/modules/parallel-agent-isolation.md
+    - skills/foundation-quality/modules/read-before-write.md
+    - skills/foundation-quality/modules/syntax-check.md
+    - skills/foundation-context/modules/file-reading-optimization.md
+    - skills/foundation-context/modules/knowledge-management.md
+    - skills/workflow-spec/modules/analysis-template.md
+    - skills/workflow-spec/modules/architecture-template.md
+    - skills/workflow-spec/modules/checklist-system.md
+    - skills/workflow-spec/modules/checklist-templates.md
+    - skills/workflow-spec/modules/complexity-check.md
+    - skills/workflow-spec/modules/report-template.md
+    - skills/workflow-tdd/modules/tdd-cycle.md
+    - skills/workflow-testing/modules/bug-fix-workflow.md
+    - skills/workflow-testing/modules/testing-rules.md
+    - skills/workflow-project/references/ai-forbidden-patterns.md
+    - skills/workflow-project/references/docker-rules.md
 
 # Persona-specific rules
 rules:
