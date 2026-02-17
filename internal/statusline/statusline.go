@@ -76,9 +76,9 @@ func Render(cfg Config) {
 		modePrefix = "[Do]"
 	}
 
-	modelShort := ShortenModel(input.Model.DisplayName)
+	modelShort := input.Model.DisplayName
 	if modelShort == "" {
-		modelShort = ShortenModel(input.Model.ID)
+		modelShort = input.Model.ID
 	}
 
 	ctxPercent := 0
@@ -162,13 +162,23 @@ func ShortenModel(model string) string {
 
 	lower := strings.ToLower(model)
 
+	// Extract model variant (e.g., opus[1m], glm-5[1m])
+	extractVariant := func(base, full string) string {
+		if idx := strings.Index(full, "["); idx != -1 {
+			return base + full[idx:]
+		}
+		return base
+	}
+
 	switch {
 	case strings.Contains(lower, "opus"):
-		return "opus"
+		return extractVariant("opus", model)
 	case strings.Contains(lower, "sonnet"):
-		return "sonnet"
+		return extractVariant("sonnet", model)
 	case strings.Contains(lower, "haiku"):
-		return "haiku"
+		return extractVariant("haiku", model)
+	case strings.Contains(lower, "glm"):
+		return extractVariant("glm", model)
 	case strings.Contains(lower, "gpt-4"):
 		return "gpt4"
 	case strings.Contains(lower, "gpt-3"):
