@@ -33,7 +33,7 @@
             "type": "command"
           }
         ],
-        "matcher": "Write|Edit|Bash"
+        "matcher": "Write|Edit|Bash|Task"
       }
     ],
     "SessionEnd": [
