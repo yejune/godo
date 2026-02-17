@@ -10,10 +10,11 @@ import (
 )
 
 var glmCmd = &cobra.Command{
-	Use:   "glm",
-	Short: "Launch Claude Code with GLM backend",
-	Long:  `Without subcommands, runs Claude Code using stored GLM credentials.`,
-	RunE:  runGLM,
+	Use:                "glm [flags] [-- claude-args...]",
+	Short:              "Launch Claude Code with GLM backend",
+	Long:               `Without subcommands, runs Claude Code using stored GLM credentials. Supports -c/--continue and other Claude flags.`,
+	RunE:               runGLM,
+	DisableFlagParsing: true,
 }
 
 var glmSetupCmd = &cobra.Command{
@@ -54,7 +55,7 @@ func runGLM(cmd *cobra.Command, args []string) error {
 
 	glm.SetGLMEnv(creds.APIKey)
 	fmt.Fprintln(cmd.OutOrStdout(), "Launching Claude Code with GLM backend")
-	return runClaude(cmd, nil)
+	return runClaude(cmd, args)
 }
 
 func runGLMSetup(cmd *cobra.Command, args []string) error {

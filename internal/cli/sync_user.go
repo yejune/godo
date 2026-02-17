@@ -74,9 +74,10 @@ func runUserSync(cmd *cobra.Command, args []string) error {
 		return scaffoldCustomDir(cmd)
 	}
 
-	// Step 1: Dev folder guard
+	// Step 1: Dev folder warning (stop with warning, not error)
 	if fileExists("tobrew.yaml") && fileExists(filepath.Join("cmd", "godo", "main.go")) {
-		return fmt.Errorf("refusing to run in framework development directory (tobrew.yaml + cmd/godo/main.go detected). Use 'godo moai sync' instead")
+		fmt.Fprintln(cmd.ErrOrStderr(), "Warning: running in framework development directory")
+		return nil
 	}
 
 	// --dry-run: show what would happen and exit
@@ -263,7 +264,7 @@ func initGlobalDir(cmd *cobra.Command) error {
 type projectEntry struct {
 	Path         string `json:"path"`
 	Name         string `json:"name"`
-	RegisteredAt string `json:"registered_at"`
+	RegisteredAt int64  `json:"registered_at"`
 }
 
 // projectsFile represents the structure of projects.json.
@@ -305,7 +306,7 @@ func registerProject(cmd *cobra.Command) error {
 	pf.Projects = append(pf.Projects, projectEntry{
 		Path:         cwd,
 		Name:         filepath.Base(cwd),
-		RegisteredAt: time.Now().UTC().Format(time.RFC3339),
+		RegisteredAt: time.Now().Unix(),
 	})
 
 	out, err := json.MarshalIndent(pf, "", "  ")
