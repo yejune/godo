@@ -19,6 +19,19 @@ func ReadStdin() map[string]interface{} {
 	return result
 }
 
+// ReadInput reads JSON from stdin into a structured Input.
+func ReadInput() *Input {
+	data, err := io.ReadAll(os.Stdin)
+	if err != nil || len(data) == 0 {
+		return &Input{}
+	}
+	var input Input
+	if json.Unmarshal(data, &input) != nil {
+		return &Input{}
+	}
+	return &input
+}
+
 // WriteResult writes a JSON hook result to stdout.
 func WriteResult(result map[string]interface{}) {
 	enc := json.NewEncoder(os.Stdout)
