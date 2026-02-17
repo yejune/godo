@@ -1,0 +1,26 @@
+name: godo
+language: go
+description: Do framework CLI — extract, assemble, and manage .claude/ personas
+homepage: https://github.com/yejune/godo
+license: MIT
+github:
+    user: yejune
+    repo: godo
+    tap_repo: homebrew-tap
+build:
+    command: |
+        go build -ldflags "-X main.version={{.Version}}" -o build/godo ./cmd/godo/
+assets:
+    - build/godo
+formula:
+    install: |-
+        system "go", "build", "-ldflags", "-X main.version=#{version}", "-o", "godo", "./cmd/godo/"
+        bin.install "godo"
+    test: assert_match "godo", shell_output("#{bin}/godo --help")
+    caveats: |-
+        godo has been installed!
+
+        Usage:
+          godo extract     # Extract moai-adk into core/persona layers
+          godo assemble    # Assemble persona package
+          godo sync        # Install Do into a project

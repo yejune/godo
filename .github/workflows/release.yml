@@ -1,0 +1,99 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Run tests
+        run: go test ./...
+
+  release:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Get version
+        id: version
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/}"
+          else
+            VERSION="dev"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Build godo binaries
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          LDFLAGS="-X main.version=$VERSION"
+
+          # Linux
+          GOOS=linux GOARCH=amd64 go build -ldflags "$LDFLAGS" -o godo-linux-amd64 ./cmd/godo/
+          GOOS=linux GOARCH=arm64 go build -ldflags "$LDFLAGS" -o godo-linux-arm64 ./cmd/godo/
+
+          # macOS
+          GOOS=darwin GOARCH=amd64 go build -ldflags "$LDFLAGS" -o godo-darwin-amd64 ./cmd/godo/
+          GOOS=darwin GOARCH=arm64 go build -ldflags "$LDFLAGS" -o godo-darwin-arm64 ./cmd/godo/
+
+          # Windows
+          GOOS=windows GOARCH=amd64 go build -ldflags "$LDFLAGS" -o godo-windows-amd64.exe ./cmd/godo/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          name: godo ${{ steps.version.outputs.version }}
+          body: |
+            ## godo ${{ steps.version.outputs.version }}
+
+            Do framework CLI — extract, assemble, and manage .claude/ personas.
+
+            ### Install
+
+            **macOS (Apple Silicon)**
+            ```bash
+            curl -fsSL https://github.com/yejune/godo/releases/latest/download/godo-darwin-arm64 -o /usr/local/bin/godo
+            chmod +x /usr/local/bin/godo
+            ```
+
+            **macOS (Intel)**
+            ```bash
+            curl -fsSL https://github.com/yejune/godo/releases/latest/download/godo-darwin-amd64 -o /usr/local/bin/godo
+            chmod +x /usr/local/bin/godo
+            ```
+
+            **Linux (amd64)**
+            ```bash
+            curl -fsSL https://github.com/yejune/godo/releases/latest/download/godo-linux-amd64 -o /usr/local/bin/godo
+            chmod +x /usr/local/bin/godo
+            ```
+          files: |
+            godo-linux-amd64
+            godo-linux-arm64
+            godo-darwin-amd64
+            godo-darwin-arm64
+            godo-windows-amd64.exe
+          draft: false
+          prerelease: false
