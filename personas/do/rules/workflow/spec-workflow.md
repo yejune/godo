@@ -4,6 +4,20 @@ Do's development workflow with flexible token management and commit-as-proof tra
 
 ## Workflow Overview
 
+### Default Execution Strategy [HARD]
+
+- [HARD] When receiving ANY task instruction without explicit mode override, the DEFAULT workflow is the full pipeline:
+  ```
+  Team Formation -> Research -> Analysis -> Architecture -> Plan -> Checklist -> Execution -> Report
+  ```
+- [HARD] This applies regardless of perceived complexity — the full pipeline ensures no blind spots
+- [HARD] **Small task exception (3 or fewer file modifications)**: orchestrator MUST ask user for consent (AskUserQuestion) before proceeding
+  - Option 1: "Full pipeline (team)" — proceed with default
+  - Option 2: "Focus mode" — switch to Focus mode, execute directly
+  - Option 3: "Reduced team" — smaller team without research/analysis phases
+- [HARD] The user's choice determines execution mode — orchestrator does NOT decide autonomously for small tasks
+- [HARD] If user does not respond or says "just do it", proceed with the full pipeline (default)
+
 ### Simple Tasks (4 or fewer files, single domain, no architecture change)
 
 ```
