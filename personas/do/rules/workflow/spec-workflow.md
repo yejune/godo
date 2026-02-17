@@ -13,9 +13,13 @@ Do's development workflow with flexible token management and commit-as-proof tra
 - [HARD] This applies regardless of perceived complexity — the full pipeline ensures no blind spots
 - [HARD] **Small task exception (3 or fewer file modifications)**: orchestrator MUST ask user for consent (AskUserQuestion) before proceeding
   - Option 1: "Full pipeline (team)" — proceed with default
-  - Option 2: "Focus mode" — switch to Focus mode, execute directly
-  - Option 3: "Reduced team" — smaller team without research/analysis phases
-- [HARD] The user's choice determines execution mode — orchestrator does NOT decide autonomously for small tasks
+  - Option 2: "Do mode" — switch to Do mode, single-agent delegation
+  - Option 3: "Focus mode" — switch to Focus mode, execute directly
+- [HARD] **Phase skip exception**: even in Team mode, if Research/Analysis/Architecture phases appear unnecessary, orchestrator MUST ask user for consent (AskUserQuestion) to skip them
+  - Option 1: "Full pipeline" — proceed with all phases
+  - Option 2: "Skip to Plan" — skip Research/Analysis/Architecture, go directly to Plan
+  - Orchestrator MUST NOT autonomously decide to skip phases — user decides
+- [HARD] The user's choice determines execution mode and phase scope — orchestrator does NOT decide autonomously
 - [HARD] If user does not respond or says "just do it", proceed with the full pipeline (default)
 
 ### Simple Tasks (4 or fewer files, single domain, no architecture change)
