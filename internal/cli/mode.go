@@ -16,8 +16,16 @@ Without arguments, prints the current mode. With an argument, switches to the sp
 	RunE: runMode,
 }
 
+var modePermissionCmd = &cobra.Command{
+	Use:   "permission [bypass|accept|default|plan]",
+	Short: "Set the Claude Code permission mode",
+	Args:  cobra.ExactArgs(1),
+	RunE:  runModePermission,
+}
+
 func init() {
 	rootCmd.AddCommand(modeCmd)
+	modeCmd.AddCommand(modePermissionCmd)
 }
 
 func runMode(cmd *cobra.Command, args []string) error {
@@ -38,5 +46,20 @@ func runMode(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("invalid mode %q (valid: do, focus, team)", newMode)
 	}
 
+	return nil
+}
+
+func runModePermission(cmd *cobra.Command, args []string) error {
+	name := args[0]
+	ccMode, ok := mode.PermissionModes[name]
+	if !ok {
+		return fmt.Errorf("invalid permission mode %q (valid: bypass, accept, default, plan)", name)
+	}
+
+	if err := mode.SetDefaultMode(ccMode); err != nil {
+		return fmt.Errorf("set permission mode: %w", err)
+	}
+
+	fmt.Fprintf(cmd.OutOrStdout(), "permission mode set to %s (%s)\n", name, ccMode)
 	return nil
 }
