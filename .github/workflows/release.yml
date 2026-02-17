@@ -60,6 +60,21 @@ jobs:
           # Windows
           GOOS=windows GOARCH=amd64 go build -ldflags "$LDFLAGS" -o godo-windows-amd64.exe ./cmd/godo/
 
+      - name: Assemble and package
+        run: |
+          # Build linux binary for assemble
+          ./godo-linux-amd64 assemble --core ./core --persona ./personas/do/manifest.yaml --out ./dist
+
+          # Package assembled output as tarball
+          cd dist
+          tar -czvf ../godo-release.tar.gz .
+          cd ..
+
+          # Also create zip for Windows users
+          cd dist
+          zip -r ../godo-release.zip .
+          cd ..
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
@@ -95,5 +110,7 @@ jobs:
             godo-darwin-amd64
             godo-darwin-arm64
             godo-windows-amd64.exe
+            godo-release.tar.gz
+            godo-release.zip
           draft: false
           prerelease: false
