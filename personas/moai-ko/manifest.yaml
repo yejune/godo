@@ -1,0 +1,713 @@
+name: moai
+version: ""
+description: ""
+brand: moai
+brand_dir: moai
+brand_cmd: moai
+claude_md: ""
+agents:
+    - agents/moai/manager-ddd.md
+    - agents/moai/manager-project.md
+    - agents/moai/manager-quality.md
+    - agents/moai/manager-spec.md
+    - agents/moai/manager-tdd.md
+    - agents/moai/team-quality.md
+skills:
+    - skills/moai/SKILL.md
+    - skills/moai/moai-workflow-team/SKILL.md
+    - skills/moai/references/reference.md
+    - skills/moai/workflows/feedback.md
+    - skills/moai/workflows/fix.md
+    - skills/moai/workflows/loop.md
+    - skills/moai/workflows/moai.md
+    - skills/moai/workflows/plan.md
+    - skills/moai/workflows/project.md
+    - skills/moai/workflows/run.md
+    - skills/moai/workflows/sync.md
+    - skills/moai/workflows/team-debug.md
+    - skills/moai/workflows/team-plan.md
+    - skills/moai/workflows/team-review.md
+    - skills/moai/workflows/team-run.md
+    - skills/moai/workflows/team-sync.md
+    - skills/moai-foundation-core/SKILL.md
+    - skills/moai-foundation-quality/SKILL.md
+    - skills/moai-workflow-ddd/SKILL.md
+    - skills/moai-workflow-project/SKILL.md
+    - skills/moai-workflow-spec/SKILL.md
+    - skills/moai-workflow-tdd/SKILL.md
+    - skills/moai-workflow-testing/modules/ddd/core-classes.md
+    - skills/moai-workflow-testing/modules/ddd-context7/advanced-features.md
+    - skills/moai-workflow-testing/modules/ddd-context7/analyze-preserve-improve.md
+    - skills/moai-workflow-testing/modules/ddd-context7/test-generation.md
+    - skills/moai-workflow-testing/modules/ddd-context7/test-patterns.md
+    - skills/moai-workflow-testing/modules/ddd-context7.md
+rules:
+    - rules/moai/workflow/spec-workflow.md
+    - rules/moai/workflow/workflow-modes.md
+styles:
+    - output-styles/moai/moai.md
+    - output-styles/moai/r2d2.md
+    - output-styles/moai/yoda.md
+characters: []
+spinners: []
+commands:
+    - commands/moai/99-release.md
+    - commands/moai/github.md
+hook_scripts:
+    - hooks/moai/handle-agent-hook.sh
+    - hooks/moai/handle-compact.sh
+    - hooks/moai/handle-post-tool.sh
+    - hooks/moai/handle-pre-tool.sh
+    - hooks/moai/handle-session-end.sh
+    - hooks/moai/handle-session-start.sh
+    - hooks/moai/handle-stop.sh
+settings:
+    attribution:
+        commit: "\U0001F5FF MoAI <email@mo.ai.kr>"
+        pr: "\U0001F5FF MoAI <email@mo.ai.kr>"
+    env:
+        MOAI_CONFIG_SOURCE: sections
+    hooks:
+        PostToolUse:
+            - hooks:
+                - command: '"$CLAUDE_PROJECT_DIR/.claude/hooks/moai/handle-post-tool.sh"'
+                  timeout: 60
+                  type: command
+              matcher: Write|Edit
+        PreCompact:
+            - hooks:
+                - command: '"$CLAUDE_PROJECT_DIR/.claude/hooks/moai/handle-compact.sh"'
+                  timeout: 5
+                  type: command
+        PreToolUse:
+            - hooks:
+                - command: '"$CLAUDE_PROJECT_DIR/.claude/hooks/moai/handle-pre-tool.sh"'
+                  timeout: 5
+                  type: command
+              matcher: Write|Edit|Bash
+        SessionEnd:
+            - hooks:
+                - command: '"$CLAUDE_PROJECT_DIR/.claude/hooks/moai/handle-session-end.sh"'
+                  timeout: 5
+                  type: command
+        SessionStart:
+            - hooks:
+                - command: '"$CLAUDE_PROJECT_DIR/.claude/hooks/moai/handle-session-start.sh"'
+                  timeout: 5
+                  type: command
+        Stop:
+            - hooks:
+                - command: '"$CLAUDE_PROJECT_DIR/.claude/hooks/moai/handle-stop.sh"'
+                  timeout: 5
+                  type: command
+    outputStyle: MoAI
+    plansDirectory: .moai/plans
+    statusLine:
+        command: .moai/status_line.sh
+        type: command
+slot_content:
+    QUALITY_FRAMEWORK: |
+        ### TRUST 5 Compliance
+
+        - Test First: Comprehensive test strategy before implementation
+        - Readable: Clear test documentation and maintainable test code
+        - Unified: Consistent testing patterns across all components
+        - Secured: Security testing integrated into strategy
+    QUALITY_GATE_TEXT: TRUST 5 quality gates
+    TRACEABILITY_SYSTEM: |
+        ### TAG Chain Integrity
+
+        Frontend TAG Types:
+
+        Example with Research Integration:
+
+        ```
+
+        ```
+agent_patches:
+    agents/moai/builder-agent.md:
+        append_skills:
+            - moai-workflow-project
+        remove_skills: []
+        append_content: ""
+    agents/moai/builder-plugin.md:
+        append_skills:
+            - moai-workflow-project
+        remove_skills: []
+        append_content: ""
+    agents/moai/builder-skill.md:
+        append_skills:
+            - moai-workflow-project
+        remove_skills: []
+        append_content: ""
+    agents/moai/expert-backend.md:
+        append_skills:
+            - moai-foundation-core
+            - moai-workflow-tdd
+            - moai-workflow-ddd
+        remove_skills: []
+        append_content: ""
+    agents/moai/expert-chrome-extension.md:
+        append_skills:
+            - moai-foundation-quality
+        remove_skills: []
+        append_content: ""
+    agents/moai/expert-debug.md:
+        append_skills:
+            - moai-foundation-core
+            - moai-foundation-quality
+        remove_skills: []
+        append_content: ""
+    agents/moai/expert-devops.md:
+        append_skills:
+            - moai-foundation-core
+            - moai-workflow-project
+        remove_skills: []
+        append_content: ""
+    agents/moai/expert-frontend.md:
+        append_skills:
+            - moai-foundation-core
+            - moai-workflow-tdd
+            - moai-workflow-ddd
+        remove_skills: []
+        append_content: ""
+    agents/moai/expert-performance.md:
+        append_skills:
+            - moai-foundation-core
+            - moai-foundation-quality
+        remove_skills: []
+        append_content: ""
+    agents/moai/expert-refactoring.md:
+        append_skills:
+            - moai-foundation-core
+            - moai-foundation-quality
+            - moai-workflow-ddd
+        remove_skills: []
+        append_content: ""
+    agents/moai/expert-security.md:
+        append_skills:
+            - moai-foundation-core
+            - moai-foundation-quality
+        remove_skills: []
+        append_content: ""
+    agents/moai/expert-testing.md:
+        append_skills:
+            - moai-foundation-core
+            - moai-foundation-quality
+            - moai-workflow-tdd
+            - moai-workflow-ddd
+        remove_skills: []
+        append_content: ""
+    agents/moai/manager-docs.md:
+        append_skills:
+            - moai-foundation-core
+        remove_skills: []
+        append_content: ""
+    agents/moai/manager-git.md:
+        append_skills:
+            - moai-foundation-core
+            - moai-workflow-project
+            - moai-foundation-quality
+        remove_skills: []
+        append_content: ""
+    agents/moai/manager-strategy.md:
+        append_skills:
+            - moai-foundation-core
+            - moai-workflow-spec
+            - moai-workflow-project
+        remove_skills: []
+        append_content: ""
+    agents/moai/team-analyst.md:
+        append_skills:
+            - moai-foundation-core
+            - moai-workflow-spec
+        remove_skills: []
+        append_content: ""
+    agents/moai/team-architect.md:
+        append_skills:
+            - moai-foundation-core
+        remove_skills: []
+        append_content: ""
+    agents/moai/team-backend-dev.md:
+        append_skills:
+            - moai-foundation-core
+        remove_skills: []
+        append_content: ""
+    agents/moai/team-designer.md:
+        append_skills:
+            - moai-foundation-core
+        remove_skills: []
+        append_content: ""
+    agents/moai/team-frontend-dev.md:
+        append_skills:
+            - moai-foundation-core
+        remove_skills: []
+        append_content: ""
+    agents/moai/team-researcher.md:
+        append_skills:
+            - moai-foundation-core
+        remove_skills: []
+        append_content: ""
+    agents/moai/team-tester.md:
+        append_skills:
+            - moai-foundation-core
+        remove_skills: []
+        append_content: ""
+source_dir: /Users/max/Work/moai-adk/.claude/
+core_files:
+    - agents/moai/builder-agent.md
+    - agents/moai/builder-plugin.md
+    - agents/moai/builder-skill.md
+    - agents/moai/expert-backend.md
+    - agents/moai/expert-chrome-extension.md
+    - agents/moai/expert-debug.md
+    - agents/moai/expert-devops.md
+    - agents/moai/expert-frontend.md
+    - agents/moai/expert-performance.md
+    - agents/moai/expert-refactoring.md
+    - agents/moai/expert-security.md
+    - agents/moai/expert-testing.md
+    - agents/moai/manager-docs.md
+    - agents/moai/manager-git.md
+    - agents/moai/manager-strategy.md
+    - agents/moai/team-analyst.md
+    - agents/moai/team-architect.md
+    - agents/moai/team-backend-dev.md
+    - agents/moai/team-designer.md
+    - agents/moai/team-frontend-dev.md
+    - agents/moai/team-researcher.md
+    - agents/moai/team-tester.md
+    - rules/moai/core/agent-hooks.md
+    - rules/moai/core/hooks-system.md
+    - rules/moai/core/mcp-integration.md
+    - rules/moai/core/moai-constitution.md
+    - rules/moai/core/settings-management.md
+    - rules/moai/development/agent-authoring.md
+    - rules/moai/development/coding-standards.md
+    - rules/moai/development/skill-authoring.md
+    - rules/moai/languages/cpp.md
+    - rules/moai/languages/csharp.md
+    - rules/moai/languages/elixir.md
+    - rules/moai/languages/flutter.md
+    - rules/moai/languages/go.md
+    - rules/moai/languages/java.md
+    - rules/moai/languages/javascript.md
+    - rules/moai/languages/kotlin.md
+    - rules/moai/languages/php.md
+    - rules/moai/languages/python.md
+    - rules/moai/languages/r.md
+    - rules/moai/languages/ruby.md
+    - rules/moai/languages/rust.md
+    - rules/moai/languages/scala.md
+    - rules/moai/languages/swift.md
+    - rules/moai/languages/typescript.md
+    - rules/moai/workflow/file-reading-optimization.md
+    - skills/moai-design-tools/SKILL.md
+    - skills/moai-design-tools/reference/comparison.md
+    - skills/moai-design-tools/reference/figma.md
+    - skills/moai-design-tools/reference/pencil-code.md
+    - skills/moai-design-tools/reference/pencil-renderer.md
+    - skills/moai-docs-generation/SKILL.md
+    - skills/moai-docs-generation/modules/INDEX.md
+    - skills/moai-docs-generation/modules/api-documentation.md
+    - skills/moai-docs-generation/modules/code-documentation.md
+    - skills/moai-docs-generation/modules/multi-format-output.md
+    - skills/moai-docs-generation/modules/user-guides.md
+    - skills/moai-docs-generation/references/examples.md
+    - skills/moai-docs-generation/references/reference.md
+    - skills/moai-domain-backend/SKILL.md
+    - skills/moai-domain-backend/references/examples.md
+    - skills/moai-domain-backend/references/reference.md
+    - skills/moai-domain-database/SKILL.md
+    - skills/moai-domain-database/modules/INDEX.md
+    - skills/moai-domain-database/modules/mongodb.md
+    - skills/moai-domain-database/modules/oracle.md
+    - skills/moai-domain-database/modules/postgresql.md
+    - skills/moai-domain-database/modules/redis.md
+    - skills/moai-domain-database/references/examples.md
+    - skills/moai-domain-database/references/reference.md
+    - skills/moai-domain-frontend/SKILL.md
+    - skills/moai-domain-frontend/modules/component-architecture.md
+    - skills/moai-domain-frontend/modules/nextjs16-patterns.md
+    - skills/moai-domain-frontend/modules/performance-optimization.md
+    - skills/moai-domain-frontend/modules/react19-patterns.md
+    - skills/moai-domain-frontend/modules/state-management.md
+    - skills/moai-domain-frontend/modules/vercel-react-best-practices.md
+    - skills/moai-domain-frontend/modules/vue35-patterns.md
+    - skills/moai-domain-frontend/references/examples.md
+    - skills/moai-domain-frontend/references/reference.md
+    - skills/moai-domain-uiux/SKILL.md
+    - skills/moai-domain-uiux/modules/accessibility-wcag.md
+    - skills/moai-domain-uiux/modules/component-architecture.md
+    - skills/moai-domain-uiux/modules/icon-libraries.md
+    - skills/moai-domain-uiux/modules/theming-system.md
+    - skills/moai-domain-uiux/modules/web-interface-guidelines.md
+    - skills/moai-domain-uiux/references/examples.md
+    - skills/moai-domain-uiux/references/reference.md
+    - skills/moai-formats-data/SKILL.md
+    - skills/moai-formats-data/modules/INDEX.md
+    - skills/moai-formats-data/modules/SKILL-MODULARIZATION-TEMPLATE.md
+    - skills/moai-formats-data/modules/caching-performance.md
+    - skills/moai-formats-data/modules/data-validation.md
+    - skills/moai-formats-data/modules/json-optimization.md
+    - skills/moai-formats-data/modules/toon-encoding.md
+    - skills/moai-formats-data/references/examples.md
+    - skills/moai-formats-data/references/reference.md
+    - skills/moai-foundation-claude/SKILL.md
+    - skills/moai-foundation-claude/reference/advanced-agent-patterns.md
+    - skills/moai-foundation-claude/reference/best-practices-checklist.md
+    - skills/moai-foundation-claude/reference/claude-code-cli-reference-official.md
+    - skills/moai-foundation-claude/reference/claude-code-custom-slash-commands-official.md
+    - skills/moai-foundation-claude/reference/claude-code-devcontainers-official.md
+    - skills/moai-foundation-claude/reference/claude-code-discover-plugins-official.md
+    - skills/moai-foundation-claude/reference/claude-code-headless-official.md
+    - skills/moai-foundation-claude/reference/claude-code-hooks-official.md
+    - skills/moai-foundation-claude/reference/claude-code-iam-official.md
+    - skills/moai-foundation-claude/reference/claude-code-memory-official.md
+    - skills/moai-foundation-claude/reference/claude-code-plugin-marketplaces-official.md
+    - skills/moai-foundation-claude/reference/claude-code-plugins-official.md
+    - skills/moai-foundation-claude/reference/claude-code-sandboxing-official.md
+    - skills/moai-foundation-claude/reference/claude-code-settings-official.md
+    - skills/moai-foundation-claude/reference/claude-code-skills-official.md
+    - skills/moai-foundation-claude/reference/claude-code-statusline-official.md
+    - skills/moai-foundation-claude/reference/claude-code-sub-agents-official.md
+    - skills/moai-foundation-claude/reference/complete-configuration-guide.md
+    - skills/moai-foundation-claude/reference/skill-examples.md
+    - skills/moai-foundation-claude/reference/skill-formatting-guide.md
+    - skills/moai-foundation-claude/reference/sub-agents/sub-agent-examples.md
+    - skills/moai-foundation-claude/reference/sub-agents/sub-agent-formatting-guide.md
+    - skills/moai-foundation-claude/reference/sub-agents/sub-agent-integration-patterns.md
+    - skills/moai-foundation-claude/references/examples.md
+    - skills/moai-foundation-claude/references/reference.md
+    - skills/moai-foundation-context/SKILL.md
+    - skills/moai-foundation-context/references/examples.md
+    - skills/moai-foundation-context/references/reference.md
+    - skills/moai-foundation-core/modules/INDEX.md
+    - skills/moai-foundation-core/modules/agents-reference.md
+    - skills/moai-foundation-core/modules/commands-reference.md
+    - skills/moai-foundation-core/modules/delegation-advanced.md
+    - skills/moai-foundation-core/modules/delegation-implementation.md
+    - skills/moai-foundation-core/modules/delegation-patterns.md
+    - skills/moai-foundation-core/modules/execution-rules.md
+    - skills/moai-foundation-core/modules/modular-system.md
+    - skills/moai-foundation-core/modules/patterns.md
+    - skills/moai-foundation-core/modules/progressive-disclosure.md
+    - skills/moai-foundation-core/modules/spec-ddd-implementation.md
+    - skills/moai-foundation-core/modules/spec-ears-format.md
+    - skills/moai-foundation-core/modules/spec-first-ddd.md
+    - skills/moai-foundation-core/modules/trust-5-framework.md
+    - skills/moai-foundation-core/modules/trust-5-implementation.md
+    - skills/moai-foundation-core/modules/trust-5-validation.md
+    - skills/moai-foundation-core/references/examples.md
+    - skills/moai-foundation-core/references/reference.md
+    - skills/moai-foundation-philosopher/SKILL.md
+    - skills/moai-foundation-philosopher/modules/assumption-matrix.md
+    - skills/moai-foundation-philosopher/modules/cognitive-bias.md
+    - skills/moai-foundation-philosopher/modules/first-principles.md
+    - skills/moai-foundation-philosopher/modules/trade-off-analysis.md
+    - skills/moai-foundation-philosopher/references/examples.md
+    - skills/moai-foundation-philosopher/references/reference.md
+    - skills/moai-foundation-quality/modules/best-practices.md
+    - skills/moai-foundation-quality/modules/integration-patterns.md
+    - skills/moai-foundation-quality/modules/proactive-analysis.md
+    - skills/moai-foundation-quality/modules/trust5-validation.md
+    - skills/moai-foundation-quality/references/examples.md
+    - skills/moai-foundation-quality/references/reference.md
+    - skills/moai-framework-electron/SKILL.md
+    - skills/moai-framework-electron/references/examples.md
+    - skills/moai-framework-electron/references/reference.md
+    - skills/moai-lang-cpp/SKILL.md
+    - skills/moai-lang-cpp/modules/advanced-patterns.md
+    - skills/moai-lang-cpp/references/examples.md
+    - skills/moai-lang-cpp/references/reference.md
+    - skills/moai-lang-csharp/SKILL.md
+    - skills/moai-lang-csharp/modules/aspnet-core.md
+    - skills/moai-lang-csharp/modules/blazor-components.md
+    - skills/moai-lang-csharp/modules/cqrs-validation.md
+    - skills/moai-lang-csharp/modules/csharp12-features.md
+    - skills/moai-lang-csharp/modules/efcore-patterns.md
+    - skills/moai-lang-csharp/references/examples.md
+    - skills/moai-lang-csharp/references/reference.md
+    - skills/moai-lang-elixir/SKILL.md
+    - skills/moai-lang-elixir/modules/advanced-patterns.md
+    - skills/moai-lang-elixir/references/examples.md
+    - skills/moai-lang-elixir/references/reference.md
+    - skills/moai-lang-flutter/SKILL.md
+    - skills/moai-lang-flutter/reference/adaptive.md
+    - skills/moai-lang-flutter/reference/animations.md
+    - skills/moai-lang-flutter/reference/expert.md
+    - skills/moai-lang-flutter/references/examples.md
+    - skills/moai-lang-flutter/references/reference.md
+    - skills/moai-lang-go/SKILL.md
+    - skills/moai-lang-go/reference/advanced.md
+    - skills/moai-lang-go/reference/testing.md
+    - skills/moai-lang-go/references/examples.md
+    - skills/moai-lang-go/references/reference.md
+    - skills/moai-lang-java/SKILL.md
+    - skills/moai-lang-java/references/examples.md
+    - skills/moai-lang-java/references/reference.md
+    - skills/moai-lang-javascript/SKILL.md
+    - skills/moai-lang-javascript/references/examples.md
+    - skills/moai-lang-javascript/references/reference.md
+    - skills/moai-lang-kotlin/SKILL.md
+    - skills/moai-lang-kotlin/references/examples.md
+    - skills/moai-lang-kotlin/references/reference.md
+    - skills/moai-lang-php/SKILL.md
+    - skills/moai-lang-php/modules/advanced-patterns.md
+    - skills/moai-lang-php/references/examples.md
+    - skills/moai-lang-php/references/reference.md
+    - skills/moai-lang-python/SKILL.md
+    - skills/moai-lang-python/references/examples.md
+    - skills/moai-lang-python/references/reference.md
+    - skills/moai-lang-r/SKILL.md
+    - skills/moai-lang-r/modules/advanced-patterns.md
+    - skills/moai-lang-r/references/examples.md
+    - skills/moai-lang-r/references/reference.md
+    - skills/moai-lang-ruby/SKILL.md
+    - skills/moai-lang-ruby/modules/advanced-patterns.md
+    - skills/moai-lang-ruby/modules/testing-patterns.md
+    - skills/moai-lang-ruby/references/examples.md
+    - skills/moai-lang-ruby/references/reference.md
+    - skills/moai-lang-rust/SKILL.md
+    - skills/moai-lang-rust/reference/engineering.md
+    - skills/moai-lang-rust/reference/guidelines.md
+    - skills/moai-lang-rust/reference/performance.md
+    - skills/moai-lang-rust/references/examples.md
+    - skills/moai-lang-rust/references/reference.md
+    - skills/moai-lang-scala/SKILL.md
+    - skills/moai-lang-scala/modules/akka-actors.md
+    - skills/moai-lang-scala/modules/cats-effect.md
+    - skills/moai-lang-scala/modules/functional-programming.md
+    - skills/moai-lang-scala/modules/spark-data.md
+    - skills/moai-lang-scala/modules/zio-patterns.md
+    - skills/moai-lang-scala/references/examples.md
+    - skills/moai-lang-scala/references/reference.md
+    - skills/moai-lang-swift/SKILL.md
+    - skills/moai-lang-swift/modules/combine-reactive.md
+    - skills/moai-lang-swift/modules/concurrency.md
+    - skills/moai-lang-swift/modules/swift6-features.md
+    - skills/moai-lang-swift/modules/swiftui-patterns.md
+    - skills/moai-lang-swift/references/examples.md
+    - skills/moai-lang-swift/references/reference.md
+    - skills/moai-lang-typescript/SKILL.md
+    - skills/moai-lang-typescript/references/examples.md
+    - skills/moai-lang-typescript/references/reference.md
+    - skills/moai-library-mermaid/SKILL.md
+    - skills/moai-library-mermaid/modules/advanced-patterns.md
+    - skills/moai-library-mermaid/modules/optimization.md
+    - skills/moai-library-mermaid/references/examples.md
+    - skills/moai-library-mermaid/references/reference.md
+    - skills/moai-library-nextra/SKILL.md
+    - skills/moai-library-nextra/modules/advanced-deployment-patterns.md
+    - skills/moai-library-nextra/modules/advanced-patterns.md
+    - skills/moai-library-nextra/modules/configuration.md
+    - skills/moai-library-nextra/modules/content-architecture-optimization.md
+    - skills/moai-library-nextra/modules/deployment.md
+    - skills/moai-library-nextra/modules/framework-core-configuration.md
+    - skills/moai-library-nextra/modules/i18n-setup.md
+    - skills/moai-library-nextra/modules/mdx-components.md
+    - skills/moai-library-nextra/modules/optimization.md
+    - skills/moai-library-nextra/references/examples.md
+    - skills/moai-library-nextra/references/reference.md
+    - skills/moai-library-shadcn/SKILL.md
+    - skills/moai-library-shadcn/modules/advanced-patterns.md
+    - skills/moai-library-shadcn/modules/optimization.md
+    - skills/moai-library-shadcn/modules/shadcn-components.md
+    - skills/moai-library-shadcn/modules/shadcn-theming.md
+    - skills/moai-library-shadcn/references/examples.md
+    - skills/moai-library-shadcn/references/reference.md
+    - skills/moai-platform-auth/SKILL.md
+    - skills/moai-platform-auth/reference/auth0.md
+    - skills/moai-platform-auth/reference/clerk.md
+    - skills/moai-platform-auth/reference/comparison.md
+    - skills/moai-platform-auth/reference/firebase-auth.md
+    - skills/moai-platform-chrome-extension/SKILL.md
+    - skills/moai-platform-chrome-extension/modules/apis-quick-reference.md
+    - skills/moai-platform-chrome-extension/modules/content-scripts-guide.md
+    - skills/moai-platform-chrome-extension/modules/manifest-v3-reference.md
+    - skills/moai-platform-chrome-extension/modules/messaging-patterns.md
+    - skills/moai-platform-chrome-extension/modules/publishing-guide.md
+    - skills/moai-platform-chrome-extension/modules/security-csp.md
+    - skills/moai-platform-chrome-extension/modules/service-worker-patterns.md
+    - skills/moai-platform-chrome-extension/modules/ui-components.md
+    - skills/moai-platform-database-cloud/SKILL.md
+    - skills/moai-platform-database-cloud/reference/comparison.md
+    - skills/moai-platform-database-cloud/reference/firestore.md
+    - skills/moai-platform-database-cloud/reference/neon.md
+    - skills/moai-platform-database-cloud/reference/supabase.md
+    - skills/moai-platform-deployment/SKILL.md
+    - skills/moai-platform-deployment/reference/comparison.md
+    - skills/moai-platform-deployment/reference/convex.md
+    - skills/moai-platform-deployment/reference/railway.md
+    - skills/moai-platform-deployment/reference/vercel.md
+    - skills/moai-tool-ast-grep/SKILL.md
+    - skills/moai-tool-ast-grep/modules/language-specific.md
+    - skills/moai-tool-ast-grep/modules/pattern-syntax.md
+    - skills/moai-tool-ast-grep/modules/refactoring-patterns.md
+    - skills/moai-tool-ast-grep/modules/security-rules.md
+    - skills/moai-tool-ast-grep/references/examples.md
+    - skills/moai-tool-ast-grep/references/reference.md
+    - skills/moai-tool-ast-grep/rules/languages/go.yml
+    - skills/moai-tool-ast-grep/rules/languages/python.yml
+    - skills/moai-tool-ast-grep/rules/languages/typescript.yml
+    - skills/moai-tool-ast-grep/rules/quality/complexity-check.yml
+    - skills/moai-tool-ast-grep/rules/quality/deprecated-apis.yml
+    - skills/moai-tool-ast-grep/rules/security/secrets-detection.yml
+    - skills/moai-tool-ast-grep/rules/security/sql-injection.yml
+    - skills/moai-tool-ast-grep/rules/security/xss-prevention.yml
+    - skills/moai-tool-ast-grep/rules/sgconfig.yml
+    - skills/moai-tool-svg/SKILL.md
+    - skills/moai-tool-svg/modules/INDEX.md
+    - skills/moai-tool-svg/modules/svg-animation.md
+    - skills/moai-tool-svg/modules/svg-basics.md
+    - skills/moai-tool-svg/modules/svg-optimization.md
+    - skills/moai-tool-svg/modules/svg-styling.md
+    - skills/moai-tool-svg/references/examples.md
+    - skills/moai-tool-svg/references/reference.md
+    - skills/moai-workflow-jit-docs/SKILL.md
+    - skills/moai-workflow-jit-docs/modules/advanced-patterns.md
+    - skills/moai-workflow-jit-docs/modules/optimization.md
+    - skills/moai-workflow-jit-docs/references/examples.md
+    - skills/moai-workflow-jit-docs/references/reference.md
+    - skills/moai-workflow-loop/SKILL.md
+    - skills/moai-workflow-loop/references/examples.md
+    - skills/moai-workflow-loop/references/reference.md
+    - skills/moai-workflow-project/references/examples.md
+    - skills/moai-workflow-project/references/overview.md
+    - skills/moai-workflow-project/references/reference.md
+    - skills/moai-workflow-project/templates/doc-templates/product-template.md
+    - skills/moai-workflow-project/templates/doc-templates/structure-template.md
+    - skills/moai-workflow-project/templates/doc-templates/tech-template.md
+    - skills/moai-workflow-spec/modules/advanced-patterns.md
+    - skills/moai-workflow-spec/references/examples.md
+    - skills/moai-workflow-spec/references/reference.md
+    - skills/moai-workflow-tdd/references/examples.md
+    - skills/moai-workflow-tdd/references/reference.md
+    - skills/moai-workflow-templates/SKILL.md
+    - skills/moai-workflow-templates/modules/code-templates.md
+    - skills/moai-workflow-templates/modules/feedback-templates.md
+    - skills/moai-workflow-templates/modules/template-optimizer.md
+    - skills/moai-workflow-templates/references/examples.md
+    - skills/moai-workflow-templates/references/reference.md
+    - skills/moai-workflow-testing/LICENSE.txt
+    - skills/moai-workflow-testing/SKILL.md
+    - skills/moai-workflow-testing/examples/ai-powered-testing.py
+    - skills/moai-workflow-testing/examples/console_logging.py
+    - skills/moai-workflow-testing/examples/element_discovery.py
+    - skills/moai-workflow-testing/examples/static_html_automation.py
+    - skills/moai-workflow-testing/modules/INDEX.md
+    - skills/moai-workflow-testing/modules/advanced-patterns.md
+    - skills/moai-workflow-testing/modules/ai-debugging.md
+    - skills/moai-workflow-testing/modules/automated-code-review/context7-integration.md
+    - skills/moai-workflow-testing/modules/automated-code-review/review-workflows.md
+    - skills/moai-workflow-testing/modules/automated-code-review/trust5-framework/relevance-analysis.md
+    - skills/moai-workflow-testing/modules/automated-code-review/trust5-framework/safety-analysis.md
+    - skills/moai-workflow-testing/modules/automated-code-review/trust5-framework/scoring-algorithms.md
+    - skills/moai-workflow-testing/modules/automated-code-review/trust5-framework/timeliness-analysis.md
+    - skills/moai-workflow-testing/modules/automated-code-review/trust5-framework/truthfulness-analysis.md
+    - skills/moai-workflow-testing/modules/automated-code-review/trust5-framework/usability-analysis.md
+    - skills/moai-workflow-testing/modules/automated-code-review/trust5-framework.md
+    - skills/moai-workflow-testing/modules/automated-code-review.md
+    - skills/moai-workflow-testing/modules/code-review/analysis-patterns.md
+    - skills/moai-workflow-testing/modules/code-review/core-classes.md
+    - skills/moai-workflow-testing/modules/code-review/tool-integration.md
+    - skills/moai-workflow-testing/modules/debugging/debugging-workflows.md
+    - skills/moai-workflow-testing/modules/debugging/error-analysis.md
+    - skills/moai-workflow-testing/modules/optimization.md
+    - skills/moai-workflow-testing/modules/performance/optimization-patterns.md
+    - skills/moai-workflow-testing/modules/performance/profiling-techniques.md
+    - skills/moai-workflow-testing/modules/performance-optimization/ai-optimization.md
+    - skills/moai-workflow-testing/modules/performance-optimization/bottleneck-detection.md
+    - skills/moai-workflow-testing/modules/performance-optimization/optimization-plan.md
+    - skills/moai-workflow-testing/modules/performance-optimization/profiler-core.md
+    - skills/moai-workflow-testing/modules/performance-optimization/real-time-monitoring.md
+    - skills/moai-workflow-testing/modules/performance-optimization.md
+    - skills/moai-workflow-testing/modules/quality-metrics.md
+    - skills/moai-workflow-testing/modules/refactoring/ai-workflows.md
+    - skills/moai-workflow-testing/modules/refactoring/patterns.md
+    - skills/moai-workflow-testing/modules/security-analysis.md
+    - skills/moai-workflow-testing/modules/smart-refactoring.md
+    - skills/moai-workflow-testing/modules/static-analysis.md
+    - skills/moai-workflow-testing/modules/trust5-validation.md
+    - skills/moai-workflow-testing/reference/playwright-best-practices.md
+    - skills/moai-workflow-testing/references/examples.md
+    - skills/moai-workflow-testing/references/reference.md
+    - skills/moai-workflow-testing/scripts/with_server.py
+    - skills/moai-workflow-testing/templates/alfred-integration.md
+    - skills/moai-workflow-testing/workflows/enterprise-testing-workflow.py
+    - skills/moai-workflow-thinking/SKILL.md
+    - skills/moai-workflow-worktree/SKILL.md
+    - skills/moai-workflow-worktree/modules/integration-patterns.md
+    - skills/moai-workflow-worktree/modules/moai-adk-integration.md
+    - skills/moai-workflow-worktree/modules/parallel-advanced.md
+    - skills/moai-workflow-worktree/modules/parallel-development.md
+    - skills/moai-workflow-worktree/modules/parallel-workflows.md
+    - skills/moai-workflow-worktree/modules/registry-architecture.md
+    - skills/moai-workflow-worktree/modules/resource-optimization.md
+    - skills/moai-workflow-worktree/modules/tools-integration.md
+    - skills/moai-workflow-worktree/modules/troubleshooting.md
+    - skills/moai-workflow-worktree/modules/worktree-commands.md
+    - skills/moai-workflow-worktree/modules/worktree-management.md
+    - skills/moai-workflow-worktree/references/examples.md
+    - skills/moai-workflow-worktree/references/reference.md
+persona_files:
+    agents/moai/manager-ddd.md: /Users/max/Work/moai-adk/.claude/agents/moai/manager-ddd.md
+    agents/moai/manager-project.md: /Users/max/Work/moai-adk/.claude/agents/moai/manager-project.md
+    agents/moai/manager-quality.md: /Users/max/Work/moai-adk/.claude/agents/moai/manager-quality.md
+    agents/moai/manager-spec.md: /Users/max/Work/moai-adk/.claude/agents/moai/manager-spec.md
+    agents/moai/manager-tdd.md: /Users/max/Work/moai-adk/.claude/agents/moai/manager-tdd.md
+    agents/moai/team-quality.md: /Users/max/Work/moai-adk/.claude/agents/moai/team-quality.md
+    commands/moai/99-release.md: /Users/max/Work/moai-adk/.claude/commands/moai/99-release.md
+    commands/moai/github.md: /Users/max/Work/moai-adk/.claude/commands/moai/github.md
+    hooks/moai/handle-agent-hook.sh: /Users/max/Work/moai-adk/.claude/hooks/moai/handle-agent-hook.sh
+    hooks/moai/handle-compact.sh: /Users/max/Work/moai-adk/.claude/hooks/moai/handle-compact.sh
+    hooks/moai/handle-post-tool.sh: /Users/max/Work/moai-adk/.claude/hooks/moai/handle-post-tool.sh
+    hooks/moai/handle-pre-tool.sh: /Users/max/Work/moai-adk/.claude/hooks/moai/handle-pre-tool.sh
+    hooks/moai/handle-session-end.sh: /Users/max/Work/moai-adk/.claude/hooks/moai/handle-session-end.sh
+    hooks/moai/handle-session-start.sh: /Users/max/Work/moai-adk/.claude/hooks/moai/handle-session-start.sh
+    hooks/moai/handle-stop.sh: /Users/max/Work/moai-adk/.claude/hooks/moai/handle-stop.sh
+    output-styles/moai/moai.md: /Users/max/Work/moai-adk/.claude/output-styles/moai/moai.md
+    output-styles/moai/r2d2.md: /Users/max/Work/moai-adk/.claude/output-styles/moai/r2d2.md
+    output-styles/moai/yoda.md: /Users/max/Work/moai-adk/.claude/output-styles/moai/yoda.md
+    rules/moai/workflow/spec-workflow.md: /Users/max/Work/moai-adk/.claude/rules/moai/workflow/spec-workflow.md
+    rules/moai/workflow/workflow-modes.md: /Users/max/Work/moai-adk/.claude/rules/moai/workflow/workflow-modes.md
+    settings.json: /Users/max/Work/moai-adk/.claude/settings.json
+    skills/moai-foundation-core/SKILL.md: /Users/max/Work/moai-adk/.claude/skills/moai-foundation-core/SKILL.md
+    skills/moai-foundation-quality/SKILL.md: /Users/max/Work/moai-adk/.claude/skills/moai-foundation-quality/SKILL.md
+    skills/moai-foundation-quality/scripts/quality-gate.sh: /Users/max/Work/moai-adk/.claude/skills/moai-foundation-quality/scripts/quality-gate.sh
+    skills/moai-foundation-quality/templates/github-actions-quality.yml: /Users/max/Work/moai-adk/.claude/skills/moai-foundation-quality/templates/github-actions-quality.yml
+    skills/moai-foundation-quality/templates/quality-config.yaml: /Users/max/Work/moai-adk/.claude/skills/moai-foundation-quality/templates/quality-config.yaml
+    skills/moai-workflow-ddd/SKILL.md: /Users/max/Work/moai-adk/.claude/skills/moai-workflow-ddd/SKILL.md
+    skills/moai-workflow-project/SKILL.md: /Users/max/Work/moai-adk/.claude/skills/moai-workflow-project/SKILL.md
+    skills/moai-workflow-project/schemas/config-schema.json: /Users/max/Work/moai-adk/.claude/skills/moai-workflow-project/schemas/config-schema.json
+    skills/moai-workflow-project/schemas/tab_schema.json: /Users/max/Work/moai-adk/.claude/skills/moai-workflow-project/schemas/tab_schema.json
+    skills/moai-workflow-project/templates/config-template.json: /Users/max/Work/moai-adk/.claude/skills/moai-workflow-project/templates/config-template.json
+    skills/moai-workflow-project/templates/question-templates/config-manager-setup.json: /Users/max/Work/moai-adk/.claude/skills/moai-workflow-project/templates/question-templates/config-manager-setup.json
+    skills/moai-workflow-project/templates/question-templates/language-initializer.json: /Users/max/Work/moai-adk/.claude/skills/moai-workflow-project/templates/question-templates/language-initializer.json
+    skills/moai-workflow-project/templates/question-templates/menu-project-config.json: /Users/max/Work/moai-adk/.claude/skills/moai-workflow-project/templates/question-templates/menu-project-config.json
+    skills/moai-workflow-project/templates/question-templates/project-batch-questions.json: /Users/max/Work/moai-adk/.claude/skills/moai-workflow-project/templates/question-templates/project-batch-questions.json
+    skills/moai-workflow-project/templates/question-templates/spec-workflow-setup.json: /Users/max/Work/moai-adk/.claude/skills/moai-workflow-project/templates/question-templates/spec-workflow-setup.json
+    skills/moai-workflow-spec/SKILL.md: /Users/max/Work/moai-adk/.claude/skills/moai-workflow-spec/SKILL.md
+    skills/moai-workflow-tdd/SKILL.md: /Users/max/Work/moai-adk/.claude/skills/moai-workflow-tdd/SKILL.md
+    skills/moai-workflow-testing/modules/ddd-context7.md: /Users/max/Work/moai-adk/.claude/skills/moai-workflow-testing/modules/ddd-context7.md
+    skills/moai-workflow-testing/modules/ddd-context7/advanced-features.md: /Users/max/Work/moai-adk/.claude/skills/moai-workflow-testing/modules/ddd-context7/advanced-features.md
+    skills/moai-workflow-testing/modules/ddd-context7/analyze-preserve-improve.md: /Users/max/Work/moai-adk/.claude/skills/moai-workflow-testing/modules/ddd-context7/analyze-preserve-improve.md
+    skills/moai-workflow-testing/modules/ddd-context7/test-generation.md: /Users/max/Work/moai-adk/.claude/skills/moai-workflow-testing/modules/ddd-context7/test-generation.md
+    skills/moai-workflow-testing/modules/ddd-context7/test-patterns.md: /Users/max/Work/moai-adk/.claude/skills/moai-workflow-testing/modules/ddd-context7/test-patterns.md
+    skills/moai-workflow-testing/modules/ddd/core-classes.md: /Users/max/Work/moai-adk/.claude/skills/moai-workflow-testing/modules/ddd/core-classes.md
+    skills/moai/SKILL.md: /Users/max/Work/moai-adk/.claude/skills/moai/SKILL.md
+    skills/moai/moai-workflow-team/SKILL.md: /Users/max/Work/moai-adk/.claude/skills/moai/moai-workflow-team/SKILL.md
+    skills/moai/references/reference.md: /Users/max/Work/moai-adk/.claude/skills/moai/references/reference.md
+    skills/moai/workflows/feedback.md: /Users/max/Work/moai-adk/.claude/skills/moai/workflows/feedback.md
+    skills/moai/workflows/fix.md: /Users/max/Work/moai-adk/.claude/skills/moai/workflows/fix.md
+    skills/moai/workflows/loop.md: /Users/max/Work/moai-adk/.claude/skills/moai/workflows/loop.md
+    skills/moai/workflows/moai.md: /Users/max/Work/moai-adk/.claude/skills/moai/workflows/moai.md
+    skills/moai/workflows/plan.md: /Users/max/Work/moai-adk/.claude/skills/moai/workflows/plan.md
+    skills/moai/workflows/project.md: /Users/max/Work/moai-adk/.claude/skills/moai/workflows/project.md
+    skills/moai/workflows/run.md: /Users/max/Work/moai-adk/.claude/skills/moai/workflows/run.md
+    skills/moai/workflows/sync.md: /Users/max/Work/moai-adk/.claude/skills/moai/workflows/sync.md
+    skills/moai/workflows/team-debug.md: /Users/max/Work/moai-adk/.claude/skills/moai/workflows/team-debug.md
+    skills/moai/workflows/team-plan.md: /Users/max/Work/moai-adk/.claude/skills/moai/workflows/team-plan.md
+    skills/moai/workflows/team-review.md: /Users/max/Work/moai-adk/.claude/skills/moai/workflows/team-review.md
+    skills/moai/workflows/team-run.md: /Users/max/Work/moai-adk/.claude/skills/moai/workflows/team-run.md
+    skills/moai/workflows/team-sync.md: /Users/max/Work/moai-adk/.claude/skills/moai/workflows/team-sync.md
