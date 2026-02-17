@@ -1,0 +1,137 @@
+# Checklist System Rules [HARD]
+
+## Creation Timing
+- [HARD] Create checklist after plan is confirmed (one per agent task)
+- [HARD] Never create checklist without a plan — the plan is the checklist's basis
+- PostToolUse hook automatically creates checklist stub when plan file is generated
+- [HARD] If plan file exists and checklist is in stub state (not yet written), prioritize checklist creation over all other work
+- [HARD] Checklist creation procedure: Read plan file → Decompose into agent tasks → Invoke agent (Task tool) to write checklist
+- [HARD] Items must be granular enough for an agent to complete without token exhaustion
+- [HARD] One item = 1-3 file changes + verification — split if exceeding this scope
+- [HARD] Specify verification method per item: testable → unit/integration test, not testable → build check/manual check/`docker compose config` etc.
+
+### Decomposition Procedure [HARD]
+- [HARD] Step 1: Estimate how many files each item touches
+- [HARD] Step 2: More than 3 files → must decompose
+- [HARD] Step 3: Each decomposed item must be independently completable/verifiable
+- [HARD] Step 4: If dependencies exist between items, link with `depends on:`
+- [HARD] Decomposition example:
+  - "Implement API" ← too large (5+ files)
+  - → "Define router" (1 file), "Implement handler" (1 file), "Add validation logic" (1 file), "Error response handling" (1 file), "Unit tests" (1 file)
+- [HARD] Proceeding with development while checklist is unwritten is a VIOLATION
+
+## Authoring Rules [HARD]
+- [HARD] All documents in jobs folder (checklist.md, report.md, checklists/*.md) must be delegated to agents (Task tool)
+- [HARD] Same for both Do/Focus modes — orchestrator never directly writes/edits jobs folder files
+- [HARD] Reason: Prevent orchestrator context token waste — document authoring is the agent's responsibility
+- [HARD] Only exception: plan.md — Plan Mode hook auto-generates/moves it (not written by orchestrator)
+
+## Checklist = Agent State File [HARD]
+- [HARD] Checklist is not just a document — it is the **agent's persistent state store**
+- [HARD] Agent reads checklist at task start → determines work scope
+- [HARD] Updates checklist state on each item completion → progress recorded in file
+- [HARD] On agent token exhaustion/interruption → last state remains in checklist
+- [HARD] When new agent receives same checklist → skips `[o]` items, resumes from incomplete
+- [HARD] This pattern guarantees **work continuity** — any agent can pick up where another left off
+
+## File Structure (jobs directory integration) [HARD]
+- [HARD] One task = one folder — all artifacts in same directory:
+  - Analysis: `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/analysis.md` (complex tasks only)
+  - Architecture: `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/architecture.md` (complex tasks only)
+  - Plan: `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/plan.md`
+  - Checklist: `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/checklist.md`
+  - Report: `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/report.md`
+  - Sub files: `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/checklists/{order}_{agent-topic}.md`
+- [HARD] Sub file `{order}` is two-digit number: `01`, `02`, ... `99`
+- Directories auto-created if missing
+
+### Example (complex task)
+```
+.do/jobs/26/02/11/queue-library-migration/
+  ├── analysis.md
+  ├── architecture.md
+  ├── plan.md
+  ├── checklist.md
+  ├── report.md
+  └── checklists/
+      ├── 01_expert-backend.md
+      ├── 02_expert-security.md
+      └── 03_expert-testing.md
+```
+
+### Example (simple task)
+```
+.do/jobs/26/02/11/login-api-security/
+  ├── plan.md
+  ├── checklist.md
+  ├── report.md
+  └── checklists/
+      ├── 01_expert-backend.md
+      └── 02_expert-testing.md
+```
+
+## State Management
+
+### State Symbols
+| Symbol | State | Meaning |
+|--------|-------|---------|
+| `[ ]` | pending | Not yet started |
+| `[~]` | in progress | Currently being worked on |
+| `[*]` | testing | Implementation done, test verification in progress |
+| `[!]` | blocked | Waiting on external dependency/decision |
+| `[o]` | done | Tests passed, work complete |
+| `[x]` | failed | Final failure, no further progress possible |
+
+> **[HARD] `[x]` = FAILED, `[o]` = DONE. Never confuse them.**
+> - Completed items in `.do/jobs/` checklists must use `[o]`
+> - `[x]` means "final failure" — different from standard markdown `[x]` ("checked")
+> - Same applies to Acceptance Criteria, FINAL STEP, and all other items
+> - Marking completion with `[x]` is a VIOLATION
+
+### State Transition Rules [HARD]
+- [HARD] Allowed transitions:
+  ```
+  [ ] → [~]        start
+  [~] → [*]        implementation done → testing
+  [~] → [!]        blocker occurred
+  [*] → [o]        tests passed → done
+  [*] → [~]        test failed → rework (regression)
+  [*] → [x]        test final failure → failed
+  [~] → [x]        implementation final failure → failed
+  [!] → [~]        blocker resolved → resume
+  ```
+- [HARD] Forbidden transitions: `[ ] → [o]` (cannot complete without testing), `[ ] → [x]` (cannot fail without working), `[ ] → [*]` (cannot test without working)
+- [HARD] Record history on state changes (never overwrite)
+
+### Blocker Recording Rules [HARD]
+- [HARD] On `[!]` transition, must record 3 things:
+  1. **What** is blocking (specific reason)
+  2. **Who** can resolve it (owner/external system)
+  3. **When** it was blocked (timestamp)
+
+### State History Example
+```
+[~] Login API implementation
+    - [ ] 2026-02-11 14:00:00 created
+    - [~] 2026-02-11 14:05:12 work started
+    - [!] 2026-02-11 15:00:33 blocker: Redis config incomplete (owner: infra team, awaiting resolution)
+    - [~] 2026-02-11 16:00:05 blocker resolved, resumed
+    - [*] 2026-02-11 17:00:41 testing
+    - [~] 2026-02-11 17:30:18 test failed (JWT expiry logic error) → rework
+    - [*] 2026-02-11 18:00:22 re-testing
+    - [o] 2026-02-11 18:30:55 done
+```
+
+## Dependency Management [HARD]
+- [HARD] Declare dependencies between items with `depends on:` keyword
+- [HARD] If dependency target is incomplete, the item is automatically treated as `[!]` blocked
+- [HARD] Dependencies managed in main checklist (cross-referencing sub files)
+
+### Dependency Notation
+```
+## Task List
+- [o] #1 DB schema migration
+- [~] #2 Login API implementation (depends on: #1)
+- [ ] #3 Frontend login form (depends on: #2)
+- [!] #4 Social login integration (depends on: #2, blocker: OAuth key not issued)
+```
