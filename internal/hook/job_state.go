@@ -45,10 +45,7 @@ func LoadJobState(path string) (*JobState, error) {
 
 // SaveJobState writes a JobState to a JSON file with indentation.
 func SaveJobState(path string, state *JobState) error {
-	data, err := json.MarshalIndent(state, "", "  ")
-	if err != nil {
-		return err
-	}
+	data, _ := json.MarshalIndent(state, "", "  ")
 	data = append(data, '\n')
 	return os.WriteFile(path, data, 0644)
 }

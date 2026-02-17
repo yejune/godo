@@ -36,10 +36,6 @@ func HandleUserPromptSubmit(input *Input) *Output {
 		}
 	}
 
-	if len(parts) == 0 {
-		return &Output{}
-	}
-
 	return &Output{
 		HookSpecificOutput: &SpecificOutput{
 			HookEventName:    "UserPromptSubmit",
