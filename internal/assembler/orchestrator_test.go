@@ -96,7 +96,7 @@ func TestAssemble_PersonaOnlyFiles(t *testing.T) {
 	}
 
 	// Create persona-only agent.
-	agentsDir := filepath.Join(personaDir, "agents", "moai")
+	agentsDir := filepath.Join(personaDir, "agents")
 	if err := os.MkdirAll(agentsDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -109,7 +109,7 @@ func TestAssemble_PersonaOnlyFiles(t *testing.T) {
 	manifest := &model.PersonaManifest{
 		Name:   "test-persona",
 		Styles: []string{"styles/sprint.md"},
-		Agents: []string{"agents/moai/custom.md"},
+		Agents: []string{"agents/custom.md"},
 	}
 
 	orch := NewAssembler(coreDir, personaDir, outputDir, manifest, reg)
@@ -132,7 +132,7 @@ func TestAssemble_PersonaOnlyFiles(t *testing.T) {
 	}
 
 	// Verify agent file copied.
-	data, err = os.ReadFile(filepath.Join(outputDir, "agents", "moai", "custom.md"))
+	data, err = os.ReadFile(filepath.Join(outputDir, "agents", "test-persona", "custom.md"))
 	if err != nil {
 		t.Fatalf("read output agent: %v", err)
 	}
@@ -174,7 +174,7 @@ func TestAssemble_AgentPatchingApplied(t *testing.T) {
 	outputDir := t.TempDir()
 
 	// Create a core agent file that will be copied then patched.
-	agentsDir := filepath.Join(coreDir, "agents")
+	agentsDir := filepath.Join(coreDir, "agents", "test-persona")
 	if err := os.MkdirAll(agentsDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -215,7 +215,7 @@ Core implementation.`
 	}
 
 	// Verify the patched file.
-	data, err := os.ReadFile(filepath.Join(outputDir, "agents", "expert-backend.md"))
+	data, err := os.ReadFile(filepath.Join(outputDir, "agents", "test-persona", "expert-backend.md"))
 	if err != nil {
 		t.Fatalf("read patched agent: %v", err)
 	}
@@ -315,7 +315,7 @@ func TestAssemble_CommandsAndHookScriptsCopied(t *testing.T) {
 	}
 
 	// Verify command copied.
-	data, err := os.ReadFile(filepath.Join(outputDir, "commands", "do-plan.md"))
+	data, err := os.ReadFile(filepath.Join(outputDir, "commands", "test-persona", "do-plan.md"))
 	if err != nil {
 		t.Fatalf("read output command: %v", err)
 	}
@@ -324,7 +324,7 @@ func TestAssemble_CommandsAndHookScriptsCopied(t *testing.T) {
 	}
 
 	// Verify hook script copied.
-	data, err = os.ReadFile(filepath.Join(outputDir, "hooks", "pre-tool.sh"))
+	data, err = os.ReadFile(filepath.Join(outputDir, "hooks", "test-persona", "pre-tool.sh"))
 	if err != nil {
 		t.Fatalf("read output hook: %v", err)
 	}
@@ -379,7 +379,7 @@ func TestAssemble_FullPipeline(t *testing.T) {
 	outputDir := t.TempDir()
 
 	// Core: agent with slot + plain rule.
-	agentsDir := filepath.Join(coreDir, "agents")
+	agentsDir := filepath.Join(coreDir, "agents", "godo")
 	if err := os.MkdirAll(agentsDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -466,7 +466,7 @@ Use {{slot:TOOL_NAME}} for development.`
 	}
 
 	// Verify inline slot filled.
-	data, err := os.ReadFile(filepath.Join(outputDir, "agents", "expert-backend.md"))
+	data, err := os.ReadFile(filepath.Join(outputDir, "agents", "godo", "expert-backend.md"))
 	if err != nil {
 		t.Fatalf("read output agent: %v", err)
 	}

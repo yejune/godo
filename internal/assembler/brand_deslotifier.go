@@ -147,3 +147,58 @@ func (d *BrandDeslotifier) RemapBrandDirInPath(relPath, sourceBrandDir string) s
 	}
 	return strings.Replace(relPath, "/"+sourceBrandDir+"/", "/"+d.brandDir+"/", 1)
 }
+
+// brandSubdirCategories lists directory categories that use {category}/{brand}/ pattern.
+var brandSubdirCategories = map[string]bool{
+	"agents":        true,
+	"rules":         true,
+	"commands":      true,
+	"hooks":         true,
+	"output-styles": true,
+	"skills":        true,
+}
+
+// AddBrandSubdir inserts the brand subdirectory into a persona file path.
+// This is used during assembly to restore brand nesting that was stripped during extraction.
+//
+// Only applies to paths whose top-level directory is one of the brand subdir categories.
+// Does NOT add brand subdir if one is already present (prevents double-nesting).
+//
+// Examples (brand="moai"):
+//
+//	agents/manager-ddd.md → agents/moai/manager-ddd.md
+//	rules/workflow/spec.md → rules/moai/workflow/spec.md
+//	hooks/pre-tool.sh → hooks/moai/pre-tool.sh
+//	commands/plan.md → commands/moai/plan.md
+//	agents/moai/manager-ddd.md → agents/moai/manager-ddd.md (unchanged, already has brand)
+//	styles/pair.md → styles/pair.md (unchanged, not in brand categories)
+//	CLAUDE.md → CLAUDE.md (unchanged, no category dir)
+func (d *BrandDeslotifier) AddBrandSubdir(relPath string) string {
+	if d == nil {
+		return relPath
+	}
+
+	parts := strings.Split(relPath, "/")
+
+	// Need at least 2 parts: category/file
+	if len(parts) < 2 {
+		return relPath
+	}
+
+	category := parts[0]
+	if !brandSubdirCategories[category] {
+		return relPath
+	}
+
+	// Don't double-add if brand subdir is already present.
+	if len(parts) >= 2 && parts[1] == d.brand {
+		return relPath
+	}
+
+	// Insert brand after category: [category, rest...] → [category, brand, rest...]
+	newParts := make([]string, 0, len(parts)+1)
+	newParts = append(newParts, parts[0])
+	newParts = append(newParts, d.brand)
+	newParts = append(newParts, parts[1:]...)
+	return strings.Join(newParts, "/")
+}

@@ -171,7 +171,8 @@ func (a *Assembler) copyPersonaFiles(merger *Merger, result *AssembleResult) err
 	}
 
 	for _, relPath := range files {
-		if _, err := merger.CopyPersonaFile(relPath); err != nil {
+		mergeResult, err := merger.CopyPersonaFile(relPath)
+		if err != nil {
 			// Check if file was already written by core copy (skip duplicate).
 			if strings.Contains(err.Error(), "read persona file") {
 				result.Warnings = append(result.Warnings,
@@ -181,7 +182,12 @@ func (a *Assembler) copyPersonaFiles(merger *Merger, result *AssembleResult) err
 			return err
 		}
 		result.FilesWritten++
-		result.Files = append(result.Files, relPath)
+		// Use remapped output path (brand subdir added during copy).
+		outPath := mergeResult.OutputPath
+		if outPath == "" {
+			outPath = relPath
+		}
+		result.Files = append(result.Files, outPath)
 	}
 
 	// Copy additional persona assets from PersonaFiles that aren't in named
@@ -195,7 +201,8 @@ func (a *Assembler) copyPersonaFiles(merger *Merger, result *AssembleResult) err
 		if relPath == "settings.json" || relPath == a.manifest.ClaudeMD {
 			continue
 		}
-		if _, err := merger.CopyPersonaFile(relPath); err != nil {
+		mergeResult, err := merger.CopyPersonaFile(relPath)
+		if err != nil {
 			if strings.Contains(err.Error(), "read persona file") {
 				result.Warnings = append(result.Warnings,
 					fmt.Sprintf("persona asset %q not found, skipping", relPath))
@@ -204,7 +211,11 @@ func (a *Assembler) copyPersonaFiles(merger *Merger, result *AssembleResult) err
 			return err
 		}
 		result.FilesWritten++
-		result.Files = append(result.Files, relPath)
+		outPath := mergeResult.OutputPath
+		if outPath == "" {
+			outPath = relPath
+		}
+		result.Files = append(result.Files, outPath)
 	}
 
 	return nil

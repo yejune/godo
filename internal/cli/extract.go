@@ -10,6 +10,7 @@ import (
 
 	"github.com/do-focus/convert/internal/detector"
 	"github.com/do-focus/convert/internal/extractor"
+	"github.com/do-focus/convert/internal/model"
 	"github.com/do-focus/convert/internal/template"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -220,6 +221,13 @@ func runExtract(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("create persona dir %s: %w", personaDir, err)
 	}
 
+	// Remap persona file paths: strip brand subdirectory for cleaner storage.
+	// e.g., agents/moai/manager-ddd.md → agents/manager-ddd.md
+	// The assembler will add the brand subdir back during assembly.
+	if slotifier != nil {
+		remapManifestPersonaPaths(manifest, slotifier)
+	}
+
 	manifestData, err := yaml.Marshal(manifest)
 	if err != nil {
 		return fmt.Errorf("marshal persona manifest: %w", err)
@@ -229,6 +237,7 @@ func runExtract(cmd *cobra.Command, args []string) error {
 	if err := os.WriteFile(manifestPath, manifestData, 0o644); err != nil {
 		return fmt.Errorf("write persona manifest %s: %w", manifestPath, err)
 	}
+
 
 	// Copy persona files to <out>/personas/<name>/
 	personaFileCount := 0
@@ -310,6 +319,51 @@ func copyFileSlotified(src, dst string, slotifier *extractor.BrandSlotifier) err
 	}
 
 	return nil
+}
+
+// remapManifestPersonaPaths strips brand subdirectories from all persona file paths
+// in the manifest. This ensures persona files are stored without brand nesting.
+// The assembler will add the brand subdir back during assembly.
+func remapManifestPersonaPaths(manifest *model.PersonaManifest, slotifier *extractor.BrandSlotifier) {
+	// Remap PersonaFiles map keys.
+	newPersonaFiles := make(map[string]string, len(manifest.PersonaFiles))
+	for relPath, srcPath := range manifest.PersonaFiles {
+		stripped := slotifier.StripBrandSubdir(relPath)
+		newPersonaFiles[stripped] = srcPath
+	}
+	manifest.PersonaFiles = newPersonaFiles
+
+	// Remap named persona file lists.
+	manifest.Agents = remapPaths(manifest.Agents, slotifier)
+	manifest.Rules = remapPaths(manifest.Rules, slotifier)
+	manifest.Commands = remapPaths(manifest.Commands, slotifier)
+	manifest.HookScripts = remapPaths(manifest.HookScripts, slotifier)
+	manifest.Styles = remapPaths(manifest.Styles, slotifier)
+	manifest.Characters = remapPaths(manifest.Characters, slotifier)
+	manifest.Spinners = remapPaths(manifest.Spinners, slotifier)
+	manifest.Skills = remapPaths(manifest.Skills, slotifier)
+
+	// Remap AgentPatches map keys.
+	if len(manifest.AgentPatches) > 0 {
+		newPatches := make(map[string]*model.AgentPatch, len(manifest.AgentPatches))
+		for relPath, patch := range manifest.AgentPatches {
+			stripped := slotifier.StripBrandSubdir(relPath)
+			newPatches[stripped] = patch
+		}
+		manifest.AgentPatches = newPatches
+	}
+}
+
+// remapPaths applies StripBrandSubdir to each path in the slice.
+func remapPaths(paths []string, slotifier *extractor.BrandSlotifier) []string {
+	if len(paths) == 0 {
+		return paths
+	}
+	result := make([]string, len(paths))
+	for i, p := range paths {
+		result[i] = slotifier.StripBrandSubdir(p)
+	}
+	return result
 }
 
 // copyFile copies a file from src to dst, preserving the source file's permissions.

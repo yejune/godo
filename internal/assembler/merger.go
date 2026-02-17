@@ -99,6 +99,10 @@ func (m *Merger) MergeFile(relPath string) (*MergeResult, error) {
 
 // CopyPersonaFile copies a persona-only file (no core template) to the output
 // directory. The relPath is relative to personaDir.
+//
+// During assembly, the brand subdirectory is added back to the output path
+// for files in brand-aware categories (agents, rules, commands, hooks, etc.).
+// For example, with brand "moai": agents/manager-ddd.md → agents/moai/manager-ddd.md
 func (m *Merger) CopyPersonaFile(relPath string) (*MergeResult, error) {
 	srcPath := filepath.Join(m.personaDir, relPath)
 	data, err := os.ReadFile(srcPath)
@@ -113,7 +117,11 @@ func (m *Merger) CopyPersonaFile(relPath string) (*MergeResult, error) {
 	// Apply brand deslotification to persona file content.
 	content := m.deslotifier.DeslotifyContent(string(data))
 
-	dstPath := filepath.Join(m.outputDir, relPath)
+	// Add brand subdirectory to output path.
+	// e.g., agents/manager-ddd.md → agents/moai/manager-ddd.md
+	outRelPath := m.deslotifier.AddBrandSubdir(relPath)
+
+	dstPath := filepath.Join(m.outputDir, outRelPath)
 	if err := os.MkdirAll(filepath.Dir(dstPath), 0o755); err != nil {
 		return nil, &model.ErrAssembly{
 			Phase:   "copy",
@@ -130,7 +138,7 @@ func (m *Merger) CopyPersonaFile(relPath string) (*MergeResult, error) {
 		}
 	}
 
-	return &MergeResult{FilesWritten: 1}, nil
+	return &MergeResult{FilesWritten: 1, OutputPath: outRelPath}, nil
 }
 
 // PatchAgent applies persona patches to a core agent file that has already been
@@ -145,7 +153,8 @@ func (m *Merger) PatchAgent(relPath string) error {
 		return nil // No patch defined for this agent.
 	}
 
-	agentPath := filepath.Join(m.outputDir, relPath)
+	outRelPath := m.deslotifier.AddBrandSubdir(relPath)
+	agentPath := filepath.Join(m.outputDir, outRelPath)
 	data, err := os.ReadFile(agentPath)
 	if err != nil {
 		return &model.ErrAssembly{
