@@ -7,16 +7,29 @@ import (
 )
 
 func Test_HandleStop_no_checklist(t *testing.T) {
+	original := GitStatus
+	defer func() { GitStatus = original }()
+	GitStatus = func() (bool, string) { return false, "" }
+
+	origDir, _ := os.Getwd()
+	tmpDir := t.TempDir()
+	os.Chdir(tmpDir)
+	defer os.Chdir(origDir)
+
 	input := &Input{}
 	output := HandleStop(input)
 
-	// When no checklist exists, should return empty output (allow stop)
+	// When no checklist exists and git is clean, should return empty output (allow stop)
 	if output.Decision != "" {
 		t.Errorf("expected empty Decision when no checklist, got %q", output.Decision)
 	}
 }
 
 func Test_HandleStop_returns_output(t *testing.T) {
+	original := GitStatus
+	defer func() { GitStatus = original }()
+	GitStatus = func() (bool, string) { return false, "" }
+
 	input := &Input{}
 	output := HandleStop(input)
 
@@ -54,6 +67,10 @@ func Test_HandleSessionEnd_returns_continue(t *testing.T) {
 }
 
 func Test_HandleStop_blocks_with_in_progress_items(t *testing.T) {
+	original := GitStatus
+	defer func() { GitStatus = original }()
+	GitStatus = func() (bool, string) { return false, "" }
+
 	origDir, err := os.Getwd()
 	if err != nil {
 		t.Fatalf("failed to get cwd: %v", err)
@@ -87,6 +104,10 @@ func Test_HandleStop_blocks_with_in_progress_items(t *testing.T) {
 }
 
 func Test_HandleStop_allows_when_all_done(t *testing.T) {
+	original := GitStatus
+	defer func() { GitStatus = original }()
+	GitStatus = func() (bool, string) { return false, "" }
+
 	origDir, err := os.Getwd()
 	if err != nil {
 		t.Fatalf("failed to get cwd: %v", err)
@@ -117,6 +138,10 @@ func Test_HandleStop_allows_when_all_done(t *testing.T) {
 }
 
 func Test_HandleStop_empty_checklist_file(t *testing.T) {
+	original := GitStatus
+	defer func() { GitStatus = original }()
+	GitStatus = func() (bool, string) { return false, "" }
+
 	origDir, err := os.Getwd()
 	if err != nil {
 		t.Fatalf("failed to get cwd: %v", err)
@@ -147,6 +172,10 @@ func Test_HandleStop_empty_checklist_file(t *testing.T) {
 }
 
 func Test_HandleStop_blocks_with_blocked_items(t *testing.T) {
+	original := GitStatus
+	defer func() { GitStatus = original }()
+	GitStatus = func() (bool, string) { return false, "" }
+
 	origDir, err := os.Getwd()
 	if err != nil {
 		t.Fatalf("failed to get cwd: %v", err)
@@ -173,5 +202,45 @@ func Test_HandleStop_blocks_with_blocked_items(t *testing.T) {
 
 	if output.Decision != DecisionBlock {
 		t.Errorf("expected Decision %q when blocked items exist, got %q", DecisionBlock, output.Decision)
+	}
+}
+
+func Test_HandleStop_blocks_with_uncommitted_changes(t *testing.T) {
+	original := GitStatus
+	defer func() { GitStatus = original }()
+	GitStatus = func() (bool, string) { return true, "M uncommitted.go" }
+
+	// No checklist (use a temp dir with no .do/jobs)
+	origDir, _ := os.Getwd()
+	tmpDir := t.TempDir()
+	os.Chdir(tmpDir)
+	defer os.Chdir(origDir)
+
+	input := &Input{}
+	output := HandleStop(input)
+
+	if output.Decision != DecisionBlock {
+		t.Errorf("expected Decision %q with uncommitted changes, got %q", DecisionBlock, output.Decision)
+	}
+	if output.Reason == "" {
+		t.Error("expected non-empty Reason")
+	}
+}
+
+func Test_HandleStop_allows_clean_state(t *testing.T) {
+	original := GitStatus
+	defer func() { GitStatus = original }()
+	GitStatus = func() (bool, string) { return false, "" }
+
+	origDir, _ := os.Getwd()
+	tmpDir := t.TempDir()
+	os.Chdir(tmpDir)
+	defer os.Chdir(origDir)
+
+	input := &Input{}
+	output := HandleStop(input)
+
+	if output.Decision != "" {
+		t.Errorf("expected empty Decision when clean, got %q", output.Decision)
 	}
 }
