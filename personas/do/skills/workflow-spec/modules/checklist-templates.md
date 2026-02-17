@@ -44,6 +44,10 @@ git add {files} && git commit -m "{type}: {description}"
 - [HARD] **소스 파일 최대 2개**: 한 에이전트가 수정할 파일은 1-2개로 제한
 - [HARD] **커밋 명령어 포함**: 정확한 `git add` 대상과 커밋 메시지까지 명시
 - [HARD] **테스트 명령어 포함**: 검증 방법을 구체적으로 명시
+- [HARD] **사용자 요구사항 누락 금지**: 사용자가 언급한 기능은 반드시 Prompt에 포함 — "나중에 추가" 금지
+- [HARD] **재실행 시 완전한 정보**: 새 에이전트가 이 Prompt만으로 작업 완료 가능해야 함
+- [HARD] **메인 checklist 업데이트 의무**: 서브 체크리스트 완료 시 반드시 메인 checklist.md의 해당 항목도 `[o]`로 업데이트
+- [HARD] **Progress Summary Table 업데이트**: 메인 checklist.md의 진행 요약표도 함께 갱신
 
 ## Agent Instructions
 > This section contains the exact orchestrator prompt for this task.
