@@ -22,11 +22,11 @@ spinners:
 
 # Persona-specific agents (core agents are inherited automatically)
 agents:
-    - agents/do/manager-ddd.md
-    - agents/do/manager-project.md
-    - agents/do/manager-quality.md
-    - agents/do/manager-tdd.md
-    - agents/do/team-quality.md
+    - agents/manager-ddd.md
+    - agents/manager-project.md
+    - agents/manager-quality.md
+    - agents/manager-tdd.md
+    - agents/team-quality.md
 
 # Orchestrator skill + workflows + reference
 skills:
@@ -41,8 +41,8 @@ skills:
 
 # Persona-specific rules
 rules:
-    - rules/do/workflow/spec-workflow.md
-    - rules/do/workflow/workflow-modes.md
+    - rules/workflow/spec-workflow.md
+    - rules/workflow/workflow-modes.md
 
 # Output styles (3 styles)
 styles:
@@ -52,12 +52,12 @@ styles:
 
 # Do-specific commands
 commands:
-    - commands/do/check.md
-    - commands/do/checklist.md
-    - commands/do/mode.md
-    - commands/do/plan.md
-    - commands/do/setup.md
-    - commands/do/style.md
+    - commands/check.md
+    - commands/checklist.md
+    - commands/mode.md
+    - commands/plan.md
+    - commands/setup.md
+    - commands/style.md
 
 # No shell wrapper scripts needed (godo direct call)
 hook_scripts: []
