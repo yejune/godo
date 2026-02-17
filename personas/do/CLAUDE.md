@@ -173,6 +173,7 @@ Set via `/do:setup`. Hooks access as environment variables.
 | `DO_LANGUAGE` | Conversation language | "en" |
 | `DO_COMMIT_LANGUAGE` | Commit message language | "en" |
 | `DO_AI_FOOTER` | AI footer in commits | "false" |
+| `DO_JOBS_LANGUAGE` | Jobs folder title language | "en" |
 | `DO_PERSONA` | Persona type | "young-f" |
 
 ---
