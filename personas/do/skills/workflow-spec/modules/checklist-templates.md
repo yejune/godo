@@ -13,29 +13,37 @@ Status: [ ] | Owner: {agent} | Language: per DO_JOBS_LANGUAGE env var (default: 
 ## Prompt (RESTART INSTRUCTION)
 > **이 섹션은 재실행 시 에이전트가 정확히 무엇을 해야 하는지 명시합니다.**
 > 새 에이전트가 이 체크리스트를 받으면 이 프롬프트만 읽고도 작업을 이어갈 수 있어야 합니다.
+> **[HARD] 대용량 파일(architecture.md, handoff.md 등) 읽기 금지 — 핵심 내용을 이 섹션에 직접 기술**
 
 ```
-Task: {간결한 작업 요약}
+Task: {간결한 작업 요약 - 한 줄}
 
 Context:
-- Previous work: {이전에 완료된 작업}
-- Current state: {현재 상태 - [~], [*], 등}
-- Remaining: {남은 작업}
+- Current state: {[~] 또는 [ ] + 마지막 Progress Log 내용}
+- What's done: {완료된 작업 요약}
+- What's remaining: {남은 작업}
 
-Exact commands to run:
-1. {정확한 명령어 또는 작업 단계}
-2. ...
+Implementation (핵심 내용 직접 기술, 파일 참조 금지):
+{실제 구현해야 할 코드/로직을 여기에 직접 작성}
+{architecture.md 등에서 필요한 부분만 발췌해서 여기에}
 
-Files to modify:
-- {파일 경로}: {수정 내용}
+Files to modify (최대 1-2개):
+1. {파일 경로}: {수정 내용}
+2. {파일 경로}: {수정 내용}
 
-Verification:
-- Run: {테스트 명령어}
-- Expected: {예상 결과}
+Test command:
+{go test ./path/to/package -v 또는 equivalent}
 
 Commit when done:
-git add {files} && git commit -m "..."
+git add {files} && git commit -m "{type}: {description}"
 ```
+
+### Prompt 작성 규칙 [HARD]
+- [HARD] **대용량 파일 읽기 금지**: architecture.md(500줄+), handoff.md 등은 참조만 하고 내용을 prompt에 직접 기술
+- [HARD] **핵심만 발췌**: 전체 파일이 아닌, 해당 작업에 필요한 섹션만 추출해서 prompt에 포함
+- [HARD] **소스 파일 최대 2개**: 한 에이전트가 수정할 파일은 1-2개로 제한
+- [HARD] **커밋 명령어 포함**: 정확한 `git add` 대상과 커밋 메시지까지 명시
+- [HARD] **테스트 명령어 포함**: 검증 방법을 구체적으로 명시
 
 ## Agent Instructions
 > This section contains the exact orchestrator prompt for this task.

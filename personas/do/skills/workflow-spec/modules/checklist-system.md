@@ -208,21 +208,25 @@ Destructive git commands that overwrite/delete files are forbidden project-wide.
   4. Prompt 내용을 그대로 에이전트(Task tool)에 전달
 - [HARD] **Prompt 섹션이 비어있으면 오케스트레이터가 직접 작성** — fallback 금지
 - [HARD] 오케스트레이터는 Agent Instructions, Critical Files, Progress Log를 읽고 Prompt 섹션을 생성
+- [HARD] **타이트 프롬프팅 규칙**:
+  - 대용량 파일(architecture.md 500줄+, handoff.md 등) 읽기 금지
+  - 핵심 내용만 발췌해서 Prompt에 직접 기술
+  - 소스 파일 최대 1-2개만 지정
+  - 커밋 명령어까지 Prompt에 포함
 - [HARD] Prompt 작성 형식:
   ```
-  Task: {간결한 작업 요약}
-  Current state: {[~] 또는 [ ] + 마지막 Progress Log 내용}
-  Remaining: {Acceptance Criteria 중 [ ]인 항목들}
-  Files to modify: {Critical Files 목록}
-  Test command: {go test ./... 또는 equivalent}
+  Task: {간결한 작업 요약 - 한 줄}
+
+  Implementation (핵심 내용 직접 기술):
+  {실제 구현해야 할 코드/로직}
+
+  Files to modify (최대 1-2개):
+  1. {파일 경로}: {수정 내용}
+
+  Test: {go test ./... 또는 equivalent}
+  Commit: git add {files} && git commit -m "..."
   ```
 - [HARD] 에이전트에게 "Read the checklist at {path} and follow the Prompt section" 형식으로 지시
-- [HARD] 예시:
-  ```
-  Read the checklist at .do/jobs/26/02/18/auth-api/checklists/01_expert-backend.md
-  Follow the "Prompt (RESTART INSTRUCTION)" section to resume work.
-  Current state is [~] — continue from where it left off.
-  ```
 
 ## Agent Prompt Token Optimization [HARD]
 - [HARD] Never instruct agent to read entire large files (500+ lines)
