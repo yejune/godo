@@ -2,13 +2,12 @@ package cli
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"time"
 
-	"github.com/yejune/godo/internal/hook"
 	"github.com/spf13/cobra"
+	"github.com/yejune/godo/internal/hook"
 )
 
 var hookCmd = &cobra.Command{
@@ -24,14 +23,31 @@ func init() {
 	rootCmd.AddCommand(hookCmd)
 }
 
+// handlerFunc is the signature for all hook handlers.
+type handlerFunc func(*hook.Input) *hook.Output
+
+// hookHandlers maps CLI event names (kebab-case) to handler functions.
+var hookHandlers = map[string]handlerFunc{
+	"session-start":      hook.HandleSessionStart,
+	"pre-tool":           hook.HandlePreTool,
+	"post-tool-use":      hook.HandlePostToolUse,
+	"compact":            hook.HandleCompact,
+	"stop":               hook.HandleStop,
+	"session-end":        hook.HandleSessionEnd,
+	"subagent-stop":      hook.HandleSubagentStop,
+	"user-prompt-submit": hook.HandleUserPromptSubmit,
+}
+
 func runHook(cmd *cobra.Command, args []string) error {
-	eventType := hook.EventType(args[0])
-	if !hook.IsValidEventType(eventType) {
-		return fmt.Errorf("unknown event type: %s (valid: %v)", eventType, hook.ValidEventTypes())
+	cliEventType := args[0]
+
+	handler, ok := hookHandlers[cliEventType]
+	if !ok {
+		return fmt.Errorf("unknown event type: %s (valid: session-start, pre-tool, post-tool-use, compact, stop, session-end, subagent-stop, user-prompt-submit)", cliEventType)
 	}
 
-	// Read hook input from stdin.
-	input := hook.ReadStdin()
+	// Read structured input from stdin.
+	input := hook.ReadInput()
 
 	// Validate contract.
 	workDir, _ := os.Getwd()
@@ -45,10 +61,11 @@ func runHook(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	// For now, echo the input back as JSON for debugging.
-	// Individual hook handlers will be wired up as they are implemented.
-	data, _ := json.MarshalIndent(input, "", "  ")
-	fmt.Fprintf(cmd.OutOrStdout(), "event=%s input=%s\n", eventType, string(data))
+	// Dispatch to handler.
+	output := handler(input)
+	if output != nil {
+		hook.WriteOutput(output)
+	}
 
 	return nil
 }
