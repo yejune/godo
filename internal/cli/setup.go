@@ -216,6 +216,28 @@ func runSetup(cmd *cobra.Command, args []string) error {
 	jobsLangDefault := findDefault(jobsLangOpts, cur("DO_JOBS_LANGUAGE"), 0)
 	jobsLang := promptChoice(reader, "Jobs language", jobsLangOpts, jobsLangDefault)
 
+	// --- Claude Launch Flags ---
+	fmt.Fprintln(cmd.OutOrStdout())
+	fmt.Fprintln(cmd.OutOrStdout(), "Claude Launch Flags")
+	fmt.Fprintln(cmd.OutOrStdout(), strings.Repeat("-", 40))
+
+	// 9. Bypass permissions
+	bypassCur := cur("DO_CLAUDE_BYPASS") == "true"
+	bypass := promptYN(reader, "Bypass permissions?", bypassCur, "true", "false")
+
+	// 10. Chrome MCP
+	chromeCur := cur("DO_CLAUDE_CHROME") == "true"
+	chrome := promptYN(reader, "Enable Chrome MCP?", chromeCur, "true", "false")
+
+	// 11. Continue session
+	continueCur := cur("DO_CLAUDE_CONTINUE") == "true"
+	continueSession := promptYN(reader, "Continue previous session?", continueCur, "true", "false")
+
+	// 12. Auto sync
+	autoSyncCur := cur("DO_CLAUDE_AUTO_SYNC")
+	autoSyncDefault := autoSyncCur != "false" // default true
+	autoSync := promptYN(reader, "Auto sync before launch?", autoSyncDefault, "true", "false")
+
 	// Merge into env (preserves existing keys not managed here)
 	env["DO_USER_NAME"] = userName
 	env["DO_LANGUAGE"] = lang
@@ -225,6 +247,10 @@ func runSetup(cmd *cobra.Command, args []string) error {
 	env["DO_STYLE"] = style
 	env["DO_AI_FOOTER"] = aiFooter
 	env["DO_JOBS_LANGUAGE"] = jobsLang
+	env["DO_CLAUDE_BYPASS"] = bypass
+	env["DO_CLAUDE_CHROME"] = chrome
+	env["DO_CLAUDE_CONTINUE"] = continueSession
+	env["DO_CLAUDE_AUTO_SYNC"] = autoSync
 	// CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS is auto-injected via EnsureSettingsLocal (sync time)
 
 	settings["env"] = env
@@ -256,6 +282,10 @@ func EnsureSettingsLocal() {
 			"DO_STYLE":                             "pair",
 			"DO_AI_FOOTER":                         "false",
 			"DO_JOBS_LANGUAGE":                     "en",
+			"DO_CLAUDE_BYPASS":                     "false",
+			"DO_CLAUDE_CHROME":                     "false",
+			"DO_CLAUDE_CONTINUE":                   "false",
+			"DO_CLAUDE_AUTO_SYNC":                  "true",
 			"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
 		}
 		settings["env"] = env
