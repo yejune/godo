@@ -8,3 +8,5 @@ godo
 .do/.latest-version
 .do/memory/
 godo.rb
+.history/
+.do/jobs/
