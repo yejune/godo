@@ -2,14 +2,22 @@ package hook
 
 import (
 	"encoding/json"
+	"os"
 	"strings"
 )
 
 // HandlePreTool handles the PreToolUse hook event.
-// It checks file paths and bash commands against security policies.
+// It checks file paths, bash commands, and enforces checklist requirements.
 func HandlePreTool(input *Input) *Output {
 	policy := DefaultSecurityPolicy()
 	toolName := input.ToolName
+
+	// [HARD] Task tool requires valid sub-checklist path in prompt
+	if toolName == "Task" {
+		if output := checkChecklistRequirement(input); output != nil {
+			return output
+		}
+	}
 
 	switch toolName {
 	case "Write", "Edit", "Read", "Glob":
@@ -19,6 +27,71 @@ func HandlePreTool(input *Input) *Output {
 	default:
 		return NewAllowOutput()
 	}
+}
+
+// checkChecklistRequirement enforces that Task tool requires a valid sub-checklist path.
+// [HARD] Proceeding with development while checklist is unwritten is a VIOLATION
+func checkChecklistRequirement(input *Input) *Output {
+	// Extract prompt from Task tool input
+	prompt := extractPrompt(input.ToolInput)
+	if prompt == "" {
+		return NewDenyOutput("체크리스트 없음: Task 프롬프트에 체크리스트 경로가 없습니다. 먼저 체크리스트를 생성하세요.")
+	}
+
+	// Check if prompt contains a valid jobs path (.do/jobs/YY/MM/DD/title/checklists/XX_agent.md)
+	if !strings.Contains(prompt, ".do/jobs/") || !strings.Contains(prompt, "/checklists/") {
+		return NewDenyOutput("체크리스트 없음: 작업 지시에 서브 체크리스트 경로(.do/jobs/YY/MM/DD/title/checklists/XX_agent.md)가 없습니다. 먼저 체크리스트를 생성하세요.")
+	}
+
+	// Extract and verify the checklist path exists
+	checklistPath := extractChecklistPath(prompt)
+	if checklistPath == "" {
+		return NewDenyOutput("체크리스트 없음: 유효한 체크리스트 경로를 찾을 수 없습니다.")
+	}
+
+	if _, err := os.Stat(checklistPath); os.IsNotExist(err) {
+		return NewDenyOutput("체크리스트 없음: " + checklistPath + " 파일이 없습니다. 먼저 체크리스트를 생성하세요.")
+	}
+
+	return nil // Allow - valid checklist exists
+}
+
+// extractPrompt extracts the prompt from Task tool input JSON.
+func extractPrompt(toolInput json.RawMessage) string {
+	if len(toolInput) == 0 {
+		return ""
+	}
+	var data map[string]interface{}
+	if json.Unmarshal(toolInput, &data) != nil {
+		return ""
+	}
+	if prompt, ok := data["prompt"].(string); ok {
+		return prompt
+	}
+	return ""
+}
+
+// extractChecklistPath extracts .do/jobs/.../checklists/...md path from prompt.
+func extractChecklistPath(prompt string) string {
+	// Find .do/jobs path
+	idx := strings.Index(prompt, ".do/jobs/")
+	if idx == -1 {
+		return ""
+	}
+
+	// Extract from .do/jobs to end of line or space
+	rest := prompt[idx:]
+	end := strings.IndexAny(rest, " \n\t")
+	if end == -1 {
+		end = len(rest)
+	}
+
+	path := rest[:end]
+	// Verify it's a checklist path
+	if strings.Contains(path, "/checklists/") && strings.HasSuffix(path, ".md") {
+		return path
+	}
+	return ""
 }
 
 // checkFileAccess validates file tool access against security patterns.
