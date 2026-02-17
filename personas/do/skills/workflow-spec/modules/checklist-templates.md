@@ -10,6 +10,17 @@ Status: [ ] | Owner: {agent} | Language: per DO_JOBS_LANGUAGE env var (default: 
 
 > **Token Budget Warning**: Check file size before reading — never read 500+ line files in full (use Grep for relevant sections only). At ~10% tokens remaining, record current state in checklist and report to super agent.
 
+## Agent Instructions
+> This section contains the exact orchestrator prompt for this task.
+> A new agent receiving this sub-checklist should execute based on these instructions alone.
+
+{Orchestrator writes the exact task prompt here — including:
+- What to do (task description)
+- Exact content to write/modify (verbatim, not file references)
+- File paths to modify
+- Verification commands
+- Git commit command}
+
 ## Problem Summary
 - What is being solved
 - Why this work is needed

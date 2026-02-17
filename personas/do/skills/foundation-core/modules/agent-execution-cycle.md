@@ -63,6 +63,16 @@ Every agent repeats this cycle. Running it multiple times MUST produce the same 
 - **Sub-checklist is self-sufficient**: If an agent fails and a new agent is spawned, the sub-checklist alone must be enough to resume — no dependency on orchestrator memory or large external files
 - **Tight prompting mandatory**: Orchestrator extracts relevant content from large files (architecture.md, plan.md) and injects it directly into the agent prompt. Agents must NOT be instructed to read files over 200 lines
 
+### Agent Instructions Persistence [HARD]
+
+- [HARD] The sub-checklist MUST contain an "## Agent Instructions" section at the VERY TOP (after the header)
+- [HARD] This section contains the EXACT prompt/instructions that the orchestrator would give to the agent — verbatim copy
+- [HARD] Purpose: if the agent fails and a new agent is spawned, the new agent reads the sub-checklist and receives IDENTICAL instructions
+- [HARD] The orchestrator MUST write agent instructions into the sub-checklist BEFORE spawning the agent (or include it in the sub-checklist template during checklist creation)
+- [HARD] Agent Instructions section includes: task description, exact content to write/modify, file paths, verification commands, and git commit command
+- [HARD] "Identical instructions" is the core principle — any agent reading the sub-checklist must be able to execute the work without additional context from the orchestrator
+- [HARD] The orchestrator's Task tool prompt and the sub-checklist's Agent Instructions section must be equivalent — divergence is VIOLATION
+
 ### Checklist Non-Update = VIOLATION [HARD]
 
 - Code committed but sub-checklist still at `[ ]` → VIOLATION
