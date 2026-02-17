@@ -1,33 +1,33 @@
-# Workflow: Team Sync - Documentation Phase
+# 워크플로우: Team Sync - 문서화 단계
 
-Purpose: Explain why sync phase always uses sub-agent mode and document the rationale.
+목적: sync 단계가 항상 서브에이전트 모드를 사용하는 이유와 근거를 설명합니다.
 
-Flow: manager-docs subagent (always single agent, no team mode)
+흐름: manager-docs 서브에이전트 (항상 단일 에이전트, 팀 모드 없음)
 
-## Rationale
+## 근거
 
-The sync phase always uses sub-agent mode (manager-docs) because:
+sync 단계는 다음과 같은 이유로 항상 서브에이전트 모드 (manager-docs)를 사용합니다:
 
-1. Documentation generation is sequential by nature (README depends on code analysis, CHANGELOG depends on git history, PR depends on both)
-2. File outputs are few (3-5 files) with heavy interdependency
-3. Token budget is small (40K) making team overhead wasteful
-4. Single coherent voice produces better documentation quality
+1. 문서 생성은 본질적으로 순차적입니다 (README는 코드 분석에 의존, CHANGELOG는 git 히스토리에 의존, PR은 둘 다 의존)
+2. 파일 출력이 적습니다 (3-5개 파일)이며 상호 의존성이 강합니다
+3. 토큰 예산이 작습니다 (40K)이므로 팀 오버헤드가 낭비입니다
+4. 단일하고 일관된 목소리가 더 나은 문서화 품질을 만듭니다
 
-## When Team Mode Might Help
+## 팀 모드가 도움이 될 수 있는 경우
 
-Future consideration for team mode if:
-- Documentation spans multiple languages (i18n)
-- API docs and user docs need simultaneous generation
-- Documentation site has 10+ pages requiring parallel rendering
+다음의 경우 팀 모드에 대한 향후 고려 사항:
+- 문서화가 여러 언어에 걸쳐 있는 경우 (i18n)
+- API 문서와 사용자 문서를 동시에 생성해야 하는 경우
+- 문서화 사이트에 병렬 렌더링이 필요한 10개 이상의 페이지가 있는 경우
 
-## Current Behavior
+## 현재 동작
 
-When /moai sync is invoked with --team flag:
-- Log informational message: "Sync phase uses sub-agent mode for optimal coherence"
-- Execute standard sync workflow via manager-docs subagent
-- --team flag is acknowledged but not applied for this phase
+/moai sync가 --team 플래그와 함께 호출될 때:
+- 정보 메시지 기록: "동기화 단계는 최적의 일관성을 위해 서브에이전트 모드를 사용합니다"
+- manager-docs 서브에이전트를 통해 표준 동기화 워크플로우 실행
+- --team 플래그는 인식되지만 이 단계에는 적용되지 않음
 
-For standard sync workflow details: See workflows/sync.md
+표준 동기화 워크플로우 세부 사항은 workflows/sync.md를 참조하세요.
 
 ---
 

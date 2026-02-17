@@ -1,10 +1,9 @@
 ---
 name: moai-workflow-plan
 description: >
-  Creates comprehensive SPEC documents using EARS format as the first step
-  of the Plan-Run-Sync workflow. Handles project exploration, SPEC file
-  generation, validation, and optional Git environment setup with worktree
-  or branch creation. Use when planning features or creating specifications.
+  Plan-Run-Sync 워크플로우의 첫 번째 단계로 EARS 형식을 사용하여 포괄적인 SPEC 문서를
+  생성합니다. 프로젝트 탐색, SPEC 파일 생성, 검증, 그리고 선택적 Git 환경 설정(worktree
+  또는 브랜치 생성)을 처리합니다. 기능 계획이나 명세 작성 시 사용하세요.
 license: Apache-2.0
 compatibility: Designed for Claude Code
 user-invocable: false
@@ -28,242 +27,242 @@ triggers:
   phases: ["plan"]
 ---
 
-# Plan Workflow Orchestration
+# Plan 워크플로우 오케스트레이션
 
-## Purpose
+## 목적
 
-Create comprehensive SPEC documents using EARS format as the first step of the Plan-Run-Sync workflow. This workflow handles everything from project exploration to SPEC file generation and optional Git environment setup.
+Plan-Run-Sync 워크플로우의 첫 번째 단계로 EARS 형식을 사용하여 포괄적인 SPEC 문서를 생성합니다. 이 워크플로우는 프로젝트 탐색부터 SPEC 파일 생성 및 선택적 Git 환경 설정까지 모든 것을 처리합니다.
 
-## Scope
+## 범위
 
-- Implements Steps 1-2 of MoAI's 4-step workflow (Intent Understanding, Plan Creation)
-- Steps 3-4 are handled by /moai run and /moai sync respectively
+- MoAI 4단계 워크플로우의 1-2단계 구현 (의도 파악, 계획 생성)
+- 3-4단계는 각각 /moai run과 /moai sync가 처리
 
-## Input
+## 입력
 
-- $ARGUMENTS: One of three patterns
-  - Feature description: "User authentication system"
-  - Resume command: resume SPEC-XXX
-  - Feature description with flags: "User authentication" --worktree or --branch
+- $ARGUMENTS: 세 가지 패턴 중 하나
+  - 기능 설명: "사용자 인증 시스템"
+  - 재개 명령어: resume SPEC-XXX
+  - 플래그와 함께하는 기능 설명: "사용자 인증" --worktree 또는 --branch
 
-## Supported Flags
+## 지원 플래그
 
-- --worktree: Create isolated Git worktree environment (highest priority)
-- --branch: Create traditional feature branch (second priority)
-- No flag: SPEC only by default; user may be prompted based on config
-- --team: Enable team-based exploration (see team-plan.md for parallel research team)
-- resume SPEC-XXX: Continue from last saved draft state
+- --worktree: 격리된 Git worktree 환경 생성 (최우선순위)
+- --branch: 전통적인 기능 브랜치 생성 (두 번째 우선순위)
+- 플래그 없음: 기본적으로 SPEC만 생성; 설정에 따라 사용자에게 확인할 수 있음
+- --team: 팀 기반 탐색 활성화 (병렬 리서치 팀은 team-plan.md 참조)
+- resume SPEC-XXX: 마지막 저장된 초안 상태에서 계속
 
-Flag priority: --worktree takes precedence over --branch, which takes precedence over default.
+플래그 우선순위: --worktree가 --branch보다 우선하며, --branch가 기본값보다 우선합니다.
 
-## Context Loading
+## 컨텍스트 로딩
 
-Before execution, load these essential files:
+실행 전 다음 필수 파일을 로드하세요:
 
-- .moai/config/config.yaml (git strategy, language settings)
-- .moai/config/sections/git-strategy.yaml (auto_branch, branch creation policy)
-- .moai/config/sections/language.yaml (git_commit_messages setting)
-- .moai/project/product.md (product context)
-- .moai/project/structure.md (architecture context)
-- .moai/project/tech.md (technology context)
-- .moai/specs/ directory listing (existing SPECs for deduplication)
+- .moai/config/config.yaml (git 전략, 언어 설정)
+- .moai/config/sections/git-strategy.yaml (auto_branch, 브랜치 생성 정책)
+- .moai/config/sections/language.yaml (git_commit_messages 설정)
+- .moai/project/product.md (제품 컨텍스트)
+- .moai/project/structure.md (아키텍처 컨텍스트)
+- .moai/project/tech.md (기술 컨텍스트)
+- .moai/specs/ 디렉토리 목록 (중복 제거를 위한 기존 SPEC)
 
-Pre-execution commands: git status, git branch, git log, git diff, find .moai/specs.
+실행 전 명령어: git status, git branch, git log, git diff, find .moai/specs.
 
 ---
 
-## Phase Sequence
+## 단계 순서
 
-### Phase 1A: Project Exploration (Optional)
+### Phase 1A: 프로젝트 탐색 (선택 사항)
 
-Agent: Explore subagent (read-only codebase analysis)
+에이전트: Explore 서브에이전트 (읽기 전용 코드베이스 분석)
 
-When to run:
+실행 시기:
 
-- User provides vague or unstructured request
-- Need to discover existing files and patterns
-- Unclear about current project state
+- 사용자가 모호하거나 비구조적인 요청을 제공한 경우
+- 기존 파일 및 패턴을 발견해야 할 때
+- 현재 프로젝트 상태가 불명확한 경우
 
-When to skip:
+건너뛰는 경우:
 
-- User provides clear SPEC title (e.g., "Add authentication module")
-- Resume scenario with existing SPEC context
+- 사용자가 명확한 SPEC 제목을 제공한 경우 (예: "인증 모듈 추가")
+- 기존 SPEC 컨텍스트가 있는 재개 시나리오
 
-Tasks for the Explore subagent:
+Explore 서브에이전트의 작업:
 
-- Find relevant files by keywords from user request
-- Locate existing SPEC documents in .moai/specs/
-- Identify implementation patterns and dependencies
-- Discover project configuration files
-- Report comprehensive results for Phase 1B context
+- 사용자 요청의 키워드로 관련 파일 검색
+- .moai/specs/에서 기존 SPEC 문서 찾기
+- 구현 패턴 및 의존성 식별
+- 프로젝트 설정 파일 탐색
+- Phase 1B 컨텍스트를 위한 포괄적인 결과 보고
 
-### Phase 1B: SPEC Planning (Required)
+### Phase 1B: SPEC 계획 (필수)
 
-Agent: manager-spec subagent
+에이전트: manager-spec 서브에이전트
 
-Input: User request plus Phase 1A results (if executed)
+입력: 사용자 요청 + Phase 1A 결과 (실행된 경우)
 
-Tasks for manager-spec:
+manager-spec의 작업:
 
-- Analyze project documents (product.md, structure.md, tech.md)
-- Propose 1-3 SPEC candidates with proper naming
-- Check for duplicate SPECs in .moai/specs/
-- Design EARS structure for each candidate
-- Create implementation plan with technical constraints
-- Identify library versions (production stable only, no beta/alpha)
+- 프로젝트 문서 분석 (product.md, structure.md, tech.md)
+- 적절한 이름을 가진 1-3개의 SPEC 후보 제안
+- .moai/specs/에서 중복 SPEC 확인
+- 각 후보에 대한 EARS 구조 설계
+- 기술적 제약 조건을 포함한 구현 계획 수립
+- 라이브러리 버전 식별 (프로덕션 안정 버전만, 베타/알파 제외)
 
-Output: Implementation plan with SPEC candidates, EARS structure, and technical constraints.
+출력: SPEC 후보, EARS 구조, 기술적 제약 조건을 포함한 구현 계획.
 
-### Decision Point 1: SPEC Creation Approval
+### 결정 지점 1: SPEC 생성 승인
 
-Tool: AskUserQuestion (at orchestrator level only)
+도구: AskUserQuestion (오케스트레이터 레벨에서만)
 
-Options:
+옵션:
 
-- Proceed with SPEC Creation
-- Request Plan Modification
-- Save as Draft
-- Cancel
+- SPEC 생성 진행
+- 계획 수정 요청
+- 초안으로 저장
+- 취소
 
-If "Proceed": Continue to Phase 1.5 then Phase 2.
-If "Modify": Collect feedback, re-run Phase 1B with feedback context.
-If "Draft": Save plan.md with status draft, create commit, print resume command, exit.
-If "Cancel": Discard plan, exit with no files created.
+"진행": Phase 1.5 후 Phase 2 계속.
+"수정": 피드백 수집 후 피드백 컨텍스트와 함께 Phase 1B 재실행.
+"초안": plan.md를 초안 상태로 저장, 커밋 생성, 재개 명령어 출력, 종료.
+"취소": 계획 삭제, 파일 생성 없이 종료.
 
-### Phase 1.5: Pre-Creation Validation Gate
+### Phase 1.5: 생성 전 검증 게이트
 
-Purpose: Prevent common SPEC creation errors before file generation.
+목적: 파일 생성 전 흔한 SPEC 생성 오류 방지.
 
-Step 1 - Document Type Classification:
+Step 1 - 문서 유형 분류:
 
-- Detect keywords to classify as SPEC, Report, or Documentation
-- Reports route to .moai/reports/, Documentation to .moai/docs/
-- Only SPEC-type content proceeds to Phase 2
+- SPEC, 리포트, 문서로 분류하기 위한 키워드 감지
+- 리포트는 .moai/reports/로, 문서는 .moai/docs/로 라우팅
+- SPEC 유형 컨텐츠만 Phase 2로 진행
 
-Step 2 - SPEC ID Validation (all checks must pass):
+Step 2 - SPEC ID 검증 (모든 확인 통과 필요):
 
-- ID Format: Must match SPEC-{DOMAIN}-{NUMBER} pattern (e.g., SPEC-AUTH-001)
-- Domain Name: Must be from the approved domain list (AUTH, API, UI, DB, REFACTOR, FIX, UPDATE, PERF, TEST, DOCS, INFRA, DEVOPS, SECURITY, and others)
-- ID Uniqueness: Search .moai/specs/ to confirm no duplicates exist
-- Directory Structure: Must create directory, never flat files
+- ID 형식: SPEC-{DOMAIN}-{NUMBER} 패턴과 일치해야 함 (예: SPEC-AUTH-001)
+- 도메인 이름: 승인된 도메인 목록에서 선택 (AUTH, API, UI, DB, REFACTOR, FIX, UPDATE, PERF, TEST, DOCS, INFRA, DEVOPS, SECURITY 등)
+- ID 고유성: .moai/specs/를 검색하여 중복 없음 확인
+- 디렉토리 구조: 디렉토리를 생성해야 함, 플랫 파일 절대 금지
 
-Composite domain rules: Maximum 2 domains recommended (e.g., UPDATE-REFACTOR-001), maximum 3 allowed.
+복합 도메인 규칙: 최대 2개 도메인 권장 (예: UPDATE-REFACTOR-001), 최대 3개 허용.
 
-### Phase 2: SPEC Document Creation
+### Phase 2: SPEC 문서 생성
 
-Agent: manager-spec subagent
+에이전트: manager-spec 서브에이전트
 
-Input: Approved plan from Phase 1B, validated SPEC ID from Phase 1.5.
+입력: Phase 1B에서 승인된 계획, Phase 1.5에서 검증된 SPEC ID.
 
-File generation (all three files created simultaneously):
+파일 생성 (세 파일 동시 생성):
 
 - .moai/specs/SPEC-{ID}/spec.md
-  - YAML frontmatter with 7 required fields (id, version, status, created, updated, author, priority)
-  - HISTORY section immediately after frontmatter
-  - Complete EARS structure with all 5 requirement types
-  - Content written in conversation_language
+  - 7개 필수 필드를 포함한 YAML 프론트매터 (id, version, status, created, updated, author, priority)
+  - 프론트매터 바로 뒤에 HISTORY 섹션
+  - 5가지 요구사항 유형을 모두 포함한 완전한 EARS 구조
+  - conversation_language로 작성된 내용
 
 - .moai/specs/SPEC-{ID}/plan.md
-  - Implementation plan with task decomposition
-  - Technology stack specifications and dependencies
-  - Risk analysis and mitigation strategies
+  - 작업 분해를 포함한 구현 계획
+  - 기술 스택 명세 및 의존성
+  - 리스크 분석 및 완화 전략
 
 - .moai/specs/SPEC-{ID}/acceptance.md
-  - Minimum 2 Given/When/Then test scenarios
-  - Edge case testing scenarios
-  - Performance and quality gate criteria
+  - 최소 2개의 Given/When/Then 테스트 시나리오
+  - 엣지 케이스 테스트 시나리오
+  - 성능 및 품질 게이트 기준
 
-Quality constraints:
+품질 제약 조건:
 
-- Requirement modules limited to 5 or fewer per SPEC
-- Acceptance criteria minimum 2 Given/When/Then scenarios
-- Technical terms and function names remain in English
+- SPEC당 요구사항 모듈 5개 이하
+- 인수 기준 최소 2개의 Given/When/Then 시나리오
+- 기술 용어 및 함수 이름은 영어 유지
 
-### Phase 3: Git Environment Setup (Conditional)
+### Phase 3: Git 환경 설정 (조건부)
 
-Execution conditions: Phase 2 completed successfully AND one of the following:
+실행 조건: Phase 2 성공적으로 완료 AND 다음 중 하나:
 
-- --worktree flag provided
-- --branch flag provided or user chose branch creation
-- Configuration permits branch creation (git_strategy settings)
+- --worktree 플래그 제공
+- --branch 플래그 제공 또는 사용자가 브랜치 생성 선택
+- 설정이 브랜치 생성 허용 (git_strategy 설정)
 
-Skipped when: develop_direct workflow, no flags and user chooses "Use current branch".
+건너뛰는 경우: develop_direct 워크플로우, 플래그 없고 사용자가 "현재 브랜치 사용" 선택.
 
-#### Worktree Path (--worktree flag)
+#### Worktree 경로 (--worktree 플래그)
 
-Prerequisite: SPEC files MUST be committed before worktree creation.
+전제 조건: worktree 생성 전 SPEC 파일을 반드시 커밋해야 합니다.
 
-- Stage SPEC files: git add .moai/specs/SPEC-{ID}/
-- Create commit: feat(spec): Add SPEC-{ID} - {title}
-- Create worktree via WorktreeManager with branch feature/SPEC-{ID}
-- Display worktree path and navigation instructions
+- SPEC 파일 스테이징: git add .moai/specs/SPEC-{ID}/
+- 커밋 생성: feat(spec): Add SPEC-{ID} - {title}
+- feature/SPEC-{ID} 브랜치로 WorktreeManager를 통해 worktree 생성
+- worktree 경로 및 탐색 방법 표시
 
-#### Branch Path (--branch flag or user choice)
+#### 브랜치 경로 (--branch 플래그 또는 사용자 선택)
 
-Agent: manager-git subagent
+에이전트: manager-git 서브에이전트
 
-- Create branch: feature/SPEC-{ID}-{description}
-- Set tracking upstream if remote exists
-- Switch to new branch
-- Team mode: Create draft PR via manager-git subagent
+- 브랜치 생성: feature/SPEC-{ID}-{description}
+- 원격 저장소 존재 시 업스트림 추적 설정
+- 새 브랜치로 전환
+- 팀 모드: manager-git 서브에이전트를 통해 초안 PR 생성
 
-#### Current Branch Path (no flag or user choice)
+#### 현재 브랜치 경로 (플래그 없음 또는 사용자 선택)
 
-- No branch creation, no manager-git invocation
-- SPEC files remain on current branch
+- 브랜치 생성 없음, manager-git 호출 없음
+- SPEC 파일은 현재 브랜치에 유지
 
-### Decision Point 2: Development Environment Selection
+### 결정 지점 2: 개발 환경 선택
 
-Tool: AskUserQuestion (when prompt_always config is true and auto_branch is true)
+도구: AskUserQuestion (prompt_always 설정이 true이고 auto_branch가 true일 때)
 
-Options:
+옵션:
 
-- Create Worktree (recommended for parallel SPEC development)
-- Create Branch (traditional workflow)
-- Use current branch
+- Worktree 생성 (병렬 SPEC 개발에 권장)
+- 브랜치 생성 (전통적인 워크플로우)
+- 현재 브랜치 사용
 
-### Decision Point 3: Next Action Selection
+### 결정 지점 3: 다음 액션 선택
 
-Tool: AskUserQuestion (after SPEC creation completes)
+도구: AskUserQuestion (SPEC 생성 완료 후)
 
-Options:
+옵션:
 
-- Start Implementation (execute /moai run SPEC-{ID})
-- Modify Plan
-- Add New Feature (create additional SPEC)
-
----
-
-## Team Mode Routing
-
-When --team flag is provided or auto-selected, the plan phase MUST switch to team orchestration:
-
-1. Verify prerequisites: workflow.team.enabled == true AND CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 env var is set
-2. If prerequisites met: Read workflows/team-plan.md and execute the team workflow (TeamCreate with researcher + analyst + architect)
-3. If prerequisites NOT met: Warn user with message "Team mode requires workflow.team.enabled: true in workflow.yaml and CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 env var" then fallback to standard sub-agent mode (manager-spec)
-
-Team composition: researcher (haiku) + analyst (inherit) + architect (inherit)
-
-For detailed team orchestration steps, see workflows/team-plan.md.
+- 구현 시작 (/moai run SPEC-{ID} 실행)
+- 계획 수정
+- 새 기능 추가 (추가 SPEC 생성)
 
 ---
 
-## Completion Criteria
+## 팀 모드 라우팅
 
-All of the following must be verified:
+--team 플래그가 제공되거나 자동 선택된 경우, plan 단계는 반드시 팀 오케스트레이션으로 전환해야 합니다:
 
-- Phase 1: manager-spec analyzed project and proposed SPEC candidates
-- User approval obtained via AskUserQuestion before SPEC creation
-- Phase 2: All 3 SPEC files created (spec.md, plan.md, acceptance.md)
-- Directory naming follows .moai/specs/SPEC-{ID}/ format
-- YAML frontmatter contains all 7 required fields
-- EARS structure is complete
-- Phase 3: Appropriate git action taken based on flags and user choice
-- If --worktree: SPEC committed before worktree creation
-- Next steps presented to user
+1. 전제 조건 확인: workflow.team.enabled == true AND CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 환경변수 설정
+2. 전제 조건 충족 시: workflows/team-plan.md를 읽고 팀 워크플로우 실행 (researcher + analyst + architect와 함께 TeamCreate)
+3. 전제 조건 미충족 시: "팀 모드는 workflow.yaml에서 workflow.team.enabled: true 설정과 CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 환경변수가 필요합니다"라고 사용자에게 경고 후 표준 서브에이전트 모드 (manager-spec)로 폴백
+
+팀 구성: researcher (haiku) + analyst (inherit) + architect (inherit)
+
+상세한 팀 오케스트레이션 단계는 workflows/team-plan.md를 참조하세요.
+
+---
+
+## 완료 기준
+
+다음 사항을 모두 확인해야 합니다:
+
+- Phase 1: manager-spec이 프로젝트를 분석하고 SPEC 후보 제안
+- SPEC 생성 전 AskUserQuestion을 통한 사용자 승인 획득
+- Phase 2: 3개의 SPEC 파일 모두 생성 (spec.md, plan.md, acceptance.md)
+- 디렉토리 이름이 .moai/specs/SPEC-{ID}/ 형식을 따름
+- YAML 프론트매터에 7개 필수 필드 모두 포함
+- EARS 구조 완성
+- Phase 3: 플래그와 사용자 선택에 따른 적절한 git 작업 수행
+- --worktree: worktree 생성 전 SPEC 커밋
+- 사용자에게 다음 단계 제시
 
 ---
 
 Version: 2.0.0
 Updated: 2026-02-07
-Source: Extracted from .claude/commands/moai/1-plan.md v5.1.0. Added team mode support and --team flag.
+Source: .claude/commands/moai/1-plan.md v5.1.0에서 추출. 팀 모드 지원 및 --team 플래그 추가.

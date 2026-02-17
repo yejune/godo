@@ -1,26 +1,26 @@
-# DDD with Context7 - Core Classes
+# Context7 DDD - 핵심 클래스
 
-> Sub-module: Core class implementations for DDD workflow management
-> Parent: [DDD with Context7](../ddd-context7.md)
+> 서브 모듈: DDD 워크플로우 관리를 위한 핵심 클래스 구현
+> 부모: [Context7 DDD](../ddd-context7.md)
 
-## Enumerations
+## 열거형
 
 ### DDDPhase Enum
 
 ```python
 class DDDPhase(Enum):
-    """Phases of the DDD cycle."""
-    ANALYZE = "analyze"        # Analyzing existing code and behavior
-    PRESERVE = "preserve"      # Creating characterization tests
-    IMPROVE = "improve"        # Refactoring with behavior preservation
-    REVIEW = "review"          # Validation and documentation
+    """DDD 사이클의 단계."""
+    ANALYZE = "analyze"        # 기존 코드 및 동작 분석
+    PRESERVE = "preserve"      # 특성화 테스트 생성
+    IMPROVE = "improve"        # 동작 보존과 함께 리팩토링
+    REVIEW = "review"          # 검증 및 문서화
 ```
 
 ### TestType Enum
 
 ```python
 class TestType(Enum):
-    """Types of tests in DDD workflow."""
+    """DDD 워크플로우의 테스트 유형."""
     UNIT = "unit"
     INTEGRATION = "integration"
     ACCEPTANCE = "acceptance"
@@ -34,7 +34,7 @@ class TestType(Enum):
 
 ```python
 class TestStatus(Enum):
-    """Status of a test case."""
+    """테스트 케이스의 상태."""
     PENDING = "pending"
     PASSED = "passed"
     FAILED = "failed"
@@ -42,14 +42,14 @@ class TestStatus(Enum):
     ERROR = "error"
 ```
 
-## Data Classes
+## 데이터 클래스
 
 ### TestSpecification
 
 ```python
 @dataclass
 class TestSpecification:
-    """Specification for generating test cases."""
+    """테스트 케이스 생성을 위한 명세."""
     name: str
     description: str
     test_type: TestType
@@ -67,7 +67,7 @@ class TestSpecification:
 ```python
 @dataclass
 class TestCase:
-    """Individual test case with metadata."""
+    """메타데이터가 있는 개별 테스트 케이스."""
     id: str
     name: str
     file_path: str
@@ -86,7 +86,7 @@ class TestCase:
 ```python
 @dataclass
 class DDDSession:
-    """DDD session tracking all cycle activities."""
+    """모든 사이클 활동을 추적하는 DDD 세션."""
     id: str
     project_path: str
     current_phase: DDDPhase
@@ -103,7 +103,7 @@ class DDDSession:
 ```python
 @dataclass
 class DDDCycleResult:
-    """Results of a complete DDD cycle."""
+    """완전한 DDD 사이클의 결과."""
     session_id: str
     test_specification: TestSpecification
     test_file_path: str
@@ -117,11 +117,11 @@ class DDDCycleResult:
     behavior_preserved: bool
 ```
 
-## DDDManager Class
+## DDDManager 클래스
 
 ```python
 class DDDManager:
-    """Manages DDD workflow with Context7 integration."""
+    """Context7 통합을 통한 DDD 워크플로우 관리."""
 
     def __init__(self, project_path: str, context7_client=None):
         self.project_path = project_path
@@ -131,10 +131,10 @@ class DDDManager:
         self.current_session: Optional[DDDSession] = None
 
     async def start_ddd_session(self, feature_name: str) -> DDDSession:
-        """Start a new DDD session."""
+        """새 DDD 세션을 시작합니다."""
         session_id = f"ddd_{feature_name}_{int(time.time())}"
 
-        # Load Context7 patterns
+        # Context7 패턴 로드
         patterns = await self.context7_integration.load_ddd_patterns()
 
         session = DDDSession(
@@ -157,31 +157,31 @@ class DDDManager:
         specification: TestSpecification,
         target_function: str
     ) -> DDDCycleResult:
-        """Run complete ANALYZE-PRESERVE-IMPROVE cycle."""
+        """완전한 ANALYZE-PRESERVE-IMPROVE 사이클을 실행합니다."""
         if not self.current_session:
             self.current_session = await self.start_ddd_session("default")
 
         cycle_start = time.time()
         context7_patterns_applied = []
 
-        # ANALYZE Phase - Understand existing code and behavior
+        # ANALYZE 단계 - 기존 코드 및 동작 이해
         analyze_result = await self._execute_analyze_phase(specification)
         self.current_session.metrics['analyze_phases'] += 1
 
-        # PRESERVE Phase - Create characterization tests
+        # PRESERVE 단계 - 특성화 테스트 생성
         preserve_result = await self._execute_preserve_phase(
             specification, target_function, analyze_result
         )
         self.current_session.metrics['preserve_phases'] += 1
 
-        # IMPROVE Phase - Refactor with behavior preservation
+        # IMPROVE 단계 - 동작 보존과 함께 리팩토링
         improve_result = await self._execute_improve_phase(
             specification, preserve_result
         )
         self.current_session.metrics['improve_phases'] += 1
         context7_patterns_applied.extend(improve_result.get('patterns_applied', []))
 
-        # Run final coverage
+        # 최종 커버리지 실행
         coverage = await self._run_coverage_analysis()
 
         return DDDCycleResult(
@@ -199,24 +199,24 @@ class DDDManager:
         )
 ```
 
-## Phase Execution Methods
+## 단계 실행 메서드
 
-### ANALYZE Phase
+### ANALYZE 단계
 
 ```python
 async def _execute_analyze_phase(
     self, specification: TestSpecification
 ) -> Dict[str, Any]:
-    """Execute ANALYZE phase - understand existing code and behavior."""
+    """ANALYZE 단계 실행 - 기존 코드 및 동작 이해."""
     self.current_session.current_phase = DDDPhase.ANALYZE
 
-    # Analyze existing code structure
+    # 기존 코드 구조 분석
     code_analysis = await self._analyze_existing_code(specification)
 
-    # Identify behavior patterns
+    # 동작 패턴 식별
     behavior_patterns = await self._identify_behavior_patterns(code_analysis)
 
-    # Determine refactoring targets
+    # 리팩토링 대상 결정
     refactoring_targets = await self._identify_refactoring_targets(code_analysis)
 
     return {
@@ -227,7 +227,7 @@ async def _execute_analyze_phase(
     }
 ```
 
-### PRESERVE Phase
+### PRESERVE 단계
 
 ```python
 async def _execute_preserve_phase(
@@ -235,24 +235,24 @@ async def _execute_preserve_phase(
     target_function: str,
     analyze_result: Dict[str, Any]
 ) -> Dict[str, Any]:
-    """Execute PRESERVE phase - create characterization tests."""
+    """PRESERVE 단계 실행 - 특성화 테스트 생성."""
     self.current_session.current_phase = DDDPhase.PRESERVE
 
-    # Generate characterization tests for existing behavior
+    # 기존 동작에 대한 특성화 테스트 생성
     test_code = await self.test_generator.generate_characterization_test(
         specification, analyze_result['behavior_patterns']
     )
 
-    # Determine test file path
+    # 테스트 파일 경로 결정
     test_file_path = self._get_test_file_path(specification)
 
-    # Write test to file
+    # 파일에 테스트 작성
     self._write_test_file(test_file_path, test_code)
 
-    # Run test - should pass (testing existing behavior)
+    # 테스트 실행 - 통과해야 함 (기존 동작 테스트)
     test_result = await self._run_tests(test_file_path)
 
-    # Create test case record
+    # 테스트 케이스 레코드 생성
     test_case = TestCase(
         id=f"tc_{specification.name}",
         name=specification.name,
@@ -272,24 +272,24 @@ async def _execute_preserve_phase(
         'test_file_path': test_file_path,
         'test_result': test_result,
         'test_case': test_case,
-        'phase_success': test_result['failed'] == 0  # Should pass in PRESERVE phase
+        'phase_success': test_result['failed'] == 0  # PRESERVE 단계에서 통과해야 함
     }
 ```
 
-### IMPROVE Phase
+### IMPROVE 단계
 
 ```python
 async def _execute_improve_phase(
     self, specification: TestSpecification,
     preserve_result: Dict[str, Any]
 ) -> Dict[str, Any]:
-    """Execute IMPROVE phase - refactor with behavior preservation."""
+    """IMPROVE 단계 실행 - 동작 보존과 함께 리팩토링."""
     self.current_session.current_phase = DDDPhase.IMPROVE
 
-    # Get improvement patterns from Context7
+    # Context7에서 개선 패턴 가져오기
     improve_patterns = await self.context7_integration.get_improvement_patterns()
 
-    # Generate improvements
+    # 개선 사항 생성
     improvements = await self._generate_improvements(
         preserve_result.get('implementation', ''),
         improve_patterns
@@ -300,21 +300,21 @@ async def _execute_improve_phase(
     behavior_preserved = True
 
     for improvement in improvements:
-        # Apply improvement
+        # 개선 적용
         improved = await self._apply_improvement(
             preserve_result.get('implementation_file_path', ''),
             improvement
         )
 
         if improved['success']:
-            # Run characterization tests to verify behavior preservation
+            # 동작 보존 검증을 위해 특성화 테스트 실행
             test_result = await self._run_tests(preserve_result['test_file_path'])
 
             if test_result['failed'] == 0:
                 successful_improvements.append(improvement)
                 patterns_applied.append(improvement.get('pattern', 'custom'))
             else:
-                # Rollback failed improvement - behavior not preserved
+                # 실패한 개선 롤백 - 동작이 보존되지 않음
                 await self._rollback_improvement(
                     preserve_result.get('implementation_file_path', '')
                 )
@@ -329,11 +329,11 @@ async def _execute_improve_phase(
     }
 ```
 
-## Helper Methods
+## 헬퍼 메서드
 
 ```python
 def _get_test_file_path(self, specification: TestSpecification) -> str:
-    """Determine test file path based on specification."""
+    """명세에 따라 테스트 파일 경로를 결정합니다."""
     test_dir = os.path.join(self.project_path, 'tests')
     os.makedirs(test_dir, exist_ok=True)
 
@@ -344,13 +344,13 @@ def _get_test_file_path(self, specification: TestSpecification) -> str:
     return os.path.join(full_test_dir, f"test_{specification.name}.py")
 
 def _get_implementation_file_path(self, target_function: str) -> str:
-    """Determine implementation file path."""
+    """구현 파일 경로를 결정합니다."""
     src_dir = os.path.join(self.project_path, 'src')
     os.makedirs(src_dir, exist_ok=True)
     return os.path.join(src_dir, f"{target_function}.py")
 
 async def _run_tests(self, test_path: str) -> Dict[str, Any]:
-    """Run pytest on specified path."""
+    """지정된 경로에서 pytest를 실행합니다."""
     result = subprocess.run(
         ['pytest', test_path, '-v', '--tb=short', '--json-report'],
         capture_output=True,
@@ -362,12 +362,12 @@ async def _run_tests(self, test_path: str) -> Dict[str, Any]:
         'passed': result.stdout.count('PASSED'),
         'failed': result.stdout.count('FAILED'),
         'errors': result.stdout.count('ERROR'),
-        'execution_time': 0.0,  # Parse from output
+        'execution_time': 0.0,  # 출력에서 파싱
         'output': result.stdout
     }
 
 async def _run_coverage_analysis(self) -> Dict[str, Any]:
-    """Run coverage analysis."""
+    """커버리지 분석을 실행합니다."""
     result = subprocess.run(
         ['pytest', '--cov=src', '--cov-report=json'],
         capture_output=True,
@@ -384,11 +384,11 @@ async def _run_coverage_analysis(self) -> Dict[str, Any]:
         return {'total_coverage': 0.0}
 ```
 
-## Related Sub-modules
+## 관련 서브 모듈
 
-- [Test Generation](./test-generation.md) - AI-powered test creation
-- [Context7 Patterns](./context7-patterns.md) - Pattern integration
+- [테스트 생성](./test-generation.md) - AI 기반 테스트 생성
+- [Context7 패턴](./context7-patterns.md) - 패턴 통합
 
 ---
 
-Sub-module: `modules/ddd/core-classes.md`
+서브 모듈: `modules/ddd/core-classes.md`

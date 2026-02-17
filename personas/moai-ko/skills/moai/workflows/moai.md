@@ -1,9 +1,9 @@
 ---
 name: moai-workflow-moai
 description: >
-  Full autonomous plan-run-sync pipeline. Default workflow when no subcommand
-  is specified. Handles parallel exploration, SPEC generation, DDD/TDD
-  implementation with optional auto-fix loop, and documentation sync.
+  완전 자율 plan-run-sync 파이프라인입니다. 서브커맨드가 지정되지 않을 때의 기본
+  워크플로우입니다. 병렬 탐색, SPEC 생성, 선택적 자동 수정 루프를 포함한 DDD/TDD
+  구현, 문서화 동기화를 처리합니다.
 license: Apache-2.0
 compatibility: Designed for Claude Code
 user-invocable: false
@@ -27,193 +27,193 @@ triggers:
   phases: ["plan", "run", "sync"]
 ---
 
-# Workflow: MoAI - Autonomous Development Orchestration
+# 워크플로우: MoAI - 자율 개발 오케스트레이션
 
-Purpose: Full autonomous workflow. User provides a goal, MoAI autonomously executes plan -> run -> sync pipeline. This is the default workflow when no subcommand is specified.
+목적: 완전 자율 워크플로우입니다. 사용자가 목표를 제공하면 MoAI가 plan -> run -> sync 파이프라인을 자율적으로 실행합니다. 서브커맨드가 지정되지 않을 때의 기본 워크플로우입니다.
 
-Flow: Explore -> Plan -> Run -> Sync -> Done
+흐름: 탐색 -> 계획 -> 실행 -> 동기화 -> 완료
 
-## Supported Flags
+## 지원 플래그
 
-- --loop: Enable auto iterative fixing during run phase
-- --max N: Maximum iteration count for loop (default 100)
-- --branch: Auto-create feature branch
-- --pr: Auto-create pull request after completion
-- --resume SPEC-XXX: Resume previous work from existing SPEC
-- --team: Force Agent Teams mode for plan and run phases
-- --solo: Force sub-agent mode (single agent per phase)
+- --loop: 실행 단계 중 자동 반복 수정 활성화
+- --max N: 루프의 최대 반복 횟수 (기본값 100)
+- --branch: 기능 브랜치 자동 생성
+- --pr: 완료 후 풀 리퀘스트 자동 생성
+- --resume SPEC-XXX: 기존 SPEC에서 이전 작업 재개
+- --team: plan 및 run 단계에서 Agent Teams 모드 강제 적용
+- --solo: 서브에이전트 모드 강제 적용 (단계별 단일 에이전트)
 
-**Default Behavior (no flag)**: System auto-selects based on complexity:
-- Team mode: Multi-domain tasks (>=3 domains), many files (>=10), or high complexity (>=7)
-- Sub-agent mode: Focused, single-domain tasks
+**기본 동작 (플래그 없음)**: 복잡도에 따라 시스템이 자동 선택:
+- 팀 모드: 멀티 도메인 작업 (도메인 3개 이상), 많은 파일 (10개 이상), 또는 높은 복잡도 (7점 이상)
+- 서브에이전트 모드: 집중적인 단일 도메인 작업
 
-## Configuration Files
+## 설정 파일
 
-- quality.yaml: TRUST 5 quality thresholds AND development_mode routing
-- workflow.yaml: Execution mode, team settings, loop prevention, completion markers
+- quality.yaml: TRUST 5 품질 임계값 AND development_mode 라우팅
+- workflow.yaml: 실행 모드, 팀 설정, 루프 방지, 완료 마커
 
-## Development Mode Routing (CRITICAL)
+## 개발 모드 라우팅 (CRITICAL)
 
-[HARD] Before Phase 2 implementation, ALWAYS check `.moai/config/sections/quality.yaml`:
+[HARD] Phase 2 구현 전, 반드시 `.moai/config/sections/quality.yaml`을 확인하세요:
 
 ```yaml
 constitution:
-  development_mode: hybrid    # ddd, tdd, or hybrid
+  development_mode: hybrid    # ddd, tdd, 또는 hybrid
   hybrid_settings:
-    new_features: tdd        # New code uses TDD
-    legacy_refactoring: ddd  # Existing code uses DDD
+    new_features: tdd        # 새 코드는 TDD 사용
+    legacy_refactoring: ddd  # 기존 코드는 DDD 사용
 ```
 
-**Routing Logic**:
+**라우팅 로직**:
 
-| Feature Type | Mode: ddd | Mode: tdd | Mode: hybrid |
+| 기능 유형 | 모드: ddd | 모드: tdd | 모드: hybrid |
 |--------------|-----------|-----------|--------------|
-| **New package/module** (no existing file) | DDD* | TDD | TDD |
-| **New feature in existing file** | DDD | TDD | TDD |
-| **Refactoring existing code** | DDD | Use DDD for this part | DDD |
-| **Bug fix in existing code** | DDD | TDD | DDD |
+| **새 패키지/모듈** (기존 파일 없음) | DDD* | TDD | TDD |
+| **기존 파일에 새 기능 추가** | DDD | TDD | TDD |
+| **기존 코드 리팩토링** | DDD | 이 부분은 DDD 사용 | DDD |
+| **기존 코드 버그 수정** | DDD | TDD | DDD |
 
-*DDD adapts for greenfield (ANALYZE requirements → PRESERVE with spec tests → IMPROVE)
+*DDD는 그린필드에 맞게 조정됩니다 (요구사항 분석 → 스펙 테스트로 보존 → 개선)
 
-**Agent Selection**:
-- **TDD cycle**: `manager-tdd` subagent (RED-GREEN-REFACTOR)
-- **DDD cycle**: `manager-ddd` subagent (ANALYZE-PRESERVE-IMPROVE)
+**에이전트 선택**:
+- **TDD 사이클**: `manager-tdd` 서브에이전트 (RED-GREEN-REFACTOR)
+- **DDD 사이클**: `manager-ddd` 서브에이전트 (ANALYZE-PRESERVE-IMPROVE)
 
-## Phase 0: Parallel Exploration
+## Phase 0: 병렬 탐색
 
-Launch three agents simultaneously in a single response for 2-3x speedup (15-30s vs 45-90s).
+단일 응답에서 세 에이전트를 동시에 실행하여 2-3배 속도 향상 (15-30초 vs 45-90초).
 
-Agent 1 - Explore (subagent_type Explore):
-- Codebase analysis for task context
-- Relevant files, architecture patterns, existing implementations
+에이전트 1 - 탐색 (subagent_type Explore):
+- 작업 컨텍스트를 위한 코드베이스 분석
+- 관련 파일, 아키텍처 패턴, 기존 구현
 
-Agent 2 - Research (subagent_type Explore with WebSearch/WebFetch focus):
-- External documentation and best practices
-- API docs, library documentation, similar implementations
+에이전트 2 - 리서치 (WebSearch/WebFetch에 초점을 맞춘 subagent_type Explore):
+- 외부 문서 및 모범 사례
+- API 문서, 라이브러리 문서, 유사 구현
 
-Agent 3 - Quality (subagent_type manager-quality):
-- Current project quality assessment
-- Test coverage status, lint status, technical debt
+에이전트 3 - 품질 (subagent_type manager-quality):
+- 현재 프로젝트 품질 평가
+- 테스트 커버리지 상태, 린트 상태, 기술 부채
 
-After all agents complete:
-- Collect outputs from each agent response
-- Extract key findings from Explore (files, patterns), Research (external knowledge), Quality (coverage baseline)
-- Synthesize into unified exploration report
-- Generate execution plan with files to create/modify and test strategy
+모든 에이전트 완료 후:
+- 각 에이전트 응답에서 출력 수집
+- 탐색 (파일, 패턴), 리서치 (외부 지식), 품질 (커버리지 기준선)에서 핵심 발견사항 추출
+- 통합 탐색 보고서로 종합
+- 생성/수정할 파일 및 테스트 전략을 포함한 실행 계획 생성
 
-Error handling: If any agent fails, continue with results from successful agents. Note missing information in plan.
+오류 처리: 에이전트 중 하나라도 실패하면 성공한 에이전트의 결과로 계속 진행합니다. 계획에 누락된 정보를 기록합니다.
 
-If --sequential flag: Run Explore, then Research, then Quality sequentially instead.
+--sequential 플래그 사용 시: 탐색, 리서치, 품질을 순서대로 실행합니다.
 
-## Phase 0 Completion: Routing Decision
+## Phase 0 완료: 라우팅 결정
 
-Single-domain routing:
-- If task is single-domain (e.g., "SQL optimization"): Delegate directly to expert agent, skip SPEC generation
-- If task is multi-domain: Proceed to full workflow with SPEC generation
+단일 도메인 라우팅:
+- 작업이 단일 도메인인 경우 (예: "SQL 최적화"): 전문 에이전트에 직접 위임, SPEC 생성 건너뜀
+- 작업이 멀티 도메인인 경우: SPEC 생성을 포함한 전체 워크플로우 진행
 
-User approval checkpoint via AskUserQuestion:
-- Options: Proceed to SPEC creation, Modify approach, Cancel
+AskUserQuestion을 통한 사용자 승인 체크포인트:
+- 옵션: SPEC 생성 진행, 접근 방식 수정, 취소
 
-## Phase 1: SPEC Generation
+## Phase 1: SPEC 생성
 
-- Delegate to manager-spec subagent
-- Output: EARS-format SPEC document at .moai/specs/SPEC-XXX/spec.md
-- Includes requirements, acceptance criteria, technical approach
+- manager-spec 서브에이전트에 위임
+- 출력: .moai/specs/SPEC-XXX/spec.md에 EARS 형식 SPEC 문서
+- 요구사항, 인수 기준, 기술 접근 방식 포함
 
-## Phase 2: Implementation (TDD or DDD based on development_mode)
+## Phase 2: 구현 (development_mode에 따라 TDD 또는 DDD)
 
-[HARD] Agent delegation mandate: ALL implementation tasks MUST be delegated to specialized agents. NEVER execute implementation directly, even after auto compact.
+[HARD] 에이전트 위임 의무: 모든 구현 작업은 반드시 전문 에이전트에게 위임해야 합니다. 자동 컴팩트 이후에도 직접 구현을 실행하지 마세요.
 
-[HARD] Methodology selection based on `.moai/config/sections/quality.yaml`:
+[HARD] `.moai/config/sections/quality.yaml`에 따른 방법론 선택:
 
-- **New features** (per hybrid_settings.new_features): Use `manager-tdd` (RED-GREEN-REFACTOR)
-- **Legacy refactoring** (per hybrid_settings.legacy_refactoring): Use `manager-ddd` (ANALYZE-PRESERVE-IMPROVE)
+- **새 기능** (hybrid_settings.new_features에 따라): `manager-tdd` 사용 (RED-GREEN-REFACTOR)
+- **레거시 리팩토링** (hybrid_settings.legacy_refactoring에 따라): `manager-ddd` 사용 (ANALYZE-PRESERVE-IMPROVE)
 
-Expert agent selection (for domain-specific work):
-- Backend logic: expert-backend subagent
-- Frontend components: expert-frontend subagent
-- Test creation: expert-testing subagent
-- Bug fixing: expert-debug subagent
-- Refactoring: expert-refactoring subagent
-- Security fixes: expert-security subagent
+전문 에이전트 선택 (도메인별 작업):
+- 백엔드 로직: expert-backend 서브에이전트
+- 프론트엔드 컴포넌트: expert-frontend 서브에이전트
+- 테스트 생성: expert-testing 서브에이전트
+- 버그 수정: expert-debug 서브에이전트
+- 리팩토링: expert-refactoring 서브에이전트
+- 보안 수정: expert-security 서브에이전트
 
-Loop behavior (when --loop flag or workflow.yaml loop_prevention settings enabled):
-- While issues exist AND iteration less than max:
-  - Execute diagnostics (parallel by default)
-  - Delegate fix to appropriate expert agent
-  - Verify fix results
-  - Check for completion marker
-  - If marker found: Break loop
+루프 동작 (--loop 플래그 또는 workflow.yaml loop_prevention 설정 활성화 시):
+- 이슈가 존재하고 반복 횟수가 최대치 미만인 동안:
+  - 진단 실행 (기본적으로 병렬)
+  - 적절한 전문 에이전트에 수정 위임
+  - 수정 결과 검증
+  - 완료 마커 확인
+  - 마커 발견 시: 루프 종료
 
-## Phase 3: Documentation Sync
+## Phase 3: 문서화 동기화
 
-- Delegate to manager-docs subagent
-- Synchronize documentation with implementation
-- Detect SPEC-implementation divergence and update SPEC documents accordingly
-- Conditionally update project documents (.moai/project/) when structural changes detected
-- Respect SPEC lifecycle level for update strategy (spec-first, spec-anchored, spec-as-source)
-- Add completion marker on success
+- manager-docs 서브에이전트에 위임
+- 구현과 문서화 동기화
+- SPEC-구현 불일치 감지 및 SPEC 문서 업데이트
+- 구조적 변경 감지 시 프로젝트 문서 (.moai/project/) 조건부 업데이트
+- 업데이트 전략을 위한 SPEC 라이프사이클 레벨 준수 (spec-first, spec-anchored, spec-as-source)
+- 성공 시 완료 마커 추가
 
-## Team Mode
+## 팀 모드
 
-When --team flag is provided or auto-selected (based on complexity thresholds in workflow.yaml):
+--team 플래그가 제공되거나 자동 선택된 경우 (workflow.yaml의 복잡도 임계값 기준):
 
-- Phase 0 exploration: Parallel research team (researcher + analyst + architect)
-- Phase 2 implementation: Parallel implementation team (backend-dev + frontend-dev + tester)
-- Phase 3 sync: Always sub-agent mode (manager-docs)
+- Phase 0 탐색: 병렬 리서치 팀 (researcher + analyst + architect)
+- Phase 2 구현: 병렬 구현 팀 (backend-dev + frontend-dev + tester)
+- Phase 3 동기화: 항상 서브에이전트 모드 (manager-docs)
 
-For team orchestration details:
-- Plan phase: See workflows/team-plan.md
-- Run phase: See workflows/team-run.md
-- Sync rationale: See workflows/team-sync.md
+팀 오케스트레이션 세부 사항:
+- Plan 단계: workflows/team-plan.md 참조
+- Run 단계: workflows/team-run.md 참조
+- Sync 근거: workflows/team-sync.md 참조
 
-Mode selection:
-- --team: Force team mode for all applicable phases
-- --solo: Force sub-agent mode
-- --auto (default): Complexity-based selection per workflow.yaml thresholds
+모드 선택:
+- --team: 모든 해당 단계에 팀 모드 강제 적용
+- --solo: 서브에이전트 모드 강제 적용
+- --auto (기본값): workflow.yaml 임계값에 따른 복잡도 기반 선택
 
-## Task Tracking
+## 작업 추적
 
-[HARD] Task management tools mandatory for all task tracking:
-- When issues discovered: TaskCreate with pending status
-- Before starting work: TaskUpdate with in_progress status
-- After completing work: TaskUpdate with completed status
-- Never output TODO lists as text
+[HARD] 모든 작업 추적에 작업 관리 도구 필수:
+- 이슈 발견 시: TaskCreate로 pending 상태로 생성
+- 작업 시작 전: TaskUpdate로 in_progress 상태로 변경
+- 작업 완료 후: TaskUpdate로 completed 상태로 변경
+- TODO 목록을 텍스트로 출력하지 않음
 
-## Safe Development Protocol
+## 안전 개발 프로토콜
 
-All implementation follows CLAUDE.md Section 7 Safe Development Protocol:
-- Approach-first: Explain approach before writing code
-- Multi-file decomposition: Split work when modifying 3+ files
-- Post-implementation review: List potential issues and suggest tests
-- Reproduction-first: Write failing test before fixing bugs
+모든 구현은 CLAUDE.md 섹션 7 안전 개발 프로토콜을 따릅니다:
+- 접근 방식 우선: 코드 작성 전 접근 방식 설명
+- 멀티 파일 분해: 3개 이상 파일 수정 시 작업 분리
+- 구현 후 검토: 잠재적 이슈 나열 및 테스트 제안
+- 재현 우선: 버그 수정 전 실패 테스트 작성
 
-## Completion Markers
+## 완료 마커
 
-AI must add a marker when work is complete:
-- `<moai>DONE</moai>` - Task complete
-- `<moai>COMPLETE</moai>` - Full completion
+작업 완료 시 AI는 마커를 추가해야 합니다:
+- `<moai>DONE</moai>` - 작업 완료
+- `<moai>COMPLETE</moai>` - 전체 완료
 
-## Execution Summary
+## 실행 요약
 
-1. Parse arguments (extract flags: --loop, --max, --sequential, --branch, --pr, --resume, --team, --solo, --auto)
-2. If --resume with SPEC ID: Load existing SPEC and continue from last state
-3. Detect development_mode from quality.yaml (hybrid/ddd/tdd)
-4. **Team mode decision**: Read workflow.yaml team settings and determine execution mode
-   - If `--team` flag: Force team mode (requires workflow.team.enabled: true AND CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 env var)
-   - If `--solo` flag: Force sub-agent mode (skip team mode entirely)
-   - If `--auto` or no flag (default): Check complexity thresholds from workflow.yaml auto_selection (domains >= 3, files >= 10, or score >= 7)
-   - If team mode selected but prerequisites not met: Warn user and fallback to sub-agent mode
-5. Execute Phase 0 (parallel or sequential exploration)
-6. Routing decision (single-domain direct delegation vs full workflow)
-7. TaskCreate for discovered tasks
-8. User confirmation via AskUserQuestion
-9. **Phase 1 (Plan)**: If team mode → Read workflows/team-plan.md and follow team orchestration. Else → manager-spec sub-agent
-10. **Phase 2 (Run)**: If team mode → Read workflows/team-run.md and follow team orchestration. Else → manager-tdd (new features) OR manager-ddd (legacy refactoring) sub-agent
-11. **Phase 3 (Sync)**: Always manager-docs sub-agent (sync phase never uses team mode)
-12. Terminate with completion marker
+1. 인수 파싱 (플래그 추출: --loop, --max, --sequential, --branch, --pr, --resume, --team, --solo, --auto)
+2. SPEC ID와 함께 --resume 사용 시: 기존 SPEC 로드 후 마지막 상태에서 계속
+3. quality.yaml에서 development_mode 감지 (hybrid/ddd/tdd)
+4. **팀 모드 결정**: workflow.yaml 팀 설정을 읽고 실행 모드 결정
+   - `--team` 플래그: 팀 모드 강제 적용 (workflow.team.enabled: true AND CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 환경변수 필요)
+   - `--solo` 플래그: 서브에이전트 모드 강제 적용 (팀 모드 완전 건너뜀)
+   - `--auto` 또는 플래그 없음 (기본값): workflow.yaml auto_selection의 복잡도 임계값 확인 (도메인 3개 이상, 파일 10개 이상, 또는 점수 7 이상)
+   - 팀 모드 선택됐으나 전제 조건 미충족 시: 사용자에게 경고 후 서브에이전트 모드로 폴백
+5. Phase 0 실행 (병렬 또는 순차 탐색)
+6. 라우팅 결정 (단일 도메인 직접 위임 vs 전체 워크플로우)
+7. 발견된 작업에 대해 TaskCreate
+8. AskUserQuestion을 통한 사용자 확인
+9. **Phase 1 (Plan)**: 팀 모드 → workflows/team-plan.md 읽고 팀 오케스트레이션 따름. 아니면 → manager-spec 서브에이전트
+10. **Phase 2 (Run)**: 팀 모드 → workflows/team-run.md 읽고 팀 오케스트레이션 따름. 아니면 → manager-tdd (새 기능) 또는 manager-ddd (레거시 리팩토링) 서브에이전트
+11. **Phase 3 (Sync)**: 항상 manager-docs 서브에이전트 (동기화 단계는 팀 모드 사용 안 함)
+12. 완료 마커와 함께 종료
 
 ---
 
 Version: 2.0.0
-Source: Renamed from alfred.md. Unified plan->run->sync pipeline. Added SPEC/project document update in sync phase.
+Source: alfred.md에서 이름 변경. plan->run->sync 파이프라인 통합. 동기화 단계에 SPEC/프로젝트 문서 업데이트 추가.

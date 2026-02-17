@@ -1,12 +1,12 @@
 ---
 name: moai-workflow-tdd
 description: >
-  Test-Driven Development workflow specialist using RED-GREEN-REFACTOR
-  cycle for test-first software development.
-  Use when developing new features from scratch, creating isolated modules,
-  or when behavior specification drives implementation.
-  Do NOT use for refactoring existing code (use moai-workflow-ddd instead)
-  or when behavior preservation is the primary goal.
+  테스트 우선 소프트웨어 개발을 위한 RED-GREEN-REFACTOR 사이클을
+  사용하는 테스트 주도 개발 워크플로우 전문가입니다.
+  처음부터 새 기능을 개발하거나, 독립된 모듈을 생성하거나,
+  동작 명세가 구현을 주도할 때 사용합니다.
+  기존 코드 리팩토링에는 사용하지 마세요 (moai-workflow-ddd 사용).
+  동작 보존이 주요 목표인 경우에도 사용하지 마세요.
 license: Apache-2.0
 compatibility: Designed for Claude Code
 allowed-tools: Read Write Edit Bash(pytest:*) Bash(ruff:*) Bash(npm:*) Bash(npx:*) Bash(node:*) Bash(jest:*) Bash(vitest:*) Bash(go:*) Bash(cargo:*) Bash(mix:*) Bash(uv:*) Bash(bundle:*) Bash(php:*) Bash(phpunit:*) Grep Glob mcp__context7__resolve-library-id mcp__context7__get-library-docs
@@ -36,298 +36,298 @@ triggers:
   agents: ["manager-tdd", "expert-backend", "expert-frontend", "expert-testing"]
 ---
 
-# Test-Driven Development (TDD) Workflow
+# 테스트 주도 개발 (TDD) 워크플로우
 
-## Development Mode Configuration (CRITICAL)
+## 개발 모드 설정 (중요)
 
-[NOTE] This workflow is selected based on `.moai/config/sections/quality.yaml`:
+[참고] 이 워크플로우는 `.moai/config/sections/quality.yaml`을 기반으로 선택됩니다:
 
 ```yaml
 constitution:
-  development_mode: hybrid    # or ddd, tdd
+  development_mode: hybrid    # 또는 ddd, tdd
   hybrid_settings:
-    new_features: tdd        # New code → use TDD (this workflow)
-    legacy_refactoring: ddd  # Existing code → use DDD
+    new_features: tdd        # 새 코드 → TDD 사용 (이 워크플로우)
+    legacy_refactoring: ddd  # 기존 코드 → DDD 사용
 ```
 
-**When to use this workflow**:
-- `development_mode: tdd` → Always use TDD
-- `development_mode: hybrid` + new package/module → Use TDD
-- `development_mode: hybrid` + refactoring existing code → Use DDD instead (moai-workflow-ddd)
+**이 워크플로우를 사용하는 경우**:
+- `development_mode: tdd` → 항상 TDD 사용
+- `development_mode: hybrid` + 새 패키지/모듈 → TDD 사용
+- `development_mode: hybrid` + 기존 코드 리팩토링 → 대신 DDD 사용 (moai-workflow-ddd)
 
-**Key distinction**:
-- **New file/package** (doesn't exist yet) → TDD (this workflow)
-- **Existing code** (file already exists) → DDD (ANALYZE-PRESERVE-IMPROVE)
+**핵심 구분**:
+- **새 파일/패키지** (아직 존재하지 않음) → TDD (이 워크플로우)
+- **기존 코드** (파일이 이미 존재함) → DDD (ANALYZE-PRESERVE-IMPROVE)
 
-## Quick Reference
+## 빠른 참조
 
-Test-Driven Development provides a disciplined approach for creating new functionality where tests define the expected behavior before implementation.
+테스트 주도 개발은 구현 전에 테스트가 기대 동작을 정의하는, 새로운 기능을 만들기 위한 체계적인 접근 방식을 제공합니다.
 
-Core Cycle - RED-GREEN-REFACTOR:
+핵심 사이클 - RED-GREEN-REFACTOR:
 
-- RED: Write a failing test that defines desired behavior
-- GREEN: Write minimal code to make the test pass
-- REFACTOR: Improve code structure while keeping tests green
+- RED: 원하는 동작을 정의하는 실패하는 테스트 작성
+- GREEN: 테스트를 통과시키는 최소한의 코드 작성
+- REFACTOR: 테스트를 통과시키면서 코드 구조 개선
 
-When to Use TDD:
+TDD 사용 시기:
 
-- Creating new functionality from scratch
-- Building isolated modules with no existing dependencies
-- When behavior specification drives development
-- New API endpoints with clear contracts
-- New UI components with defined behavior
-- Greenfield projects (rare - usually Hybrid is better)
+- 처음부터 새 기능을 만들 때
+- 기존 의존성이 없는 독립 모듈을 구축할 때
+- 동작 명세가 개발을 주도할 때
+- 명확한 계약이 있는 새 API 엔드포인트
+- 정의된 동작을 가진 새 UI 컴포넌트
+- Greenfield 프로젝트 (드물게 - 보통 Hybrid가 더 나음)
 
-When NOT to Use TDD:
+TDD를 사용하지 않는 경우:
 
-- Refactoring existing code (use DDD instead)
-- When behavior preservation is the primary goal
-- Legacy codebase without test coverage (use DDD first)
-- When modifying existing files (consider Hybrid mode)
-
----
-
-## Core Philosophy
-
-### TDD vs DDD Comparison
-
-TDD Approach:
-
-- Cycle: RED-GREEN-REFACTOR
-- Goal: Create new functionality through tests
-- Starting Point: No code exists
-- Test Type: Specification tests that define expected behavior
-- Outcome: New working code with test coverage
-
-DDD Approach:
-
-- Cycle: ANALYZE-PRESERVE-IMPROVE
-- Goal: Improve structure without behavior change
-- Starting Point: Existing code with defined behavior
-- Test Type: Characterization tests that capture current behavior
-- Outcome: Better structured code with identical behavior
-
-### Test-First Principle
-
-The golden rule of TDD is that tests must be written before implementation code:
-
-- Tests define the contract
-- Tests document expected behavior
-- Tests catch regressions immediately
-- Implementation is driven by test requirements
+- 기존 코드 리팩토링 (대신 DDD 사용)
+- 동작 보존이 주요 목표인 경우
+- 테스트 커버리지가 없는 레거시 코드베이스 (먼저 DDD 사용)
+- 기존 파일을 수정하는 경우 (Hybrid 모드 고려)
 
 ---
 
-## Implementation Guide
+## 핵심 철학
 
-### Phase 1: RED - Write a Failing Test
+### TDD vs DDD 비교
 
-The RED phase focuses on defining the desired behavior through a failing test.
+TDD 접근 방식:
 
-#### Writing Effective Tests
+- 사이클: RED-GREEN-REFACTOR
+- 목표: 테스트를 통해 새 기능 생성
+- 시작점: 코드가 존재하지 않음
+- 테스트 유형: 기대 동작을 정의하는 명세서 테스트
+- 결과: 테스트 커버리지를 갖춘 새로운 작동 코드
 
-Before writing any implementation code:
+DDD 접근 방식:
 
-- Understand the requirement clearly
-- Define the expected behavior in test form
-- Write one test at a time
-- Keep tests focused and specific
-- Use descriptive test names that document behavior
+- 사이클: ANALYZE-PRESERVE-IMPROVE
+- 목표: 동작 변경 없이 구조 개선
+- 시작점: 정의된 동작을 가진 기존 코드
+- 테스트 유형: 현재 동작을 포착하는 특성화 테스트
+- 결과: 동일한 동작을 가진 더 잘 구조화된 코드
 
-#### Test Structure
+### 테스트 우선 원칙
 
-Follow the Arrange-Act-Assert pattern:
+TDD의 황금 규칙은 구현 코드 전에 테스트를 먼저 작성해야 한다는 것입니다:
 
-- Arrange: Set up test data and dependencies
-- Act: Execute the code under test
-- Assert: Verify the expected outcome
-
-#### Verification
-
-The test must fail initially:
-
-- Confirms the test actually tests something
-- Ensures the test is not passing by accident
-- Documents the gap between current and desired state
-
-### Phase 2: GREEN - Make the Test Pass
-
-The GREEN phase focuses on writing minimal code to satisfy the test.
-
-#### Minimal Implementation
-
-Write only enough code to make the test pass:
-
-- Do not over-engineer
-- Do not add features not required by tests
-- Focus on correctness, not perfection
-- Hardcode values if necessary (refactor later)
-
-#### Verification
-
-Run the test to confirm it passes:
-
-- All assertions must succeed
-- No other tests should break
-- Implementation satisfies the test requirements
-
-### Phase 3: REFACTOR - Improve the Code
-
-The REFACTOR phase focuses on improving code quality while maintaining behavior.
-
-#### Safe Refactoring
-
-With passing tests as a safety net:
-
-- Remove duplication
-- Improve naming and readability
-- Extract methods and classes
-- Apply design patterns where appropriate
-
-#### Continuous Verification
-
-After each refactoring step:
-
-- Run all tests
-- If any test fails, revert immediately
-- Commit when tests pass
+- 테스트가 계약을 정의합니다
+- 테스트가 기대 동작을 문서화합니다
+- 테스트가 즉시 회귀를 잡아냅니다
+- 구현은 테스트 요구사항에 의해 주도됩니다
 
 ---
 
-## TDD Workflow Execution
+## 구현 가이드
 
-### Standard TDD Session
+### 1단계: RED - 실패하는 테스트 작성
 
-When executing TDD through manager-tdd:
+RED 단계는 실패하는 테스트를 통해 원하는 동작을 정의하는 데 집중합니다.
 
-Step 1 - Understand Requirements:
+#### 효과적인 테스트 작성
 
-- Read SPEC document for feature scope
-- Identify test cases from acceptance criteria
-- Plan test implementation order
+구현 코드를 작성하기 전에:
 
-Step 2 - RED Phase:
+- 요구사항을 명확히 이해합니다
+- 테스트 형식으로 기대 동작을 정의합니다
+- 한 번에 하나의 테스트를 작성합니다
+- 테스트를 집중적이고 구체적으로 유지합니다
+- 동작을 문서화하는 설명적인 테스트 이름을 사용합니다
 
-- Write first failing test
-- Verify test fails for the right reason
-- Document expected behavior
+#### 테스트 구조
 
-Step 3 - GREEN Phase:
+Arrange-Act-Assert 패턴을 따릅니다:
 
-- Write minimal implementation
-- Run test to verify it passes
-- Move to next test
+- Arrange: 테스트 데이터와 의존성 설정
+- Act: 테스트 대상 코드 실행
+- Assert: 기대 결과 검증
 
-Step 4 - REFACTOR Phase:
+#### 검증
 
-- Review code for improvements
-- Apply refactoring with tests as safety net
-- Commit clean code
+테스트는 처음에 실패해야 합니다:
 
-Step 5 - Repeat:
+- 테스트가 실제로 무언가를 테스트한다는 것을 확인합니다
+- 테스트가 우연히 통과하지 않음을 보장합니다
+- 현재 상태와 원하는 상태 사이의 간격을 문서화합니다
 
-- Continue RED-GREEN-REFACTOR cycle
-- Until all requirements are implemented
-- Until all acceptance criteria pass
+### 2단계: GREEN - 테스트 통과시키기
 
-### TDD Loop Pattern
+GREEN 단계는 테스트를 만족시키는 최소한의 코드를 작성하는 데 집중합니다.
 
-For features requiring multiple test cases:
+#### 최소한의 구현
 
-- Identify all test cases upfront
-- Prioritize by dependency and complexity
-- Execute RED-GREEN-REFACTOR for each
-- Maintain cumulative test suite
+테스트를 통과시키기에 충분한 코드만 작성합니다:
 
----
+- 과도하게 설계하지 않습니다
+- 테스트에서 요구하지 않는 기능을 추가하지 않습니다
+- 완벽함이 아닌 정확성에 집중합니다
+- 필요한 경우 값을 하드코딩합니다 (나중에 리팩토링)
 
-## Quality Metrics
+#### 검증
 
-### TDD Success Criteria
+테스트를 실행하여 통과하는지 확인합니다:
 
-Test Coverage (Required):
+- 모든 단언이 성공해야 합니다
+- 다른 테스트가 깨지지 않아야 합니다
+- 구현이 테스트 요구사항을 만족시킵니다
 
-- Minimum 80% coverage per commit
-- 90% recommended for new code
-- All public interfaces tested
+### 3단계: REFACTOR - 코드 개선
 
-Code Quality (Goals):
+REFACTOR 단계는 동작을 유지하면서 코드 품질을 개선하는 데 집중합니다.
 
-- All tests pass
-- No test written after implementation
-- Clear test names documenting behavior
-- Minimal implementation satisfying tests
+#### 안전한 리팩토링
 
-### TDD-Specific TRUST Validation
+통과하는 테스트를 안전망으로 활용하여:
 
-Apply TRUST 5 framework with TDD focus:
+- 중복을 제거합니다
+- 명명과 가독성을 개선합니다
+- 메서드와 클래스를 추출합니다
+- 적절한 경우 디자인 패턴을 적용합니다
 
-- Testability: Test-first approach ensures testability
-- Readability: Tests document expected behavior
-- Understandability: Tests serve as living documentation
-- Security: Security tests written before implementation
-- Transparency: Test failures provide immediate feedback
+#### 지속적인 검증
 
----
+각 리팩토링 단계 후:
 
-## Integration Points
-
-### With DDD Workflow
-
-TDD and DDD are complementary:
-
-- TDD for new code
-- DDD for existing code refactoring
-- Hybrid mode combines both approaches
-
-### With Testing Workflow
-
-TDD integrates with testing workflow:
-
-- Uses specification tests
-- Integrates with coverage tools
-- Supports mutation testing for test quality
-
-### With Quality Framework
-
-TDD outputs feed into quality assessment:
-
-- Coverage metrics tracked
-- TRUST 5 validation for changes
-- Quality gates enforce standards
+- 모든 테스트를 실행합니다
+- 테스트가 실패하면 즉시 되돌립니다
+- 테스트가 통과하면 커밋합니다
 
 ---
 
-## Troubleshooting
+## TDD 워크플로우 실행
 
-### Common Issues
+### 표준 TDD 세션
 
-Test is Too Complex:
+manager-tdd를 통해 TDD를 실행할 때:
 
-- Break into smaller, focused tests
-- Test one behavior at a time
-- Use test fixtures for complex setup
+1단계 - 요구사항 이해:
 
-Implementation Grows Too Fast:
+- 기능 범위를 위한 SPEC 문서 읽기
+- 인수 기준에서 테스트 케이스 식별
+- 테스트 구현 순서 계획
 
-- Resist urge to implement untested features
-- Return to RED phase for new functionality
-- Keep GREEN phase minimal
+2단계 - RED 단계:
 
-Refactoring Breaks Tests:
+- 첫 번째 실패하는 테스트 작성
+- 올바른 이유로 테스트가 실패하는지 확인
+- 기대 동작 문서화
 
-- Revert immediately
-- Refactor in smaller steps
-- Ensure tests verify behavior, not implementation
+3단계 - GREEN 단계:
 
-### Recovery Procedures
+- 최소한의 구현 작성
+- 테스트를 실행하여 통과하는지 확인
+- 다음 테스트로 이동
 
-When TDD discipline breaks down:
+4단계 - REFACTOR 단계:
 
-- Stop and assess current state
-- Write characterization tests for existing code
-- Resume TDD for remaining features
-- Consider switching to Hybrid mode
+- 개선을 위한 코드 검토
+- 테스트를 안전망으로 활용하여 리팩토링 적용
+- 깔끔한 코드 커밋
+
+5단계 - 반복:
+
+- RED-GREEN-REFACTOR 사이클 계속
+- 모든 요구사항이 구현될 때까지
+- 모든 인수 기준이 통과될 때까지
+
+### TDD 루프 패턴
+
+여러 테스트 케이스가 필요한 기능의 경우:
+
+- 처음에 모든 테스트 케이스를 식별합니다
+- 의존성과 복잡성에 따라 우선순위를 정합니다
+- 각각에 대해 RED-GREEN-REFACTOR를 실행합니다
+- 누적 테스트 스위트를 유지합니다
+
+---
+
+## 품질 지표
+
+### TDD 성공 기준
+
+테스트 커버리지 (필수):
+
+- 커밋당 최소 80% 커버리지
+- 새 코드에 대해 90% 권장
+- 모든 공개 인터페이스 테스트
+
+코드 품질 (목표):
+
+- 모든 테스트 통과
+- 구현 이후에 테스트 작성 없음
+- 동작을 문서화하는 명확한 테스트 이름
+- 테스트를 만족시키는 최소한의 구현
+
+### TDD 특화 TRUST 검증
+
+TDD 포커스로 TRUST 5 프레임워크 적용:
+
+- Testability: 테스트 우선 접근 방식이 테스트 가능성 보장
+- Readability: 테스트가 기대 동작 문서화
+- Understandability: 테스트가 살아있는 문서 역할
+- Security: 구현 전에 보안 테스트 작성
+- Transparency: 테스트 실패가 즉각적인 피드백 제공
+
+---
+
+## 통합 지점
+
+### DDD 워크플로우와의 통합
+
+TDD와 DDD는 상호 보완적입니다:
+
+- 새 코드에는 TDD
+- 기존 코드 리팩토링에는 DDD
+- Hybrid 모드에서는 두 접근 방식을 결합
+
+### 테스팅 워크플로우와의 통합
+
+TDD는 테스팅 워크플로우와 통합됩니다:
+
+- 명세서 테스트 사용
+- 커버리지 도구와 통합
+- 테스트 품질을 위한 뮤테이션 테스팅 지원
+
+### 품질 프레임워크와의 통합
+
+TDD 출력은 품질 평가에 반영됩니다:
+
+- 커버리지 지표 추적
+- 변경사항에 대한 TRUST 5 검증
+- 품질 게이트가 기준 적용
+
+---
+
+## 문제 해결
+
+### 일반적인 이슈
+
+테스트가 너무 복잡한 경우:
+
+- 더 작고 집중적인 테스트로 분해합니다
+- 한 번에 하나의 동작을 테스트합니다
+- 복잡한 설정에는 테스트 픽스처를 사용합니다
+
+구현이 너무 빠르게 성장하는 경우:
+
+- 테스트되지 않은 기능을 구현하려는 충동을 억제합니다
+- 새 기능에는 RED 단계로 돌아갑니다
+- GREEN 단계를 최소한으로 유지합니다
+
+리팩토링이 테스트를 깨뜨리는 경우:
+
+- 즉시 되돌립니다
+- 더 작은 단계로 리팩토링합니다
+- 테스트가 구현이 아닌 동작을 검증하는지 확인합니다
+
+### 복구 절차
+
+TDD 규율이 무너지면:
+
+- 멈추고 현재 상태를 평가합니다
+- 기존 코드에 대한 특성화 테스트를 작성합니다
+- 나머지 기능에 대해 TDD를 재개합니다
+- Hybrid 모드로 전환하는 것을 고려합니다
 
 ---
 

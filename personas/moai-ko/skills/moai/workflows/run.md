@@ -1,9 +1,9 @@
 ---
 name: moai-workflow-run
 description: >
-  DDD/TDD/Hybrid implementation workflow for SPEC requirements. Second step
-  of the Plan-Run-Sync workflow. Routes to manager-ddd or manager-tdd based
-  on quality.yaml development_mode setting.
+  SPEC 요구사항에 대한 DDD/TDD/Hybrid 구현 워크플로우입니다. Plan-Run-Sync 워크플로우의
+  두 번째 단계입니다. quality.yaml의 development_mode 설정에 따라 manager-ddd 또는
+  manager-tdd로 라우팅합니다.
 license: Apache-2.0
 compatibility: Designed for Claude Code
 user-invocable: false
@@ -27,335 +27,335 @@ triggers:
   phases: ["run"]
 ---
 
-# Run Workflow Orchestration
+# Run 워크플로우 오케스트레이션
 
-## Purpose
+## 목적
 
-Implement SPEC requirements using the configured development methodology. The methodology is determined by `development_mode` in quality.yaml:
+설정된 개발 방법론을 사용하여 SPEC 요구사항을 구현합니다. 방법론은 quality.yaml의 `development_mode`에 의해 결정됩니다:
 
-- **ddd**: Domain-Driven Development using ANALYZE-PRESERVE-IMPROVE cycle (for legacy refactoring only)
-- **tdd**: Test-Driven Development using RED-GREEN-REFACTOR cycle (for isolated new modules)
-- **hybrid**: Combined approach - TDD for new code, DDD for existing code modifications (recommended for all development)
+- **ddd**: ANALYZE-PRESERVE-IMPROVE 사이클을 사용하는 도메인 주도 개발 (레거시 리팩토링 전용)
+- **tdd**: RED-GREEN-REFACTOR 사이클을 사용하는 테스트 주도 개발 (격리된 신규 모듈용)
+- **hybrid**: 새 코드에는 TDD, 기존 코드 수정에는 DDD를 사용하는 통합 접근 방식 (모든 개발에 권장)
 
-This is the second step of the Plan-Run-Sync workflow.
+이것은 Plan-Run-Sync 워크플로우의 두 번째 단계입니다.
 
-## Scope
+## 범위
 
-- Implements Step 3 of MoAI's 4-step workflow (Task Execution)
-- Receives SPEC documents created by /moai plan
-- Hands off to /moai sync for documentation and PR
+- MoAI 4단계 워크플로우의 3단계 구현 (작업 실행)
+- /moai plan으로 생성된 SPEC 문서를 입력으로 받음
+- 문서화 및 PR을 위해 /moai sync로 인계
 
-## Input
+## 입력
 
-- $ARGUMENTS: SPEC-ID to implement (e.g., SPEC-AUTH-001)
-- Resume: Re-running /moai run SPEC-XXX resumes from last successful phase checkpoint
-- --team: Enable team-based implementation (see team-run.md for parallel implementation team)
+- $ARGUMENTS: 구현할 SPEC-ID (예: SPEC-AUTH-001)
+- 재개: /moai run SPEC-XXX 재실행 시 마지막 성공한 단계 체크포인트에서 재개
+- --team: 팀 기반 구현 활성화 (병렬 구현 팀은 team-run.md 참조)
 
-## Context Loading
+## 컨텍스트 로딩
 
-Before execution, load these essential files:
+실행 전 다음 필수 파일을 로드하세요:
 
-- .moai/config/config.yaml (git strategy, automation settings)
-- .moai/config/sections/quality.yaml (coverage targets, TRUST 5 settings)
-- .moai/config/sections/git-strategy.yaml (auto_branch, branch creation policy)
-- .moai/config/sections/language.yaml (git_commit_messages setting)
-- .moai/specs/SPEC-{ID}/ directory (spec.md, plan.md, acceptance.md)
+- .moai/config/config.yaml (git 전략, 자동화 설정)
+- .moai/config/sections/quality.yaml (커버리지 목표, TRUST 5 설정)
+- .moai/config/sections/git-strategy.yaml (auto_branch, 브랜치 생성 정책)
+- .moai/config/sections/language.yaml (git_commit_messages 설정)
+- .moai/specs/SPEC-{ID}/ 디렉토리 (spec.md, plan.md, acceptance.md)
 
-Pre-execution commands: git status, git branch, git log, git diff.
+실행 전 명령어: git status, git branch, git log, git diff.
 
 ---
 
-## Phase Sequence
+## 단계 순서
 
-All phases execute sequentially. Each phase receives outputs from all previous phases as context. Parallel execution is not permitted because DDD methodology mandates specific ordering.
+모든 단계는 순차적으로 실행됩니다. 각 단계는 이전 모든 단계의 출력을 컨텍스트로 받습니다. DDD 방법론이 특정 순서를 요구하므로 병렬 실행은 허용되지 않습니다.
 
-### Phase 1: Analysis and Planning
+### Phase 1: 분석 및 계획
 
-Agent: manager-strategy subagent
+에이전트: manager-strategy 서브에이전트
 
-Input: SPEC document content from the provided SPEC-ID.
+입력: 제공된 SPEC-ID의 SPEC 문서 내용.
 
-Tasks for manager-strategy:
+manager-strategy의 작업:
 
-- Read and fully analyze the SPEC document
-- Extract requirements and success criteria
-- Identify implementation phases and individual tasks
-- Determine tech stack and dependencies required
-- Estimate complexity and effort
-- Create detailed execution strategy with phased approach
+- SPEC 문서 전체 읽기 및 분석
+- 요구사항 및 성공 기준 추출
+- 구현 단계 및 개별 작업 식별
+- 필요한 기술 스택 및 의존성 결정
+- 복잡도 및 작업량 추정
+- 단계별 접근 방식을 포함한 상세 실행 전략 수립
 
-Output: Execution plan containing plan_summary, requirements list, success_criteria, and effort_estimate.
+출력: plan_summary, 요구사항 목록, success_criteria, effort_estimate를 포함한 실행 계획.
 
-### Decision Point 1: Plan Approval
+### 결정 지점 1: 계획 승인
 
-Tool: AskUserQuestion (at orchestrator level)
+도구: AskUserQuestion (오케스트레이터 레벨)
 
-Options:
+옵션:
 
-- Proceed with plan (continue to Phase 1.5)
-- Modify plan (collect feedback, re-run Phase 1)
-- Postpone (exit, continue later)
+- 계획대로 진행 (Phase 1.5로 계속)
+- 계획 수정 (피드백 수집, Phase 1 재실행)
+- 연기 (종료, 나중에 계속)
 
-If user does not select "Proceed": Exit execution.
+사용자가 "진행"을 선택하지 않으면: 실행 종료.
 
-### Phase 1.5: Task Decomposition
+### Phase 1.5: 작업 분해
 
-Agent: manager-strategy subagent (continuation)
+에이전트: manager-strategy 서브에이전트 (계속)
 
-Purpose: Decompose the approved execution plan into atomic, reviewable tasks following SDD 2025 standard.
+목적: 승인된 실행 계획을 SDD 2025 표준에 따른 원자적이고 검토 가능한 작업으로 분해합니다.
 
-Tasks for manager-strategy:
+manager-strategy의 작업:
 
-- Decompose plan into atomic implementation tasks
-- Each task must be completable in a single DDD/TDD cycle
-- Assign priority and dependencies for each task
-- Generate task tracking entries for progress visibility
-- Verify task coverage matches all SPEC requirements
+- 계획을 원자적 구현 작업으로 분해
+- 각 작업은 단일 DDD/TDD 사이클에서 완료 가능해야 함
+- 각 작업에 우선순위 및 의존성 할당
+- 진행 상황 가시성을 위한 작업 추적 항목 생성
+- 작업 범위가 모든 SPEC 요구사항을 충족하는지 확인
 
-Task structure for each decomposed task:
+각 분해된 작업의 구조:
 
-- Task ID: Sequential within SPEC (TASK-001, TASK-002, etc.)
-- Description: Clear action statement
-- Requirement Mapping: Which SPEC requirement it fulfills
-- Dependencies: List of prerequisite tasks
-- Acceptance Criteria: How to verify completion
+- 작업 ID: SPEC 내 순차적 (TASK-001, TASK-002 등)
+- 설명: 명확한 액션 문장
+- 요구사항 매핑: 충족하는 SPEC 요구사항
+- 의존성: 선행 작업 목록
+- 인수 기준: 완료 검증 방법
 
-Constraints: Decompose into atomic tasks where each task completes in a single DDD/TDD cycle. No artificial limit on task count. If the SPEC itself is too complex, consider splitting the SPEC.
+제약 조건: 각 작업이 단일 DDD/TDD 사이클에서 완료되는 원자적 작업으로 분해합니다. 작업 수에 인위적인 제한 없음. SPEC 자체가 너무 복잡한 경우 SPEC 분할을 고려하세요.
 
-Output: Task list with coverage_verified flag set to true.
+출력: coverage_verified 플래그가 true로 설정된 작업 목록.
 
-### Development Mode Routing
+### 개발 모드 라우팅
 
-Before Phase 2, determine the development methodology by reading `.moai/config/sections/quality.yaml`:
+Phase 2 전에 `.moai/config/sections/quality.yaml`을 읽어 개발 방법론을 결정합니다:
 
-**If development_mode is "ddd":**
-- Route all tasks to manager-ddd subagent
-- Use ANALYZE-PRESERVE-IMPROVE cycle
-- Focus on behavior preservation with characterization tests
+**development_mode가 "ddd"인 경우:**
+- 모든 작업을 manager-ddd 서브에이전트로 라우팅
+- ANALYZE-PRESERVE-IMPROVE 사이클 사용
+- 특성화 테스트를 통한 동작 보존에 집중
 
-**If development_mode is "tdd":**
-- Route all tasks to manager-tdd subagent
-- Use RED-GREEN-REFACTOR cycle
-- Focus on test-first development with specification tests
+**development_mode가 "tdd"인 경우:**
+- 모든 작업을 manager-tdd 서브에이전트로 라우팅
+- RED-GREEN-REFACTOR 사이클 사용
+- 명세 테스트를 통한 테스트 우선 개발에 집중
 
-**If development_mode is "hybrid" (recommended):**
-- Classify each task by change type:
-  - New files → Route to manager-tdd (TDD workflow)
-  - New functions in existing files → Route to manager-tdd (TDD workflow)
-  - Modifications to existing code → Route to manager-ddd (DDD workflow)
-  - Refactoring existing code → Route to manager-ddd (DDD workflow)
-- Execute tasks in dependency order, routing to appropriate agent per task
+**development_mode가 "hybrid" (권장)인 경우:**
+- 변경 유형별로 각 작업 분류:
+  - 새 파일 → manager-tdd로 라우팅 (TDD 워크플로우)
+  - 기존 파일의 새 함수 → manager-tdd로 라우팅 (TDD 워크플로우)
+  - 기존 코드 수정 → manager-ddd로 라우팅 (DDD 워크플로우)
+  - 기존 코드 리팩토링 → manager-ddd로 라우팅 (DDD 워크플로우)
+- 의존성 순서대로 작업 실행, 작업별로 적절한 에이전트로 라우팅
 
-### Phase 2: Implementation (Mode-Dependent)
+### Phase 2: 구현 (모드 의존적)
 
-#### Phase 2A: DDD Implementation (for ddd mode or legacy code in hybrid mode)
+#### Phase 2A: DDD 구현 (ddd 모드 또는 hybrid 모드의 레거시 코드)
 
-Agent: manager-ddd subagent
+에이전트: manager-ddd 서브에이전트
 
-Input: Approved execution plan from Phase 1 plus task decomposition from Phase 1.5.
+입력: Phase 1의 승인된 실행 계획 + Phase 1.5의 작업 분해.
 
-The DDD cycle executes three stages:
+DDD 사이클은 세 단계로 실행됩니다:
 
-- ANALYZE: Identify domain boundaries, coupling metrics, and refactoring targets. Read existing code and map dependencies.
-- PRESERVE: Verify existing tests. Create characterization tests for uncovered code paths to establish a safety net before changes.
-- IMPROVE: Apply incremental transformations with continuous verification. Run all tests after each transformation.
+- ANALYZE: 도메인 경계, 결합 지표, 리팩토링 대상 식별. 기존 코드 읽기 및 의존성 매핑.
+- PRESERVE: 기존 테스트 확인. 변경 전 안전망 구축을 위해 커버되지 않은 코드 경로에 대한 특성화 테스트 생성.
+- IMPROVE: 지속적인 검증을 통한 점진적 변환 적용. 각 변환 후 모든 테스트 실행.
 
-Requirements:
+요구사항:
 
-- Initialize task tracking for progress across refactoring steps
-- Execute the complete ANALYZE-PRESERVE-IMPROVE cycle
-- Verify all existing tests pass after each transformation
-- Create characterization tests for uncovered code paths
-- Ensure test coverage meets or exceeds 85%
+- 리팩토링 단계 전반의 진행 상황 추적을 위한 작업 추적 초기화
+- 완전한 ANALYZE-PRESERVE-IMPROVE 사이클 실행
+- 각 변환 후 모든 기존 테스트 통과 확인
+- 커버되지 않은 코드 경로에 대한 특성화 테스트 생성
+- 테스트 커버리지 85% 이상 달성
 
-Output: files_modified list, characterization_tests_created list, test_results (all passing), behavior_preserved flag, structural_metrics comparison, implementation_divergence report.
+출력: files_modified 목록, characterization_tests_created 목록, test_results (모두 통과), behavior_preserved 플래그, structural_metrics 비교, implementation_divergence 보고서.
 
-Implementation Divergence Tracking:
+구현 편차 추적:
 
-The manager-ddd subagent must track deviations from the original SPEC plan during implementation:
+manager-ddd 서브에이전트는 구현 중 원래 SPEC 계획과의 편차를 추적해야 합니다:
 
-- planned_files: Files listed in plan.md that were expected to be created or modified
-- actual_files: Files actually created or modified during the DDD cycle
-- additional_features: Features or capabilities implemented beyond the original SPEC scope (with rationale)
-- scope_changes: Description of any scope adjustments made during implementation (expansions, deferrals, or substitutions)
-- new_dependencies: Any new libraries, packages, or external dependencies introduced
-- new_directories: Any new directory structures created
+- planned_files: plan.md에 나열된 생성 또는 수정 예정 파일
+- actual_files: DDD 사이클 중 실제 생성 또는 수정된 파일
+- additional_features: 원래 SPEC 범위를 넘어 구현된 기능 또는 기능 (근거 포함)
+- scope_changes: 구현 중 수행된 범위 조정 설명 (확장, 연기 또는 대체)
+- new_dependencies: 도입된 새 라이브러리, 패키지 또는 외부 의존성
+- new_directories: 생성된 새 디렉토리 구조
 
-This divergence data is consumed by /moai sync for SPEC document updates and project document synchronization.
+이 편차 데이터는 SPEC 문서 업데이트 및 프로젝트 문서 동기화를 위해 /moai sync에서 사용됩니다.
 
-#### Phase 2B: TDD Implementation (for tdd mode or new code in hybrid mode)
+#### Phase 2B: TDD 구현 (tdd 모드 또는 hybrid 모드의 새 코드)
 
-Agent: manager-tdd subagent
+에이전트: manager-tdd 서브에이전트
 
-Input: Approved execution plan from Phase 1 plus task decomposition from Phase 1.5.
+입력: Phase 1의 승인된 실행 계획 + Phase 1.5의 작업 분해.
 
-The TDD cycle executes three stages:
+TDD 사이클은 세 단계로 실행됩니다:
 
-- RED: Write specification tests that define expected behavior. Tests must fail initially (confirms they test something new).
-- GREEN: Write minimal implementation code to make tests pass. Focus on correctness, not elegance.
-- REFACTOR: Improve code structure while keeping tests green. Apply clean code principles.
+- RED: 예상 동작을 정의하는 명세 테스트 작성. 테스트는 초기에 실패해야 합니다 (새로운 것을 테스트한다는 것을 확인).
+- GREEN: 테스트를 통과하는 최소한의 구현 코드 작성. 정확성에 집중, 우아함은 나중에.
+- REFACTOR: 테스트를 통과하는 상태를 유지하면서 코드 구조 개선. 클린 코드 원칙 적용.
 
-Requirements:
+요구사항:
 
-- Initialize task tracking for progress across TDD cycles
-- Execute the complete RED-GREEN-REFACTOR cycle for each feature
-- Write tests before implementation (test-first discipline)
-- Ensure minimum 80% coverage per commit (85% recommended for new code)
+- TDD 사이클 전반의 진행 상황 추적을 위한 작업 추적 초기화
+- 각 기능에 대한 완전한 RED-GREEN-REFACTOR 사이클 실행
+- 구현 전 테스트 작성 (테스트 우선 원칙)
+- 커밋당 최소 80% 커버리지 (새 코드에는 85% 권장)
 
-Output: files_created list, specification_tests_created list, test_results (all passing), coverage percentage, refactoring_improvements list, implementation_divergence report.
+출력: files_created 목록, specification_tests_created 목록, test_results (모두 통과), coverage 퍼센트, refactoring_improvements 목록, implementation_divergence 보고서.
 
-Implementation Divergence Tracking:
+구현 편차 추적:
 
-The manager-tdd subagent must track deviations from the original SPEC plan during implementation:
+manager-tdd 서브에이전트는 구현 중 원래 SPEC 계획과의 편차를 추적해야 합니다:
 
-- planned_files: Files listed in plan.md that were expected to be created
-- actual_files: Files actually created during the TDD cycle
-- additional_features: Features or capabilities implemented beyond the original SPEC scope (with rationale)
-- scope_changes: Description of any scope adjustments made during implementation
-- new_dependencies: Any new libraries, packages, or external dependencies introduced
-- new_directories: Any new directory structures created
+- planned_files: plan.md에 나열된 생성 예정 파일
+- actual_files: TDD 사이클 중 실제 생성된 파일
+- additional_features: 원래 SPEC 범위를 넘어 구현된 기능 또는 기능 (근거 포함)
+- scope_changes: 구현 중 수행된 범위 조정 설명
+- new_dependencies: 도입된 새 라이브러리, 패키지 또는 외부 의존성
+- new_directories: 생성된 새 디렉토리 구조
 
-This divergence data is consumed by /moai sync for SPEC document updates and project document synchronization.
+이 편차 데이터는 SPEC 문서 업데이트 및 프로젝트 문서 동기화를 위해 /moai sync에서 사용됩니다.
 
-### Phase 2.5: Quality Validation
+### Phase 2.5: 품질 검증
 
-Agent: manager-quality subagent
+에이전트: manager-quality 서브에이전트
 
-Input: Both Phase 1 planning context and Phase 2 implementation results.
+입력: Phase 1 계획 컨텍스트와 Phase 2 구현 결과 모두.
 
-TRUST 5 validation checks:
+TRUST 5 검증 항목:
 
-- Tested: Tests exist and pass before changes. Test-driven design discipline maintained.
-- Readable: Code follows project conventions and includes documentation.
-- Unified: Implementation follows existing project patterns.
-- Secured: No security vulnerabilities introduced. OWASP compliance verified.
-- Trackable: All changes logged with clear commit messages. History analysis supported.
+- Tested: 변경 전 테스트가 존재하고 통과. 테스트 주도 설계 원칙 유지.
+- Readable: 코드가 프로젝트 관례를 따르고 문서 포함.
+- Unified: 구현이 기존 프로젝트 패턴을 따름.
+- Secured: 보안 취약점 없음. OWASP 준수 확인.
+- Trackable: 모든 변경 사항이 명확한 커밋 메시지로 기록됨. 히스토리 분석 지원.
 
-Additional validation (mode-dependent):
+추가 검증 (모드 의존적):
 
-For DDD mode:
-- Test coverage at least 85%
-- Behavior preservation: All existing tests pass unchanged
-- Characterization tests pass: Behavior snapshots match
-- Structural improvement: Coupling and cohesion metrics improved
+DDD 모드의 경우:
+- 테스트 커버리지 85% 이상
+- 동작 보존: 모든 기존 테스트가 변경 없이 통과
+- 특성화 테스트 통과: 동작 스냅샷 일치
+- 구조적 개선: 결합 및 응집 지표 개선
 
-For TDD mode:
-- Test coverage at least 80% per commit (85% recommended for new code)
-- Test-first discipline: No code written without failing test first
-- All specification tests pass
-- Clean code principles applied in REFACTOR phase
+TDD 모드의 경우:
+- 커밋당 테스트 커버리지 80% 이상 (새 코드에는 85% 권장)
+- 테스트 우선 원칙: 실패 테스트 없이 코드 작성 금지
+- 모든 명세 테스트 통과
+- REFACTOR 단계에서 클린 코드 원칙 적용
 
-For Hybrid mode:
-- New code: TDD coverage targets (85% for new files)
-- Modified code: DDD coverage targets (85% with behavior preservation)
-- Overall coverage improvement trend maintained
+Hybrid 모드의 경우:
+- 새 코드: TDD 커버리지 목표 (새 파일 85%)
+- 수정된 코드: DDD 커버리지 목표 (동작 보존 포함 85%)
+- 전반적인 커버리지 개선 추세 유지
 
-Output: trust_5_validation results per pillar, coverage percentage, overall status (PASS, WARNING, or CRITICAL), and issues_found list.
+출력: 항목별 trust_5_validation 결과, coverage 퍼센트, 전반적인 상태 (PASS, WARNING, 또는 CRITICAL), issues_found 목록.
 
-### Quality Gate Decision
+### 품질 게이트 결정
 
-If status is CRITICAL:
+상태가 CRITICAL인 경우:
 
-- Present quality issues to user via AskUserQuestion
-- Option to return to implementation phase for fixes
-- Exit current execution flow
+- AskUserQuestion을 통해 사용자에게 품질 이슈 제시
+- 수정을 위해 구현 단계로 돌아가는 옵션
+- 현재 실행 흐름 종료
 
-If status is PASS or WARNING: Continue to Phase 3.
+상태가 PASS 또는 WARNING인 경우: Phase 3으로 계속.
 
-### LSP Quality Gates
+### LSP 품질 게이트
 
-The run phase enforces LSP-based quality gates as configured in quality.yaml:
-- Zero LSP errors required (lsp_quality_gates.run.max_errors: 0)
-- Zero type errors required (lsp_quality_gates.run.max_type_errors: 0)
-- Zero lint errors required (lsp_quality_gates.run.max_lint_errors: 0)
-- No regression from baseline allowed (lsp_quality_gates.run.allow_regression: false)
+실행 단계는 quality.yaml에 설정된 LSP 기반 품질 게이트를 적용합니다:
+- LSP 오류 없음 필수 (lsp_quality_gates.run.max_errors: 0)
+- 타입 오류 없음 필수 (lsp_quality_gates.run.max_type_errors: 0)
+- 린트 오류 없음 필수 (lsp_quality_gates.run.max_lint_errors: 0)
+- 기준선 대비 회귀 불허 (lsp_quality_gates.run.allow_regression: false)
 
-### Phase 3: Git Operations (Conditional)
+### Phase 3: Git 작업 (조건부)
 
-Agent: manager-git subagent
+에이전트: manager-git 서브에이전트
 
-Input: Full context from Phases 1, 2, and 2.5.
+입력: Phase 1, 2, 2.5의 전체 컨텍스트.
 
-Execution conditions:
+실행 조건:
 
-- quality_status is PASS or WARNING
-- If config git_strategy.automation.auto_branch is true: Create feature branch feature/SPEC-{ID}
-- If auto_branch is false: Commit directly to current branch
+- quality_status가 PASS 또는 WARNING
+- 설정 git_strategy.automation.auto_branch가 true인 경우: feature/SPEC-{ID} 기능 브랜치 생성
+- auto_branch가 false인 경우: 현재 브랜치에 직접 커밋
 
-Tasks for manager-git:
+manager-git의 작업:
 
-- Create feature branch (if auto_branch enabled)
-- Stage all relevant implementation and test files
-- Create commits with conventional commit messages
-- Verify each commit was created successfully
+- 기능 브랜치 생성 (auto_branch 활성화 시)
+- 모든 관련 구현 및 테스트 파일 스테이징
+- 컨벤셔널 커밋 메시지로 커밋 생성
+- 각 커밋이 성공적으로 생성됐는지 확인
 
-Output: branch_name, commits array (sha and message), files_staged count, status.
+출력: branch_name, commits 배열 (sha와 message), files_staged 수, status.
 
-### Phase 4: Completion and Guidance
+### Phase 4: 완료 및 안내
 
-Tool: AskUserQuestion (at orchestrator level)
+도구: AskUserQuestion (오케스트레이터 레벨)
 
-Display implementation summary:
+구현 요약 표시:
 
-- Files created count
-- Tests passing count
-- Coverage percentage
-- Commits count
+- 생성된 파일 수
+- 통과된 테스트 수
+- 커버리지 퍼센트
+- 커밋 수
 
-Options:
+옵션:
 
-- Sync Documentation (recommended): Execute /moai sync to synchronize docs and create PR
-- Implement Another Feature: Return to /moai plan for additional SPEC
-- Review Results: Examine implementation and test coverage locally
-- Finish: Session complete
+- 문서 동기화 (권장): /moai sync 실행하여 문서 동기화 및 PR 생성
+- 다른 기능 구현: 추가 SPEC을 위해 /moai plan으로 돌아가기
+- 결과 검토: 구현 및 테스트 커버리지 로컬 검토
+- 완료: 세션 종료
 
 ---
 
-## Team Mode Routing
+## 팀 모드 라우팅
 
-When --team flag is provided or auto-selected, the run phase MUST switch to team orchestration:
+--team 플래그가 제공되거나 자동 선택된 경우, 실행 단계는 반드시 팀 오케스트레이션으로 전환해야 합니다:
 
-1. Verify prerequisites: workflow.team.enabled == true AND CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 env var is set
-2. If prerequisites met: Read workflows/team-run.md and execute the team workflow (TeamCreate with backend-dev + frontend-dev + tester + quality)
-3. If prerequisites NOT met: Warn user with message "Team mode requires workflow.team.enabled: true in workflow.yaml and CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 env var" then fallback to standard sub-agent mode (manager-ddd/tdd based on development_mode)
+1. 전제 조건 확인: workflow.team.enabled == true AND CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 환경변수 설정
+2. 전제 조건 충족 시: workflows/team-run.md를 읽고 팀 워크플로우 실행 (backend-dev + frontend-dev + tester + quality와 함께 TeamCreate)
+3. 전제 조건 미충족 시: "팀 모드는 workflow.yaml에서 workflow.team.enabled: true 설정과 CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 환경변수가 필요합니다"라고 사용자에게 경고 후 표준 서브에이전트 모드 (development_mode 기반 manager-ddd/tdd)로 폴백
 
-Team composition: backend-dev (inherit) + frontend-dev (inherit) + tester (inherit) + quality (inherit, read-only)
+팀 구성: backend-dev (inherit) + frontend-dev (inherit) + tester (inherit) + quality (inherit, 읽기 전용)
 
-For detailed team orchestration steps, see workflows/team-run.md.
-
----
-
-## Context Propagation
-
-Context flows forward through every phase:
-
-- Phase 1 to Phase 2: Execution plan with architecture decisions guides implementation
-- Phase 2 to Phase 2.5: Implementation code plus planning context enables context-aware validation
-- Phase 2.5 to Phase 3: Quality findings enable semantically meaningful commit messages
-- Phase 2 to /moai sync: Implementation divergence report enables accurate SPEC and project document updates
-
-Benefits: No re-analysis between phases. Architectural decisions propagate naturally. Commits explain both what changed and why. Divergence tracking ensures sync phase can accurately update SPEC and project documents.
+상세한 팀 오케스트레이션 단계는 workflows/team-run.md를 참조하세요.
 
 ---
 
-## Completion Criteria
+## 컨텍스트 전파
 
-All of the following must be verified:
+컨텍스트는 모든 단계를 통해 앞으로 전달됩니다:
 
-- Phase 1: manager-strategy returned execution plan with requirements and success criteria
-- User approval checkpoint blocked Phase 2 until user confirmed
-- Phase 1.5: Tasks decomposed with requirement traceability
-- Phase 2: Implementation completed according to development_mode:
-  - DDD mode: manager-ddd executed ANALYZE-PRESERVE-IMPROVE with 85%+ coverage
-  - TDD mode: manager-tdd executed RED-GREEN-REFACTOR with 85%+ coverage
-  - Hybrid mode: Appropriate agent per task type with 85%+ unified coverage target
-- Phase 2.5: manager-quality completed TRUST 5 validation with PASS or WARNING status
-- Quality gate blocked Phase 3 if status was CRITICAL
-- Phase 3: manager-git created commits (branch or direct) only if quality permitted
-- Phase 4: User presented with next step options
+- Phase 1 → Phase 2: 아키텍처 결정을 포함한 실행 계획이 구현을 안내
+- Phase 2 → Phase 2.5: 구현 코드와 계획 컨텍스트가 컨텍스트 인식 검증을 가능하게 함
+- Phase 2.5 → Phase 3: 품질 발견사항이 의미 있는 커밋 메시지를 가능하게 함
+- Phase 2 → /moai sync: 구현 편차 보고서가 SPEC 및 프로젝트 문서의 정확한 업데이트를 가능하게 함
+
+이점: 단계 간 재분석 없음. 아키텍처 결정이 자연스럽게 전파됨. 커밋이 변경된 내용과 이유 모두 설명. 편차 추적으로 동기화 단계가 SPEC 및 프로젝트 문서를 정확하게 업데이트할 수 있음.
+
+---
+
+## 완료 기준
+
+다음 사항을 모두 확인해야 합니다:
+
+- Phase 1: manager-strategy가 요구사항 및 성공 기준을 포함한 실행 계획 반환
+- 사용자 승인 체크포인트가 사용자 확인 전까지 Phase 2를 차단
+- Phase 1.5: 요구사항 추적성을 가진 작업 분해 완료
+- Phase 2: development_mode에 따른 구현 완료:
+  - DDD 모드: manager-ddd가 85%+ 커버리지로 ANALYZE-PRESERVE-IMPROVE 실행
+  - TDD 모드: manager-tdd가 85%+ 커버리지로 RED-GREEN-REFACTOR 실행
+  - Hybrid 모드: 작업 유형별 적절한 에이전트로 85%+ 통합 커버리지 목표 달성
+- Phase 2.5: manager-quality가 PASS 또는 WARNING 상태로 TRUST 5 검증 완료
+- 품질 게이트가 상태 CRITICAL인 경우 Phase 3 차단
+- Phase 3: 품질이 허용된 경우에만 manager-git이 커밋 생성 (브랜치 또는 직접)
+- Phase 4: 사용자에게 다음 단계 옵션 제시
 
 ---
 
 Version: 2.0.0
 Updated: 2026-02-07
-Source: Extracted from .claude/commands/moai/2-run.md v5.0.0. Added implementation divergence tracking, development_mode routing (ddd/tdd/hybrid), team mode support, and LSP quality gates.
+Source: .claude/commands/moai/2-run.md v5.0.0에서 추출. 구현 편차 추적, development_mode 라우팅 (ddd/tdd/hybrid), 팀 모드 지원, LSP 품질 게이트 추가.

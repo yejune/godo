@@ -1,269 +1,269 @@
-# Domain-Driven Development with Context7 Integration
+# Context7 통합 도메인 주도 개발
 
-> Module: ANALYZE-PRESERVE-IMPROVE DDD cycle with Context7 patterns and AI-powered testing
-> Complexity: Advanced
-> Time: 25+ minutes
-> Dependencies: Python 3.8+, pytest, Context7 MCP, unittest, asyncio
+> 모듈: Context7 패턴과 AI 기반 테스팅을 포함한 ANALYZE-PRESERVE-IMPROVE DDD 사이클
+> 복잡도: 고급
+> 소요 시간: 25분+
+> 의존성: Python 3.8+, pytest, Context7 MCP, unittest, asyncio
 
-## Overview
+## 개요
 
-DDD Context7 integration provides a comprehensive domain-driven development workflow with AI-powered test generation, Context7-enhanced testing patterns, and automated best practices enforcement.
+DDD Context7 통합은 AI 기반 테스트 생성, Context7 강화 테스팅 패턴, 자동화된 모범 사례 적용을 포함한 포괄적인 도메인 주도 개발 워크플로우를 제공합니다.
 
-### Key Features
+### 주요 기능
 
-- AI-Powered Test Generation: Generate comprehensive test suites from specifications
-- Context7 Integration: Access latest testing patterns and best practices
-- ANALYZE-PRESERVE-IMPROVE Cycle: Complete DDD workflow implementation
-- Advanced Testing: Property-based testing, mutation testing, continuous testing
-- Test Patterns: Comprehensive library of testing patterns and fixtures
+- AI 기반 테스트 생성: 명세에서 포괄적인 테스트 스위트 생성
+- Context7 통합: 최신 테스팅 패턴 및 모범 사례 접근
+- ANALYZE-PRESERVE-IMPROVE 사이클: 완전한 DDD 워크플로우 구현
+- 고급 테스팅: 속성 기반 테스팅, 변이 테스팅, 지속적 테스팅
+- 테스트 패턴: 포괄적인 테스팅 패턴 및 픽스처 라이브러리
 
-## Quick Start
+## 빠른 시작
 
-### Basic DDD Cycle
+### 기본 DDD 사이클
 
 ```python
 from moai_workflow_testing import DDDManager, TestSpecification, TestType
 
-# Initialize DDD Manager
+# DDD Manager 초기화
 ddd_manager = DDDManager(
     project_path="/path/to/project",
     context7_client=context7
 )
 
-# Start DDD session
+# DDD 세션 시작
 session = await ddd_manager.start_ddd_session("user_authentication_refactor")
 
-# Create test specification
+# 테스트 명세 생성
 test_spec = TestSpecification(
     name="test_user_login_behavior_preservation",
-    description="Preserve existing login behavior during refactoring",
+    description="리팩토링 중 기존 로그인 동작 보존",
     test_type=TestType.CHARACTERIZATION,
     requirements=[
-        "Existing login flow must continue to work",
-        "Error messages should remain consistent"
+        "기존 로그인 흐름이 계속 작동해야 함",
+        "오류 메시지가 일관성 있게 유지되어야 함"
     ],
     acceptance_criteria=[
-        "Valid credentials return user token (existing behavior)",
-        "Invalid credentials raise same error messages"
+        "유효한 자격증명이 사용자 토큰을 반환함 (기존 동작)",
+        "잘못된 자격증명이 동일한 오류 메시지를 발생시킴"
     ],
     edge_cases=[
-        "Test with empty email (existing behavior)",
-        "Test with empty password (existing behavior)"
+        "빈 이메일로 테스트 (기존 동작)",
+        "빈 비밀번호로 테스트 (기존 동작)"
     ]
 )
 
-# Run complete DDD cycle
+# 전체 DDD 사이클 실행
 cycle_results = await ddd_manager.run_full_ddd_cycle(
     specification=test_spec,
     target_function="authenticate_user"
 )
 ```
 
-## Core Components
+## 핵심 컴포넌트
 
-### DDD Cycle Phases
+### DDD 사이클 단계
 
-1. ANALYZE Phase: Understand existing code
-   - Analyze existing code structure and patterns
-   - Identify current behavior through code reading
-   - Document dependencies and side effects
-   - Map test coverage gaps
+1. ANALYZE 단계: 기존 코드 이해
+   - 기존 코드 구조 및 패턴 분석
+   - 코드 읽기를 통한 현재 동작 식별
+   - 의존성 및 부작용 문서화
+   - 테스트 커버리지 공백 매핑
 
-2. PRESERVE Phase: Create characterization tests
-   - Write characterization tests for existing behavior
-   - Capture current behavior as the "golden standard"
-   - Ensure tests pass with current implementation
-   - Create behavior snapshots for complex outputs
+2. PRESERVE 단계: 특성화 테스트 생성
+   - 기존 동작에 대한 특성화 테스트 작성
+   - 현재 동작을 "황금 표준"으로 캡처
+   - 현재 구현으로 테스트가 통과하는지 확인
+   - 복잡한 출력에 대한 동작 스냅샷 생성
 
-3. IMPROVE Phase: Refactor with behavior preservation
-   - Refactor code while keeping tests green
-   - Make small, incremental changes
-   - Run tests after each change
-   - Maintain behavior preservation
+3. IMPROVE 단계: 동작 보존과 함께 리팩토링
+   - 테스트를 통과하는 상태를 유지하며 코드 리팩토링
+   - 작고 점진적인 변경 수행
+   - 각 변경 후 테스트 실행
+   - 동작 보존 유지
 
-4. REVIEW Phase: Verify and commit
-   - Verify all characterization tests still pass
-   - Review code quality and documentation
-   - Check for any behavior changes
-   - Commit changes with clear messages
+4. REVIEW 단계: 검증 및 커밋
+   - 모든 특성화 테스트가 여전히 통과하는지 확인
+   - 코드 품질 및 문서화 검토
+   - 동작 변경 사항 확인
+   - 명확한 메시지로 변경 사항 커밋
 
-### Context7 Integration
+### Context7 통합
 
-The DDD Context7 integration provides:
+DDD Context7 통합은 다음을 제공합니다:
 
-- Pattern Loading: Access latest testing patterns from Context7
-- AI Test Generation: Enhanced test generation with Context7 patterns
-- Best Practices: Industry-standard testing practices
-- Edge Case Detection: Automatic edge case identification
-- Test Suggestions: AI-powered test improvement suggestions
+- 패턴 로딩: Context7에서 최신 테스팅 패턴 접근
+- AI 테스트 생성: Context7 패턴을 사용한 강화된 테스트 생성
+- 모범 사례: 업계 표준 테스팅 관행
+- 엣지 케이스 감지: 자동 엣지 케이스 식별
+- 테스트 제안: AI 기반 테스트 개선 제안
 
-## Module Structure
+## 모듈 구조
 
-### Core Modules
+### 핵심 모듈
 
-**ANALYZE-PRESERVE-IMPROVE Implementation** (`ddd-context7/analyze-preserve-improve.md`)
-- DDD cycle implementation
-- Test execution and validation
-- Coverage analysis
-- Session management
+**ANALYZE-PRESERVE-IMPROVE 구현** (`ddd-context7/analyze-preserve-improve.md`)
+- DDD 사이클 구현
+- 테스트 실행 및 검증
+- 커버리지 분석
+- 세션 관리
 
-**Test Generation** (`ddd-context7/test-generation.md`)
-- AI-powered test generation
-- Specification-based generation
-- Context7-enhanced generation
-- Template-based generation
+**테스트 생성** (`ddd-context7/test-generation.md`)
+- AI 기반 테스트 생성
+- 명세 기반 생성
+- Context7 강화 생성
+- 템플릿 기반 생성
 
-**Test Patterns** (`ddd-context7/test-patterns.md`)
-- Testing patterns and best practices
-- Pytest fixtures and organization
-- Test discovery structure
-- Coverage configuration
+**테스트 패턴** (`ddd-context7/test-patterns.md`)
+- 테스팅 패턴 및 모범 사례
+- Pytest 픽스처 및 구성
+- 테스트 탐색 구조
+- 커버리지 설정
 
-**Advanced Features** (`ddd-context7/advanced-features.md`)
-- Comprehensive test suite generation
-- Property-based testing
-- Mutation testing
-- Continuous testing
+**고급 기능** (`ddd-context7/advanced-features.md`)
+- 포괄적인 테스트 스위트 생성
+- 속성 기반 테스팅
+- 변이 테스팅
+- 지속적 테스팅
 
-## Common Use Cases
+## 일반적인 사용 사례
 
-### Behavior Preservation
+### 동작 보존
 
 ```python
-# Characterization test specification
+# 특성화 테스트 명세
 char_spec = TestSpecification(
     name="test_calculate_sum_existing_behavior",
-    description="Preserve existing sum calculation behavior",
+    description="기존 합계 계산 동작 보존",
     test_type=TestType.CHARACTERIZATION,
-    requirements=["Function should sum two numbers (existing behavior)"],
-    acceptance_criteria=["Returns correct sum as currently implemented"],
-    edge_cases=["Zero values", "Negative numbers", "Large numbers"]
+    requirements=["함수가 두 수를 더해야 함 (기존 동작)"],
+    acceptance_criteria=["현재 구현대로 올바른 합계 반환"],
+    edge_cases=["0 값", "음수", "큰 수"]
 )
 
 test_code = await test_generator.generate_test_case(char_spec)
 ```
 
-### Refactoring with Tests
+### 테스트와 함께 리팩토링
 
 ```python
-# Integration test specification for refactoring
+# 리팩토링을 위한 통합 테스트 명세
 refactor_spec = TestSpecification(
     name="test_database_integration_refactor",
-    description="Preserve database behavior during refactoring",
+    description="리팩토링 중 데이터베이스 동작 보존",
     test_type=TestType.INTEGRATION,
-    requirements=["Database connection", "Query execution"],
-    acceptance_criteria=["Connection succeeds as before", "Query returns same data"],
-    edge_cases=["Connection failure handling", "Empty results", "Large datasets"]
+    requirements=["데이터베이스 연결", "쿼리 실행"],
+    acceptance_criteria=["이전과 동일하게 연결 성공", "쿼리가 동일한 데이터 반환"],
+    edge_cases=["연결 실패 처리", "빈 결과", "대용량 데이터셋"]
 )
 ```
 
-### Exception Behavior Preservation
+### 예외 동작 보존
 
 ```python
-# Exception test specification
+# 예외 테스트 명세
 exception_spec = TestSpecification(
     name="test_divide_by_zero_existing_behavior",
-    description="Preserve division by zero exception handling",
+    description="0으로 나누기 예외 처리 보존",
     test_type=TestType.CHARACTERIZATION,
-    requirements=["Division function", "Error handling"],
-    acceptance_criteria=["Raises same ZeroDivisionError as before"],
-    edge_cases=["Divisor is zero", "Dividend is zero"]
+    requirements=["나누기 함수", "에러 처리"],
+    acceptance_criteria=["이전과 동일한 ZeroDivisionError 발생"],
+    edge_cases=["제수가 0", "피제수가 0"]
 )
 ```
 
-## Best Practices
+## 모범 사례
 
-### Test Design
+### 테스트 설계
 
-1. Characterization First: Write tests that capture existing behavior before changing code
-2. Descriptive Names: Test names should clearly describe what behavior is being preserved
-3. Arrange-Act-Assert: Structure tests with this pattern for clarity
-4. Independent Tests: Tests should not depend on each other
-5. Fast Execution: Keep tests fast for quick feedback
+1. 특성화 우선: 코드 변경 전에 기존 동작을 캡처하는 테스트 작성
+2. 서술적 이름: 테스트 이름은 어떤 동작이 보존되는지 명확하게 설명해야 함
+3. Arrange-Act-Assert: 명확성을 위해 이 패턴으로 테스트 구성
+4. 독립적인 테스트: 테스트가 서로에게 의존하지 않아야 함
+5. 빠른 실행: 빠른 피드백을 위해 테스트를 빠르게 유지
 
-### Context7 Integration
+### Context7 통합
 
-1. Pattern Loading: Load Context7 patterns for latest best practices
-2. Edge Case Detection: Use Context7 to identify missing edge cases
-3. Test Suggestions: Leverage AI suggestions for test improvements
-4. Quality Analysis: Use Context7 for test quality analysis
+1. 패턴 로딩: 최신 모범 사례를 위해 Context7 패턴 로드
+2. 엣지 케이스 감지: 누락된 엣지 케이스를 식별하기 위해 Context7 사용
+3. 테스트 제안: 테스트 개선을 위해 AI 제안 활용
+4. 품질 분석: 테스트 품질 분석을 위해 Context7 사용
 
-### DDD Workflow
+### DDD 워크플로우
 
-1. Analyze First: Always understand existing behavior before changing code
-2. Preserve with Tests: Create characterization tests before refactoring
-3. Keep Tests Green: Never commit failing tests
-4. Small Increments: Make small, incremental changes
-5. Continuous Testing: Run tests after every change
+1. 먼저 분석: 코드 변경 전에 항상 기존 동작 이해
+2. 테스트로 보존: 리팩토링 전에 특성화 테스트 생성
+3. 테스트를 통과 상태로 유지: 실패하는 테스트는 커밋하지 않음
+4. 작은 증분: 작고 점진적인 변경 수행
+5. 지속적 테스팅: 매 변경 후 테스트 실행
 
-## Advanced Features
+## 고급 기능
 
-### Property-Based Testing
+### 속성 기반 테스팅
 
-Use Hypothesis for property-based testing to verify code properties across many random inputs.
+많은 무작위 입력에 걸쳐 코드 속성을 검증하기 위해 Hypothesis를 사용한 속성 기반 테스팅을 활용하세요.
 
-### Mutation Testing
+### 변이 테스팅
 
-Use mutation testing to verify test suite quality by introducing code mutations and checking if tests catch them.
+코드 변이를 도입하고 테스트가 이를 감지하는지 확인하여 테스트 스위트 품질을 검증하기 위해 변이 테스팅을 사용하세요.
 
-### Continuous Testing
+### 지속적 테스팅
 
-Implement watch mode for automatic test execution on file changes.
+파일 변경 시 자동 테스트 실행을 위한 감시 모드를 구현하세요.
 
-### AI-Powered Generation
+### AI 기반 생성
 
-Leverage Context7 for intelligent test generation and suggestions.
+지능적인 테스트 생성 및 제안을 위해 Context7을 활용하세요.
 
-## Performance Considerations
+## 성능 고려사항
 
-- Test Execution: Use parallel test execution for faster feedback
-- Test Isolation: Ensure tests are isolated to prevent interference
-- Mock External Dependencies: Mock external services for fast, reliable tests
-- Optimize Setup: Use fixtures and test factories for efficient test setup
+- 테스트 실행: 더 빠른 피드백을 위해 병렬 테스트 실행 사용
+- 테스트 격리: 간섭 방지를 위해 테스트가 격리되어 있는지 확인
+- 외부 의존성 모킹: 빠르고 신뢰할 수 있는 테스트를 위해 외부 서비스 모킹
+- 설정 최적화: 효율적인 테스트 설정을 위해 픽스처 및 테스트 팩토리 사용
 
-## Troubleshooting
+## 문제 해결
 
-### Common Issues
+### 일반적인 이슈
 
-1. Tests Failing Intermittently
-   - Check for shared state between tests
-   - Verify test isolation
-   - Add proper cleanup in fixtures
+1. 간헐적으로 실패하는 테스트
+   - 테스트 간 공유 상태 확인
+   - 테스트 격리 검증
+   - 픽스처에 적절한 정리 추가
 
-2. Slow Test Execution
-   - Use parallel test execution
-   - Mock external dependencies
-   - Optimize test setup
+2. 느린 테스트 실행
+   - 병렬 테스트 실행 사용
+   - 외부 의존성 모킹
+   - 테스트 설정 최적화
 
-3. Context7 Integration Issues
-   - Verify Context7 client configuration
-   - Check network connectivity
-   - Use default patterns as fallback
+3. Context7 통합 이슈
+   - Context7 클라이언트 설정 확인
+   - 네트워크 연결 확인
+   - 폴백으로 기본 패턴 사용
 
-## Resources
+## 리소스
 
-### Detailed Modules
+### 상세 모듈
 
-- [ANALYZE-PRESERVE-IMPROVE Implementation](./ddd-context7/analyze-preserve-improve.md) - Core DDD cycle
-- [Test Generation](./ddd-context7/test-generation.md) - AI-powered generation
-- [Test Patterns](./ddd-context7/test-patterns.md) - Patterns and best practices
-- [Advanced Features](./ddd-context7/advanced-features.md) - Advanced testing techniques
+- [ANALYZE-PRESERVE-IMPROVE 구현](./ddd-context7/analyze-preserve-improve.md) - 핵심 DDD 사이클
+- [테스트 생성](./ddd-context7/test-generation.md) - AI 기반 생성
+- [테스트 패턴](./ddd-context7/test-patterns.md) - 패턴 및 모범 사례
+- [고급 기능](./ddd-context7/advanced-features.md) - 고급 테스팅 기법
 
-### Related Modules
+### 관련 모듈
 
-- [AI Debugging](./ai-debugging.md) - Debugging techniques
-- [Performance Optimization](./performance-optimization.md) - Performance testing
-- [Smart Refactoring](./smart-refactoring.md) - Refactoring with tests
+- [AI 디버깅](./ai-debugging.md) - 디버깅 기법
+- [성능 최적화](./performance-optimization.md) - 성능 테스팅
+- [스마트 리팩토링](./smart-refactoring.md) - 테스트와 함께 리팩토링
 
-### External Resources
+### 외부 리소스
 
-- [Pytest Documentation](https://docs.pytest.org/)
-- [Python Testing Best Practices](https://docs.python-guide.org/writing/tests/)
-- [Hypothesis Property-Based Testing](https://hypothesis.works/)
-- [Context7 MCP Documentation](https://context7.io/docs)
+- [Pytest 문서](https://docs.pytest.org/)
+- [Python 테스팅 모범 사례](https://docs.python-guide.org/writing/tests/)
+- [Hypothesis 속성 기반 테스팅](https://hypothesis.works/)
+- [Context7 MCP 문서](https://context7.io/docs)
 
 ---
 
-Module: `modules/ddd-context7.md`
-Version: 2.0.0 (DDD Migration)
+모듈: `modules/ddd-context7.md`
+Version: 2.0.0 (DDD 마이그레이션)
 Last Updated: 2026-01-17

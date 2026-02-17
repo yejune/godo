@@ -1,10 +1,10 @@
 ---
 name: moai-reference
 description: >
-  Common execution patterns, flag reference, legacy command mapping,
-  configuration file paths, and error handling delegation used across all
-  MoAI workflows. Provides resume patterns and context propagation guidance.
-  Use when needing execution patterns, flag details, or configuration reference.
+  모든 MoAI 워크플로우에서 사용되는 일반적인 실행 패턴, 플래그 참조,
+  레거시 명령어 매핑, 설정 파일 경로, 에러 처리 위임.
+  재개 패턴 및 컨텍스트 전파 안내를 제공합니다.
+  실행 패턴, 플래그 세부 정보, 또는 설정 참조가 필요할 때 사용합니다.
 license: Apache-2.0
 compatibility: Designed for Claude Code
 user-invocable: false
@@ -28,221 +28,221 @@ triggers:
   phases: ["plan", "run", "sync"]
 ---
 
-# MoAI Skill Reference
+# MoAI 스킬 참조
 
-Common patterns, flag reference, legacy command mapping, and configuration files used across all MoAI workflows.
-
----
-
-## Execution Patterns
-
-### Parallel Execution Pattern
-
-When multiple operations are independent, invoke them in a single response. Claude Code automatically runs multiple Task() calls in parallel (up to 10 concurrent).
-
-Use Cases:
-
-- Exploration Phase: Launch codebase analysis, documentation research, and quality assessment simultaneously via separate Task() calls
-- Diagnostic Scan: Run LSP diagnostics, AST-grep analysis, and linter checks in parallel
-- Multi-file Generation: Generate product.md, structure.md, and tech.md simultaneously when analysis is complete
-
-Implementation:
-
-- Include multiple Task() calls in the same response message
-- Each Task() targets a different subagent or a different scope within the same agent
-- Results are collected when all parallel tasks complete
-- Maximum 10 concurrent Task() calls for optimal throughput
-
-### Sequential Execution Pattern
-
-When operations have dependencies, chain them sequentially. Each Task() call receives context from the previous phase results.
-
-Use Cases:
-
-- DDD Workflow: Phase 1 (planning) feeds Phase 2 (implementation) feeds Phase 2.5 (quality validation)
-- SPEC Creation: Explore agent results feed into manager-spec agent for document generation
-- Release Pipeline: Quality gates must pass before version selection, which must complete before tagging
-
-Implementation:
-
-- Wait for each Task() to return before invoking the next
-- Include previous phase outputs in the next Task() prompt as context
-- Ensure semantic continuity: each agent receives sufficient context to operate independently
-
-### Hybrid Execution Pattern
-
-Combine parallel and sequential patterns within a single workflow.
-
-Use Cases:
-
-- Fix Workflow: Parallel diagnostic scan (LSP + linters + AST-grep), then sequential fix application based on combined results
-- MoAI Workflow: Parallel exploration phase, then sequential SPEC generation and DDD implementation
-- Run Workflow: Parallel quality checks, then sequential implementation tasks
-
-Implementation:
-
-- Identify which operations are independent (parallelize these)
-- Identify which operations depend on prior results (sequence these)
-- Group parallel operations at the beginning of each phase, followed by sequential dependent operations
+모든 MoAI 워크플로우에서 사용되는 일반적인 패턴, 플래그 참조, 레거시 명령어 매핑, 설정 파일.
 
 ---
 
-## Resume Pattern
+## 실행 패턴
 
-When a workflow is interrupted or needs to continue from a previous session, use the --resume flag.
+### 병렬 실행 패턴
 
-Behavior:
+여러 작업이 독립적인 경우, 단일 응답에서 호출합니다. Claude Code는 여러 Task() 호출을 자동으로 병렬로 실행합니다 (최대 10개 동시).
 
-- Read existing SPEC document from .moai/specs/SPEC-XXX/
-- Determine last completed phase from SPEC status markers
-- Skip completed phases and resume from the next pending phase
-- Preserve all prior analysis, decisions, and generated artifacts
+사용 사례:
 
-Applicable Workflows:
+- 탐색 단계: 코드베이스 분석, 문서 조사, 품질 평가를 별도의 Task() 호출로 동시에 실행
+- 진단 스캔: LSP 진단, AST-grep 분석, 린터 검사를 병렬로 실행
+- 다중 파일 생성: 분석이 완료되면 product.md, structure.md, tech.md를 동시에 생성
 
-- plan --resume SPEC-XXX: Resume SPEC creation from last checkpoint
-- run --resume SPEC-XXX: Resume DDD implementation from last completed task
-- moai --resume SPEC-XXX: Resume full autonomous workflow from last phase
-- fix --resume: Resume fix cycle from last diagnostic state
+구현:
 
----
+- 동일한 응답 메시지에 여러 Task() 호출 포함
+- 각 Task()는 다른 서브에이전트 또는 동일 에이전트의 다른 범위를 대상으로 함
+- 모든 병렬 작업이 완료되면 결과 수집
+- 최적 처리량을 위해 최대 10개 동시 Task() 호출
 
-## Context Propagation Between Phases
+### 순차 실행 패턴
 
-Each phase must pass results forward to the next phase to avoid redundant analysis.
+작업에 의존성이 있는 경우, 순차적으로 연결합니다. 각 Task() 호출은 이전 단계 결과의 컨텍스트를 받습니다.
 
-Required Context Elements:
+사용 사례:
 
-- Exploration Results: File paths, architecture patterns, technology stack, dependency map
-- SPEC Data: Requirements list, acceptance criteria, technical approach, scope boundaries
-- Implementation Results: Files modified, tests created, coverage metrics, remaining tasks
-- Quality Results: Test pass/fail counts, lint errors, type check results, security findings
-- Git State: Current branch, commit count since last tag, tag history
+- DDD 워크플로우: 1단계(계획)가 2단계(구현)로, 2단계가 2.5단계(품질 검증)로 이어짐
+- SPEC 생성: Explore 에이전트 결과가 manager-spec 에이전트의 문서 생성으로 이어짐
+- 릴리즈 파이프라인: 품질 게이트 통과 후 버전 선택, 버전 선택 완료 후 태깅
 
-Propagation Method:
+구현:
 
-- Include a structured summary of previous phase outputs in the Task() prompt
-- Reference specific file paths rather than inline large content blocks
-- Use SPEC document as the canonical source of truth across phases
+- 다음 Task()를 호출하기 전에 각 Task()의 반환 대기
+- 다음 Task() 프롬프트에 이전 단계 출력을 컨텍스트로 포함
+- 의미론적 연속성 보장: 각 에이전트가 독립적으로 작동하기에 충분한 컨텍스트 수신
 
----
+### 하이브리드 실행 패턴
 
-## Flag Reference
+단일 워크플로우 내에서 병렬과 순차 패턴을 결합합니다.
 
-### Global Flags (Available Across All Workflows)
+사용 사례:
 
-- --resume [ID]: Resume workflow from last checkpoint (SPEC-ID or snapshot ID)
-- --seq: Force sequential execution instead of parallel where applicable
-- --ultrathink: Activate Sequential Thinking MCP for deep analysis before execution
+- Fix 워크플로우: 병렬 진단 스캔 (LSP + 린터 + AST-grep), 그 후 결합된 결과를 기반으로 순차적 수정 적용
+- MoAI 워크플로우: 병렬 탐색 단계, 그 후 순차적 SPEC 생성과 DDD 구현
+- Run 워크플로우: 병렬 품질 검사, 그 후 순차적 구현 작업
 
-### Plan Flags
+구현:
 
-- --worktree: Create an isolated git worktree for the SPEC implementation
-- --branch: Create a feature branch for the SPEC (default branch naming: spec/SPEC-XXX)
-- --resume SPEC-XXX: Resume an interrupted plan session
-
-### Run Flags
-
-- --resume SPEC-XXX: Resume DDD implementation from last completed task
-
-### Sync Flags
-
-- Modes (positional): auto (default), force, status, project
-- --merge: Auto-merge PR and clean up branch after sync
-
-### Fix Flags
-
-- --dry: Preview detected issues without applying fixes
-- --level N: Control fix depth (Level 1: auto-fixable, Level 2: simple logic, Level 3: complex, Level 4: architectural)
-- --security: Include security issues in scan
-
-### Loop Flags
-
-- --max N: Maximum iteration count (default: 100)
-- --auto: Enable automatic fix application for Level 1-2
-
-### MoAI (Default) Flags
-
-- --loop: Enable iterative fixing during run phase
-- --max N: Maximum fix iterations when --loop is active
-- --branch: Create feature branch before implementation
-- --pr: Create pull request after completion
+- 어떤 작업이 독립적인지 파악 (병렬화)
+- 어떤 작업이 이전 결과에 의존하는지 파악 (순차화)
+- 각 단계 시작 시 병렬 작업을 그룹화하고, 이어서 순차적 의존 작업 실행
 
 ---
 
-## Legacy Command Mapping
+## 재개 패턴
 
-Previous /moai:X-Y command format mapped to new /moai subcommand format:
+워크플로우가 중단되거나 이전 세션에서 계속해야 할 때 --resume 플래그를 사용합니다.
 
-- /moai:0-project maps to /moai project
-- /moai:1-plan maps to /moai plan
-- /moai:2-run maps to /moai run
-- /moai:3-sync maps to /moai sync
-- /moai:9-feedback maps to /moai feedback
-- /moai:fix maps to /moai fix
-- /moai:loop maps to /moai loop
-- /moai:moai maps to /moai (default autonomous workflow)
+동작:
 
-Note: /moai:99-release is a separate local-only command, not part of the /moai skill.
+- .moai/specs/SPEC-XXX/에서 기존 SPEC 문서 읽기
+- SPEC 상태 마커에서 마지막으로 완료된 단계 결정
+- 완료된 단계를 건너뛰고 다음 보류 단계에서 재개
+- 이전의 모든 분석, 결정, 생성된 산출물 보존
 
----
+적용 가능한 워크플로우:
 
-## Configuration Files Reference
-
-### Core Configuration
-
-- .moai/config/config.yaml: Main configuration file (merged from section files)
-- .moai/config/sections/language.yaml: Language settings (conversation_language, agent_prompt_language, code_comments)
-- .moai/config/sections/user.yaml: User identification (name)
-- .moai/config/sections/quality.yaml: TRUST 5 framework settings, LSP quality gates, test coverage targets
-- .moai/config/sections/system.yaml: System metadata (moai.version)
-
-### Project Documentation
-
-- .moai/project/product.md: Product overview, features, user value
-- .moai/project/structure.md: Project architecture and directory organization
-- .moai/project/tech.md: Technology stack, dependencies, technical decisions
-
-### SPEC Documents
-
-- .moai/specs/SPEC-XXX/spec.md: Specification document with EARS format requirements
-- .moai/specs/SPEC-XXX/plan.md: Execution plan with task breakdown
-- .moai/specs/SPEC-XXX/acceptance.md: Acceptance criteria and test plan
-
-### Release Artifacts
-
-- CHANGELOG.md: Bilingual changelog (English + Korean per version)
-- .moai/cache/release-snapshots/latest.json: Release state snapshot for recovery
-
-### Version Files (5 files synchronized during release)
-
-- pyproject.toml: Authoritative version source
-- pkg/version/version.go: Runtime version with build-time injection
-- .moai/config/config.yaml: Config display version
-- .moai/config/sections/system.yaml: System metadata version
-- internal/template/templates/: Embedded template directory for binary bundling
+- plan --resume SPEC-XXX: 마지막 체크포인트에서 SPEC 생성 재개
+- run --resume SPEC-XXX: 마지막으로 완료된 작업에서 DDD 구현 재개
+- moai --resume SPEC-XXX: 마지막 단계에서 전체 자율 워크플로우 재개
+- fix --resume: 마지막 진단 상태에서 수정 사이클 재개
 
 ---
 
-## Completion Markers
+## 단계 간 컨텍스트 전파
 
-AI adds markers to signal workflow state:
+중복 분석을 피하기 위해 각 단계는 결과를 다음 단계로 전달해야 합니다.
 
-- `<moai>DONE</moai>`: Single task or phase completed
-- `<moai>COMPLETE</moai>`: Full workflow completed (all phases finished)
+필수 컨텍스트 요소:
 
-These markers enable automation detection and loop termination in the loop workflow.
+- 탐색 결과: 파일 경로, 아키텍처 패턴, 기술 스택, 의존성 맵
+- SPEC 데이터: 요구사항 목록, 인수 기준, 기술적 접근 방식, 범위 경계
+- 구현 결과: 수정된 파일, 생성된 테스트, 커버리지 지표, 남은 작업
+- 품질 결과: 테스트 통과/실패 수, 린트 오류, 타입 검사 결과, 보안 발견사항
+- Git 상태: 현재 브랜치, 마지막 태그 이후 커밋 수, 태그 히스토리
+
+전파 방법:
+
+- Task() 프롬프트에 이전 단계 출력의 구조화된 요약 포함
+- 대용량 콘텐츠 블록을 인라인으로 포함하는 대신 특정 파일 경로 참조
+- 단계 전반에 걸쳐 SPEC 문서를 진실의 단일 출처로 사용
 
 ---
 
-## Error Handling Delegation
+## 플래그 참조
 
-- Quality gate failures: Use expert-debug subagent for diagnosis and resolution
-- Agent execution failures: Use expert-debug subagent for investigation
-- Token limit errors: Execute /clear, then guide user to resume with --resume flag
-- Permission errors: Review .claude/settings.json manually
-- Integration errors: Use expert-devops subagent
-- MoAI-ADK errors: Suggest /moai feedback to create a GitHub issue
+### 전역 플래그 (모든 워크플로우에서 사용 가능)
+
+- --resume [ID]: 마지막 체크포인트에서 워크플로우 재개 (SPEC-ID 또는 스냅샷 ID)
+- --seq: 해당하는 경우 병렬 대신 순차 실행 강제
+- --ultrathink: 실행 전 심층 분석을 위해 Sequential Thinking MCP 활성화
+
+### Plan 플래그
+
+- --worktree: SPEC 구현을 위한 격리된 git worktree 생성
+- --branch: SPEC을 위한 기능 브랜치 생성 (기본 브랜치 명명: spec/SPEC-XXX)
+- --resume SPEC-XXX: 중단된 plan 세션 재개
+
+### Run 플래그
+
+- --resume SPEC-XXX: 마지막으로 완료된 작업에서 DDD 구현 재개
+
+### Sync 플래그
+
+- 모드 (위치 인수): auto (기본값), force, status, project
+- --merge: sync 후 PR 자동 병합 및 브랜치 정리
+
+### Fix 플래그
+
+- --dry: 수정 적용 없이 감지된 이슈 미리보기
+- --level N: 수정 깊이 제어 (레벨 1: 자동 수정 가능, 레벨 2: 간단한 로직, 레벨 3: 복잡, 레벨 4: 아키텍처)
+- --security: 스캔에 보안 이슈 포함
+
+### Loop 플래그
+
+- --max N: 최대 반복 횟수 (기본값: 100)
+- --auto: 레벨 1-2에 대한 자동 수정 적용 활성화
+
+### MoAI (기본값) 플래그
+
+- --loop: run 단계에서 반복 수정 활성화
+- --max N: --loop 활성화 시 최대 수정 반복 횟수
+- --branch: 구현 전 기능 브랜치 생성
+- --pr: 완료 후 풀 리퀘스트 생성
+
+---
+
+## 레거시 명령어 매핑
+
+이전 /moai:X-Y 명령어 형식을 새 /moai 서브커맨드 형식으로 매핑:
+
+- /moai:0-project → /moai project
+- /moai:1-plan → /moai plan
+- /moai:2-run → /moai run
+- /moai:3-sync → /moai sync
+- /moai:9-feedback → /moai feedback
+- /moai:fix → /moai fix
+- /moai:loop → /moai loop
+- /moai:moai → /moai (기본 자율 워크플로우)
+
+참고: /moai:99-release는 별도의 로컬 전용 명령어로, /moai 스킬의 일부가 아닙니다.
+
+---
+
+## 설정 파일 참조
+
+### 핵심 설정
+
+- .moai/config/config.yaml: 메인 설정 파일 (섹션 파일에서 병합됨)
+- .moai/config/sections/language.yaml: 언어 설정 (conversation_language, agent_prompt_language, code_comments)
+- .moai/config/sections/user.yaml: 사용자 식별 (name)
+- .moai/config/sections/quality.yaml: TRUST 5 프레임워크 설정, LSP 품질 게이트, 테스트 커버리지 목표
+- .moai/config/sections/system.yaml: 시스템 메타데이터 (moai.version)
+
+### 프로젝트 문서
+
+- .moai/project/product.md: 제품 개요, 기능, 사용자 가치
+- .moai/project/structure.md: 프로젝트 아키텍처 및 디렉토리 구성
+- .moai/project/tech.md: 기술 스택, 의존성, 기술적 결정
+
+### SPEC 문서
+
+- .moai/specs/SPEC-XXX/spec.md: EARS 형식 요구사항이 있는 명세서 문서
+- .moai/specs/SPEC-XXX/plan.md: 작업 분해가 있는 실행 계획
+- .moai/specs/SPEC-XXX/acceptance.md: 인수 기준 및 테스트 계획
+
+### 릴리즈 산출물
+
+- CHANGELOG.md: 이중 언어 변경 로그 (버전별 영어 + 한국어)
+- .moai/cache/release-snapshots/latest.json: 복구를 위한 릴리즈 상태 스냅샷
+
+### 버전 파일 (릴리즈 시 5개 파일 동기화)
+
+- pyproject.toml: 권위 있는 버전 소스
+- pkg/version/version.go: 빌드 타임 주입이 있는 런타임 버전
+- .moai/config/config.yaml: 설정 표시 버전
+- .moai/config/sections/system.yaml: 시스템 메타데이터 버전
+- internal/template/templates/: 바이너리 번들링을 위한 임베드 템플릿 디렉토리
+
+---
+
+## 완료 마커
+
+AI가 워크플로우 상태를 알리기 위해 마커를 추가합니다:
+
+- `<moai>DONE</moai>`: 단일 작업 또는 단계 완료
+- `<moai>COMPLETE</moai>`: 전체 워크플로우 완료 (모든 단계 완료)
+
+이 마커들은 loop 워크플로우에서 자동화 감지 및 루프 종료를 가능하게 합니다.
+
+---
+
+## 에러 처리 위임
+
+- 품질 게이트 실패: 진단 및 해결을 위해 expert-debug 서브에이전트 사용
+- 에이전트 실행 실패: 조사를 위해 expert-debug 서브에이전트 사용
+- 토큰 한도 오류: /clear 실행 후 사용자가 --resume 플래그로 재개하도록 안내
+- 권한 오류: .claude/settings.json 수동 검토
+- 통합 오류: expert-devops 서브에이전트 사용
+- MoAI-ADK 오류: GitHub 이슈 생성을 위해 /moai feedback 제안
 
 ---
 

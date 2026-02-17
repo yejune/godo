@@ -1,78 +1,78 @@
-# Workflow: Team Debug - Investigation Team
+# 워크플로우: Team Debug - 조사 팀
 
-Purpose: Debug complex issues through parallel competing hypothesis investigation. Each teammate explores a different theory independently.
+목적: 병렬 경쟁 가설 조사를 통해 복잡한 이슈를 디버깅합니다. 각 팀원은 서로 다른 이론을 독립적으로 탐구합니다.
 
-Flow: TeamCreate -> Hypothesis Assignment -> Parallel Investigation -> Evidence Synthesis -> Fix
+흐름: TeamCreate -> 가설 할당 -> 병렬 조사 -> 증거 종합 -> 수정
 
-## Prerequisites
+## 전제 조건
 
 - workflow.team.enabled: true
 - CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
-- Triggered by: /moai fix --team OR auto-detected when issue has multiple potential root causes
+- 트리거: /moai fix --team 또는 이슈에 여러 잠재적 근본 원인이 있을 때 자동 감지
 
-## Phase 0: Issue Analysis
+## Phase 0: 이슈 분석
 
-1. Analyze the error/issue to identify potential root causes
-2. Formulate 2-3 competing hypotheses
-3. Create team:
+1. 잠재적 근본 원인을 파악하기 위해 오류/이슈 분석
+2. 경쟁하는 2-3개의 가설 수립
+3. 팀 생성:
    ```
    TeamCreate(team_name: "moai-debug-{issue-slug}")
    ```
-4. Create investigation tasks:
+4. 조사 작업 생성:
    ```
-   TaskCreate: "Investigate hypothesis 1: {description}" (no deps)
-   TaskCreate: "Investigate hypothesis 2: {description}" (no deps)
-   TaskCreate: "Investigate hypothesis 3: {description}" (no deps)
-   TaskCreate: "Synthesize findings and implement fix" (blocked by above)
+   TaskCreate: "가설 1 조사: {설명}" (의존성 없음)
+   TaskCreate: "가설 2 조사: {설명}" (의존성 없음)
+   TaskCreate: "가설 3 조사: {설명}" (의존성 없음)
+   TaskCreate: "발견사항 종합 및 수정 구현" (위 항목에 의해 차단됨)
    ```
 
-## Phase 1: Spawn Investigation Team
+## Phase 1: 조사 팀 소집
 
-Use the investigation team pattern:
+조사 팀 패턴 사용:
 
-Teammate 1 - hypothesis-1 (team-researcher agent, haiku model):
-- Prompt: "Investigate whether the issue is caused by {hypothesis_1}. Look for evidence supporting or contradicting this theory. Report your findings with confidence level."
+팀원 1 - hypothesis-1 (team-researcher 에이전트, haiku 모델):
+- 프롬프트: "이슈가 {hypothesis_1}로 인해 발생하는지 조사하세요. 이 이론을 지지하거나 반박하는 증거를 찾으세요. 신뢰도 수준과 함께 발견사항을 보고하세요."
 
-Teammate 2 - hypothesis-2 (team-researcher agent, haiku model):
-- Prompt: "Investigate whether the issue is caused by {hypothesis_2}. Look for evidence supporting or contradicting this theory. Report your findings with confidence level."
+팀원 2 - hypothesis-2 (team-researcher 에이전트, haiku 모델):
+- 프롬프트: "이슈가 {hypothesis_2}로 인해 발생하는지 조사하세요. 이 이론을 지지하거나 반박하는 증거를 찾으세요. 신뢰도 수준과 함께 발견사항을 보고하세요."
 
-Teammate 3 - hypothesis-3 (team-researcher agent, haiku model):
-- Prompt: "Investigate whether the issue is caused by {hypothesis_3}. Look for evidence supporting or contradicting this theory. Report your findings with confidence level."
+팀원 3 - hypothesis-3 (team-researcher 에이전트, haiku 모델):
+- 프롬프트: "이슈가 {hypothesis_3}로 인해 발생하는지 조사하세요. 이 이론을 지지하거나 반박하는 증거를 찾으세요. 신뢰도 수준과 함께 발견사항을 보고하세요."
 
-## Phase 2: Parallel Investigation
+## Phase 2: 병렬 조사
 
-Teammates work independently (all haiku, fast and cheap):
-- Each explores their hypothesis
-- Searches codebase for evidence
-- Checks logs, tests, configuration
-- Reports findings with confidence level (high/medium/low)
+팀원들은 독립적으로 작업합니다 (모두 haiku, 빠르고 저렴):
+- 각자 자신의 가설을 탐구
+- 증거를 위해 코드베이스 검색
+- 로그, 테스트, 설정 확인
+- 신뢰도 수준 (high/medium/low)과 함께 발견사항 보고
 
-MoAI monitors:
-- Receive findings as teammates complete
-- If one hypothesis gets high confidence early, may redirect others
+MoAI 모니터링:
+- 팀원이 완료할 때마다 발견사항 수신
+- 한 가설이 조기에 높은 신뢰도를 얻으면 다른 팀원을 재지시할 수 있음
 
-## Phase 3: Evidence Synthesis
+## Phase 3: 증거 종합
 
-After all investigations complete:
-1. Compare evidence across hypotheses
-2. Identify the most likely root cause
-3. Delegate fix to expert-debug subagent (NOT a teammate) with:
-   - All investigation findings
-   - Identified root cause
-   - Reproduction steps from evidence
-4. Follow reproduction-first bug fix protocol (write failing test first)
+모든 조사 완료 후:
+1. 가설 전반의 증거 비교
+2. 가장 가능성 있는 근본 원인 식별
+3. 다음 내용과 함께 expert-debug 서브에이전트에게 수정 위임 (팀원이 아님):
+   - 모든 조사 발견사항
+   - 식별된 근본 원인
+   - 증거로부터의 재현 단계
+4. 재현 우선 버그 수정 프로토콜 따름 (먼저 실패 테스트 작성)
 
-## Phase 4: Cleanup
+## Phase 4: 정리
 
-1. Shutdown all investigation teammates
-2. TeamDelete to clean up resources
-3. Report diagnosis and fix to user
+1. 모든 조사 팀원 종료
+2. 리소스 정리를 위해 TeamDelete
+3. 진단 및 수정을 사용자에게 보고
 
-## Fallback
+## 폴백
 
-If team creation fails:
-- Fall back to sub-agent fix workflow (workflows/fix.md)
-- Use sequential hypothesis investigation instead
+팀 생성 실패 시:
+- 서브에이전트 수정 워크플로우 (workflows/fix.md)로 폴백
+- 대신 순차적 가설 조사 사용
 
 ---
 

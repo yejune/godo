@@ -1,9 +1,9 @@
 ---
 name: do-workflow-run
 description: >
-  Checklist-based implementation workflow. Dispatches agents with sub-checklist
-  files, monitors progress, handles agent resumption on token exhaustion,
-  and verifies quality. Second step of the Do workflow.
+  체크리스트 기반 구현 워크플로우. 서브 체크리스트 파일과 함께
+  에이전트를 디스패치하고, 진행 상황을 모니터링하고, 토큰 소진 시
+  에이전트 재개를 처리하며, 품질을 검증한다. Do 워크플로우의 두 번째 단계.
 license: Apache-2.0
 compatibility: Designed for Claude Code
 user-invocable: false
@@ -27,154 +27,154 @@ triggers:
   phases: ["run"]
 ---
 
-# Run Workflow Orchestration
+# 실행 워크플로우 오케스트레이션
 
-## Purpose
+## 목적
 
-Execute checklist items by dispatching agents with sub-checklist files. Each agent reads its sub-checklist, implements the work, tests it, commits, and updates the checklist status. The orchestrator monitors progress and handles interruptions.
+서브 체크리스트 파일과 함께 에이전트를 디스패치하여 체크리스트 항목을 실행한다. 각 에이전트는 서브 체크리스트를 읽고, 작업을 구현하고, 테스트하고, 커밋하고, 체크리스트 상태를 갱신한다. 오케스트레이터는 진행 상황을 모니터링하고 중단을 처리한다.
 
-## Scope
+## 범위
 
-- Second step of Do's checklist-based workflow
-- Receives plan.md + checklist.md from plan workflow
-- Hands off to test/report workflows after completion
+- Do 체크리스트 기반 워크플로우의 두 번째 단계
+- 플랜 워크플로우에서 plan.md + checklist.md를 받음
+- 완료 후 테스트/보고 워크플로우로 넘김
 
-## Input
+## 입력
 
-- Existing plan.md at `.do/jobs/{YY}/{MM}/{DD}/{title}/plan.md`
-- Existing checklist.md at `.do/jobs/{YY}/{MM}/{DD}/{title}/checklist.md`
-- Sub-checklists at `.do/jobs/{YY}/{MM}/{DD}/{title}/checklists/{NN}_{agent}.md`
+- `.do/jobs/{YY}/{MM}/{DD}/{title}/plan.md`의 기존 plan.md
+- `.do/jobs/{YY}/{MM}/{DD}/{title}/checklist.md`의 기존 checklist.md
+- `.do/jobs/{YY}/{MM}/{DD}/{title}/checklists/{NN}_{agent}.md`의 서브 체크리스트
 
-## Prerequisites
+## 전제 조건
 
-- [HARD] plan.md MUST exist
-- [HARD] checklist.md MUST exist (if missing, guide user to create via `/do:checklist` or plan workflow)
-- [HARD] Checklist must NOT be in stub state (unwritten) -- if stub, write checklist first
-
----
-
-## Phase Sequence
-
-### Phase 1: Checklist Verification
-
-Read checklist.md and verify state:
-
-1. Parse all items and their statuses (`[ ]`, `[~]`, `[*]`, `[o]`, `[x]`, `[!]`)
-2. Identify incomplete items (not `[o]` or `[x]`)
-3. Check dependency chains (`depends on:` keywords)
-4. Identify blocked items (`[!]`) and their blockers
-5. Build execution order respecting dependencies
-
-If all items are `[o]`: Skip to Phase 5 (Completion).
-If blockers exist: Report to user via AskUserQuestion.
-
-### Phase 2: Agent Dispatch
-
-Dispatch agents based on current execution mode.
-
-#### Do Mode Dispatch (DO_MODE=do)
-
-For each sub-checklist with incomplete items:
-
-1. Identify independent sub-checklists (no cross-dependencies)
-2. Launch independent agents in parallel via Task()
-3. Launch dependent agents sequentially after prerequisites complete
-
-Agent invocation MUST include these 4 items [HARD]:
-
-1. **Task instruction**: What to implement (from sub-checklist Problem Summary)
-2. **Sub-checklist path**: `.do/jobs/{YY}/{MM}/{DD}/{title}/checklists/{NN}_{agent}.md`
-3. **Docker environment info**: Container names, service names, domains
-4. **Commit instruction**: "After completing work, you MUST `git add` (specific files only) + `git commit`. Do NOT terminate without committing."
-
-Additional agent instructions:
-- "Read the sub-checklist file first to understand scope and acceptance criteria"
-- "Check Test Strategy section -- follow declared approach (TDD/DDD/pass)"
-- "Update checklist status as you progress: `[ ]` -> `[~]` -> `[*]` -> `[o]`"
-- "Record commit hash in Progress Log -- `[o]` without commit hash is FORBIDDEN"
-- "Write Lessons Learned before marking final `[o]`"
-- "Stage ONLY your own files by name -- NEVER use `git add -A` or `git add .`"
-
-#### Focus Mode Dispatch (DO_MODE=focus)
-
-Orchestrator implements directly (no Task() delegation):
-
-1. Read sub-checklist items sequentially
-2. Implement each item using Read/Write/Edit
-3. Run tests after each item
-4. Update checklist status directly
-5. Commit after each logical unit
-
-#### Team Mode Dispatch (DO_MODE=team)
-
-Route to team-do.md workflow for TeamCreate-based execution.
-
-### Phase 3: Progress Monitoring
-
-After each agent completes (Do mode):
-
-1. Read updated checklist to verify status changes
-2. Check `git status` for uncommitted changes
-3. If uncommitted changes exist: Re-invoke agent with "Complete your commit"
-4. If agent exhausted tokens mid-task:
-   - Read checklist to find last `[o]` item
-   - Create new agent with: "Resume from incomplete items in this checklist"
-   - Pass same sub-checklist path
-5. Verify `[o]` items have commit hashes in Progress Log
-
-### Phase 4: Quality Verification
-
-After all sub-checklists show `[o]` for implementation items:
-
-1. Run full test suite: `docker compose exec <service> <test-command>`
-2. Verify all tests pass (dev-testing.md rules)
-3. Run syntax check: language-appropriate build/lint command
-4. If failures: Create fix tasks, re-dispatch to agents
-
-### Phase 5: Completion
-
-1. Read final state of all checklists
-2. Display checklist summary to user (each item with status symbol + one-line summary)
-3. If incomplete items remain: Suggest next action via AskUserQuestion
-4. If all complete: Guide to report workflow
+- [HARD] plan.md가 반드시 존재해야 함
+- [HARD] checklist.md가 반드시 존재해야 함 (없으면 `/do:checklist` 또는 플랜 워크플로우로 생성 안내)
+- [HARD] 체크리스트가 stub 상태(미작성)이면 안 됨 -- stub이면 먼저 체크리스트 작성
 
 ---
 
-## Agent Delegation Checklist [HARD]
+## 단계 순서
 
-Every agent invocation in Do mode MUST verify:
+### Phase 1: 체크리스트 검증
 
-- [ ] Task instruction includes what to implement
-- [ ] Sub-checklist file path is provided
-- [ ] Docker environment info is included
-- [ ] Commit instruction is explicit
-- [ ] Agent is told to read sub-checklist first
-- [ ] Agent is told to update checklist status
-- [ ] Agent is told to record commit hash
+checklist.md 읽기 및 상태 검증:
+
+1. 모든 항목과 상태 파싱 (`[ ]`, `[~]`, `[*]`, `[o]`, `[x]`, `[!]`)
+2. 미완료 항목 식별 (`[o]` 또는 `[x]`가 아닌 것)
+3. 의존성 체인 확인 (`depends on:` 키워드)
+4. 차단된 항목(`[!]`) 및 차단 원인 식별
+5. 의존성을 고려한 실행 순서 구성
+
+모든 항목이 `[o]`인 경우: Phase 5 (완료)로 건너뜀.
+차단 항목이 있는 경우: AskUserQuestion으로 사용자에게 보고.
+
+### Phase 2: 에이전트 디스패치
+
+현재 실행 모드에 따라 에이전트 디스패치.
+
+#### Do 모드 디스패치 (DO_MODE=do)
+
+미완료 항목이 있는 각 서브 체크리스트에 대해:
+
+1. 독립적인 서브 체크리스트 식별 (교차 의존성 없음)
+2. Task()로 독립 에이전트를 병렬 실행
+3. 선행 조건 완료 후 의존성 있는 에이전트 순차 실행
+
+에이전트 호출 시 반드시 다음 4가지 포함 [HARD]:
+
+1. **태스크 지시**: 구현할 내용 (서브 체크리스트 문제 요약에서)
+2. **서브 체크리스트 경로**: `.do/jobs/{YY}/{MM}/{DD}/{title}/checklists/{NN}_{agent}.md`
+3. **Docker 환경 정보**: 컨테이너명, 서비스명, 도메인
+4. **커밋 지시**: "작업 완료 후 반드시 `git add` (특정 파일만) + `git commit` 수행. 커밋 없이 종료하지 말 것."
+
+추가 에이전트 지시:
+- "범위와 인수 기준을 파악하기 위해 먼저 서브 체크리스트 파일을 읽어라"
+- "테스트 전략 섹션 확인 -- 선언된 접근 방식 따를 것 (TDD/DDD/pass)"
+- "진행하면서 체크리스트 상태를 갱신하라: `[ ]` -> `[~]` -> `[*]` -> `[o]`"
+- "진행 로그에 커밋 해시 기록 -- 커밋 해시 없는 `[o]` 완료 전환 금지"
+- "최종 `[o]` 전환 전에 교훈 작성"
+- "본인 파일만 이름으로 스테이징 -- `git add -A` 또는 `git add .` 절대 금지"
+
+#### Focus 모드 디스패치 (DO_MODE=focus)
+
+오케스트레이터가 직접 구현 (Task() 위임 없음):
+
+1. 서브 체크리스트 항목을 순차적으로 읽기
+2. Read/Write/Edit으로 각 항목 구현
+3. 각 항목 후 테스트 실행
+4. 체크리스트 상태 직접 갱신
+5. 각 논리적 단위 완료 후 커밋
+
+#### Team 모드 디스패치 (DO_MODE=team)
+
+TeamCreate 기반 실행을 위해 team-do.md 워크플로우로 라우팅.
+
+### Phase 3: 진행 상황 모니터링
+
+각 에이전트 완료 후 (Do 모드):
+
+1. 갱신된 체크리스트를 읽어 상태 변경 검증
+2. 미커밋 변경 사항에 대한 `git status` 확인
+3. 미커밋 변경이 있으면: "커밋을 완료하라"는 지시와 함께 에이전트 재호출
+4. 에이전트가 태스크 중간에 토큰 소진된 경우:
+   - 마지막 `[o]` 항목 찾기 위해 체크리스트 읽기
+   - 새 에이전트에게: "이 체크리스트의 미완료 항목부터 이어서 진행하라"
+   - 동일한 서브 체크리스트 경로 전달
+5. `[o]` 항목의 진행 로그에 커밋 해시가 있는지 검증
+
+### Phase 4: 품질 검증
+
+모든 서브 체크리스트의 구현 항목이 `[o]`를 표시한 후:
+
+1. 전체 테스트 스위트 실행: `docker compose exec <service> <test-command>`
+2. 모든 테스트 통과 검증 (dev-testing.md 규칙)
+3. 구문 검사 실행: 언어에 맞는 빌드/린트 커맨드
+4. 실패 시: 수정 태스크 생성 후 에이전트에 재위임
+
+### Phase 5: 완료
+
+1. 모든 체크리스트의 최종 상태 읽기
+2. 사용자에게 체크리스트 요약 표시 (각 항목의 상태 기호 + 한 줄 요약)
+3. 미완료 항목이 있으면: AskUserQuestion으로 다음 행동 제안
+4. 모두 완료된 경우: 보고 워크플로우 안내
 
 ---
 
-## Agent Interruption & Resume [HARD]
+## 에이전트 위임 체크리스트 [HARD]
 
-When an agent is interrupted (token exhaustion, error, or manual stop):
+Do 모드의 모든 에이전트 호출 시 반드시 확인:
 
-1. Orchestrator reads the sub-checklist file
-2. Items marked `[o]` with commit hashes are DONE -- skip these
-3. Items marked `[~]` are IN PROGRESS -- new agent resumes from here
-4. Items marked `[ ]` are NOT STARTED -- new agent picks these up
-5. New agent receives: "Continue from incomplete items. Items marked [o] are already done."
-
-This pattern ensures work continuity regardless of which agent instance runs.
+- [ ] 태스크 지시에 구현할 내용 포함
+- [ ] 서브 체크리스트 파일 경로 제공됨
+- [ ] Docker 환경 정보 포함됨
+- [ ] 커밋 지시 명시됨
+- [ ] 에이전트에게 먼저 서브 체크리스트 읽도록 지시됨
+- [ ] 에이전트에게 체크리스트 상태 갱신하도록 지시됨
+- [ ] 에이전트에게 커밋 해시 기록하도록 지시됨
 
 ---
 
-## Completion Criteria
+## 에이전트 중단 & 재개 [HARD]
 
-- Phase 1: All checklist items parsed, execution order determined
-- Phase 2: All agents dispatched per mode (Do/Focus/Team)
-- Phase 3: All agents completed, no uncommitted changes, all `[o]` items have commits
-- Phase 4: Full test suite passes, syntax checks clean
-- Phase 5: Checklist summary displayed to user, next steps presented
+에이전트가 중단된 경우 (토큰 소진, 오류, 또는 수동 중단):
+
+1. 오케스트레이터가 서브 체크리스트 파일 읽기
+2. 커밋 해시와 함께 `[o]`로 표시된 항목은 완료 -- 건너뜀
+3. `[~]`로 표시된 항목은 진행 중 -- 새 에이전트가 여기서 재개
+4. `[ ]`로 표시된 항목은 미시작 -- 새 에이전트가 이어받음
+5. 새 에이전트에게: "미완료 항목부터 계속. [o] 항목은 이미 완료됨."
+
+이 패턴으로 어떤 에이전트 인스턴스가 실행되든 작업 연속성 보장.
+
+---
+
+## 완료 기준
+
+- Phase 1: 모든 체크리스트 항목 파싱, 실행 순서 결정
+- Phase 2: 모드별 모든 에이전트 디스패치 (Do/Focus/Team)
+- Phase 3: 모든 에이전트 완료, 미커밋 변경 없음, 모든 `[o]` 항목에 커밋 있음
+- Phase 4: 전체 테스트 스위트 통과, 구문 검사 통과
+- Phase 5: 사용자에게 체크리스트 요약 표시, 다음 단계 제시
 
 ---
 

@@ -1,91 +1,91 @@
-# Workflow: Team Plan - Agent Teams SPEC Creation
+# 워크플로우: Team Plan - Agent Teams SPEC 생성
 
-Purpose: Create comprehensive SPEC documents through parallel team-based research and analysis. Used when plan phase benefits from multi-angle exploration.
+목적: 병렬 팀 기반 리서치 및 분석을 통해 포괄적인 SPEC 문서를 생성합니다. plan 단계가 다각적 탐색으로 이점을 얻을 때 사용합니다.
 
-Flow: TeamCreate -> Parallel Research -> Synthesis -> SPEC Document -> Shutdown
+흐름: TeamCreate -> 병렬 리서치 -> 종합 -> SPEC 문서 -> 종료
 
-## Prerequisites
+## 전제 조건
 
 - workflow.team.enabled: true
 - CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
-- Triggered by: /moai plan --team OR auto-detected complexity >= threshold
+- 트리거: /moai plan --team 또는 복잡도 >= 임계값 자동 감지
 
-## Phase 0: Team Setup
+## Phase 0: 팀 설정
 
-1. Read configuration:
-   - .moai/config/sections/workflow.yaml for team settings
-   - .moai/config/sections/quality.yaml for development mode
+1. 설정 읽기:
+   - 팀 설정을 위한 .moai/config/sections/workflow.yaml
+   - 개발 모드를 위한 .moai/config/sections/quality.yaml
 
-2. Create team:
+2. 팀 생성:
    ```
    TeamCreate(team_name: "moai-plan-{feature-slug}")
    ```
 
-3. Create shared task list:
+3. 공유 작업 목록 생성:
    ```
-   TaskCreate: "Explore codebase architecture and dependencies"
-   TaskCreate: "Analyze requirements, user stories, and edge cases"
-   TaskCreate: "Design technical approach and evaluate alternatives"
-   TaskCreate: "Synthesize findings into SPEC document" (blocked by above 3)
+   TaskCreate: "코드베이스 아키텍처 및 의존성 탐색"
+   TaskCreate: "요구사항, 사용자 스토리, 엣지 케이스 분석"
+   TaskCreate: "기술 접근 방식 설계 및 대안 평가"
+   TaskCreate: "발견사항을 SPEC 문서로 종합" (위 3개에 의해 차단됨)
    ```
 
-## Phase 1: Spawn Research Team
+## Phase 1: 리서치 팀 소집
 
-Spawn 3 teammates from the plan_research pattern:
+plan_research 패턴에서 3명의 팀원 소집:
 
-Teammate 1 - researcher (team-researcher agent, haiku model):
-- Prompt: "Explore the codebase for {feature_description}. Map architecture, find relevant files, identify dependencies and patterns. Report findings to the team lead."
+팀원 1 - researcher (team-researcher 에이전트, haiku 모델):
+- 프롬프트: "{feature_description}을 위해 코드베이스를 탐색하세요. 아키텍처를 매핑하고, 관련 파일을 찾고, 의존성과 패턴을 식별하세요. 팀 리더에게 발견사항을 보고하세요."
 
-Teammate 2 - analyst (team-analyst agent, inherit model):
-- Prompt: "Analyze requirements for {feature_description}. Identify user stories, acceptance criteria, edge cases, risks, and constraints. Report findings to the team lead."
+팀원 2 - analyst (team-analyst 에이전트, inherit 모델):
+- 프롬프트: "{feature_description}에 대한 요구사항을 분석하세요. 사용자 스토리, 인수 기준, 엣지 케이스, 리스크, 제약 조건을 식별하세요. 팀 리더에게 발견사항을 보고하세요."
 
-Teammate 3 - architect (team-architect agent, inherit model):
-- Prompt: "Design the technical approach for {feature_description}. Evaluate implementation alternatives, assess trade-offs, propose architecture. Consider existing patterns found by the researcher. Report to the team lead."
+팀원 3 - architect (team-architect 에이전트, inherit 모델):
+- 프롬프트: "{feature_description}에 대한 기술 접근 방식을 설계하세요. 구현 대안을 평가하고, 트레이드오프를 평가하고, 아키텍처를 제안하세요. researcher가 찾은 기존 패턴을 고려하세요. 팀 리더에게 보고하세요."
 
-## Phase 2: Parallel Research
+## Phase 2: 병렬 리서치
 
-Teammates work independently:
-- researcher explores codebase (fastest, haiku)
-- analyst defines requirements (medium)
-- architect designs solution (waits for researcher findings)
+팀원들은 독립적으로 작업합니다:
+- researcher가 코드베이스 탐색 (가장 빠름, haiku)
+- analyst가 요구사항 정의 (중간)
+- architect가 솔루션 설계 (researcher 발견사항 대기)
 
-MoAI monitors:
-- Receive progress messages automatically
-- Forward researcher findings to architect when available
-- Resolve any questions from teammates
+MoAI 모니터링:
+- 자동으로 진행 메시지 수신
+- 가능할 때 researcher 발견사항을 architect에게 전달
+- 팀원들의 질문 해결
 
-## Phase 3: Synthesis
+## Phase 3: 종합
 
-After all research tasks complete:
-1. Collect findings from all three teammates
-2. Delegate SPEC creation to manager-spec subagent (NOT a teammate) with all findings
-3. Include: codebase analysis, requirements, technical design, edge cases
+모든 리서치 작업 완료 후:
+1. 세 팀원의 발견사항 수집
+2. 모든 발견사항과 함께 manager-spec 서브에이전트에게 SPEC 생성 위임 (팀원이 아님)
+3. 포함 내용: 코드베이스 분석, 요구사항, 기술 설계, 엣지 케이스
 
-SPEC output at: .moai/specs/SPEC-XXX/spec.md
+SPEC 출력 위치: .moai/specs/SPEC-XXX/spec.md
 
-## Phase 4: User Approval
+## Phase 4: 사용자 승인
 
-AskUserQuestion with options:
-- Approve SPEC and proceed to implementation
-- Request modifications (specify which section)
-- Cancel workflow
+AskUserQuestion 옵션:
+- SPEC 승인 및 구현 진행
+- 수정 요청 (어느 섹션인지 명시)
+- 워크플로우 취소
 
-## Phase 5: Cleanup
+## Phase 5: 정리
 
-1. Shutdown all teammates:
+1. 모든 팀원 종료:
    ```
    SendMessage(type: "shutdown_request", recipient: "researcher")
    SendMessage(type: "shutdown_request", recipient: "analyst")
    SendMessage(type: "shutdown_request", recipient: "architect")
    ```
-2. TeamDelete to clean up resources
-3. Execute /clear to free context for next phase
+2. 리소스 정리를 위해 TeamDelete
+3. 다음 단계를 위한 컨텍스트 확보를 위해 /clear 실행
 
-## Fallback
+## 폴백
 
-If team creation fails or AGENT_TEAMS not enabled:
-- Fall back to sub-agent plan workflow (workflows/plan.md)
-- Log warning about team mode unavailability
+팀 생성 실패 또는 AGENT_TEAMS 미활성화 시:
+- 서브에이전트 plan 워크플로우 (workflows/plan.md)로 폴백
+- 팀 모드 사용 불가에 대한 경고 기록
 
 ---
 
