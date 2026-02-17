@@ -199,6 +199,31 @@ Destructive git commands that overwrite/delete files are forbidden project-wide.
 - [HARD] Super agent creates new agent to continue work on report
 - [HARD] Checklist is the sole handoff mechanism — never depend on message passing
 
+## Orchestrator Resume Protocol [HARD]
+- [HARD] 오케스트레이터는 작업 재개 시 체크리스트의 `Prompt (RESTART INSTRUCTION)` 섹션을 **1차적으로** 참조
+- [HARD] Resume 절차:
+  1. `.do/jobs/{YY}/{MM}/{DD}/{title}/checklists/` 디렉토리 스캔
+  2. `[~]` 또는 `[ ]` 상태인 sub-checklist 찾기
+  3. 해당 체크리스트의 `Prompt (RESTART INSTRUCTION)` 섹션 읽기
+  4. Prompt 내용을 그대로 에이전트(Task tool)에 전달
+- [HARD] **Prompt 섹션이 비어있으면 오케스트레이터가 직접 작성** — fallback 금지
+- [HARD] 오케스트레이터는 Agent Instructions, Critical Files, Progress Log를 읽고 Prompt 섹션을 생성
+- [HARD] Prompt 작성 형식:
+  ```
+  Task: {간결한 작업 요약}
+  Current state: {[~] 또는 [ ] + 마지막 Progress Log 내용}
+  Remaining: {Acceptance Criteria 중 [ ]인 항목들}
+  Files to modify: {Critical Files 목록}
+  Test command: {go test ./... 또는 equivalent}
+  ```
+- [HARD] 에이전트에게 "Read the checklist at {path} and follow the Prompt section" 형식으로 지시
+- [HARD] 예시:
+  ```
+  Read the checklist at .do/jobs/26/02/18/auth-api/checklists/01_expert-backend.md
+  Follow the "Prompt (RESTART INSTRUCTION)" section to resume work.
+  Current state is [~] — continue from where it left off.
+  ```
+
 ## Agent Prompt Token Optimization [HARD]
 - [HARD] Never instruct agent to read entire large files (500+ lines)
 - [HARD] Extract only relevant sections and inject directly into prompt
