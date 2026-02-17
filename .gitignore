@@ -3,3 +3,7 @@
 CLAUDE.md
 dist/
 godo
+
+# Do runtime
+.do/.latest-version
+.do/memory/
