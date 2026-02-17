@@ -1,13 +1,12 @@
 ---
 name: do-foundation-core
 description: >
-  Provides Do-ADK foundational principles including TRUST 5 quality framework,
-  SPEC-First DDD methodology, delegation patterns, progressive disclosure,
-  and agent catalog reference.
-  Use when referencing TRUST 5 gates, SPEC workflow, EARS format, DDD methodology,
-  agent delegation patterns, or Do orchestration rules.
-  Do NOT use for context and token management (use do-foundation-context instead)
-  or strategic analysis (use do-foundation-philosopher instead).
+  TRUST 5 품질 프레임워크, SPEC-First DDD 방법론, 위임 패턴, 점진적 공개,
+  에이전트 카탈로그 참조 등 Do-ADK의 핵심 원칙을 제공합니다.
+  TRUST 5 게이트, SPEC 워크플로우, EARS 형식, DDD 방법론,
+  에이전트 위임 패턴, 또는 Do 오케스트레이션 규칙을 참조할 때 사용하세요.
+  컨텍스트 및 토큰 관리(do-foundation-context 사용)나
+  전략적 분석(do-foundation-philosopher 사용)에는 사용하지 마세요.
 license: Apache-2.0
 compatibility: Designed for Claude Code
 allowed-tools: Read Grep Glob mcp__context7__resolve-library-id mcp__context7__get-library-docs
@@ -57,225 +56,225 @@ triggers:
 
 # Do Foundation Core
 
-Foundational principles and architectural patterns that power Do-ADK's AI-driven development workflow.
+Do-ADK의 AI 기반 개발 워크플로우를 구동하는 핵심 원칙 및 아키텍처 패턴입니다.
 
-Core Philosophy: Quality-first, domain-driven, modular, and efficient AI development through proven patterns and automated workflows.
+핵심 철학: 검증된 패턴과 자동화된 워크플로우를 통해 품질 우선, 도메인 주도, 모듈화되고 효율적인 AI 개발을 추구합니다.
 
-## Quick Reference
+## 빠른 참조
 
-What is Do Foundation Core?
+Do Foundation Core란?
 
-Six essential principles that ensure quality, efficiency, and scalability in AI-powered development:
+AI 기반 개발에서 품질, 효율성, 확장성을 보장하는 여섯 가지 핵심 원칙:
 
-1. TRUST 5 Framework - Quality gate system (Tested, Readable, Unified, Secured, Trackable)
-2. SPEC-First DDD - Specification-driven domain-driven development workflow
-3. Delegation Patterns - Task orchestration via specialized agents (never direct execution)
-4. Token Optimization - 200K budget management and context efficiency
-5. Progressive Disclosure - Three-tier knowledge delivery (Quick, Implementation, Advanced)
-6. Modular System - File splitting and reference architecture for scalability
+1. TRUST 5 프레임워크 - 품질 게이트 시스템 (Tested, Readable, Unified, Secured, Trackable)
+2. SPEC-First DDD - 명세 주도 도메인 기반 개발 워크플로우
+3. 위임 패턴 - 전문 에이전트를 통한 작업 오케스트레이션 (직접 실행 금지)
+4. 토큰 최적화 - 200K 예산 관리 및 컨텍스트 효율성
+5. 점진적 공개 - 3단계 지식 전달 (빠른 참조, 구현, 고급)
+6. 모듈 시스템 - 확장성을 위한 파일 분할 및 참조 아키텍처
 
-Quick Access:
+빠른 접근:
 
-- Quality standards in modules/trust-5-framework.md
-- Development workflow in modules/spec-first-ddd.md
-- Agent coordination in modules/delegation-patterns.md
-- Budget management in modules/token-optimization.md
-- Content structure in modules/progressive-disclosure.md
-- File organization in modules/modular-system.md
-- Agent catalog in modules/agents-reference.md
-- Command reference in modules/commands-reference.md
-- Security and constraints in modules/execution-rules.md
+- modules/trust-5-framework.md: 품질 기준
+- modules/spec-first-ddd.md: 개발 워크플로우
+- modules/delegation-patterns.md: 에이전트 협조
+- modules/token-optimization.md: 예산 관리
+- modules/progressive-disclosure.md: 콘텐츠 구조
+- modules/modular-system.md: 파일 구성
+- modules/agents-reference.md: 에이전트 카탈로그
+- modules/commands-reference.md: 커맨드 참조
+- modules/execution-rules.md: 보안 및 제약 사항
 
-Use Cases:
+사용 사례:
 
-- New agent creation with quality standards
-- New skill development with structural guidelines
-- Complex workflow orchestration
-- Token budget planning and optimization
-- Documentation architecture design
-- Quality gate configuration
-
----
-
-## Implementation Guide
-
-### 1. TRUST 5 Framework - Quality Assurance System
-
-Purpose: Automated quality gates ensuring code quality, security, and maintainability.
-
-Five Pillars:
-
-Tested Pillar: Maintain comprehensive test coverage with characterization tests ensuring behavior preservation. Execute pytest with coverage reporting. Block merge and generate missing tests on failure. Characterization tests capture current behavior for legacy code, while specification tests validate domain requirements for new code. High coverage ensures code reliability and reduces production defects. Preserves behavior during refactoring and reduces debugging time by 60-70 percent.
-
-Readable Pillar: Use clear and descriptive naming conventions. Execute ruff linter checks. Issue warning and suggest refactoring improvements on failure. Clear naming improves code comprehension and team collaboration. Reduces onboarding time by 40 percent and improves maintenance velocity.
-
-Unified Pillar: Apply consistent formatting and import patterns. Execute black formatter and isort checks. Auto-format code or issue warning on failure. Consistency eliminates style debates and merge conflicts. Reduces code review time by 30 percent and improves readability.
-
-Secured Pillar: Comply with OWASP security standards. Execute security-expert agent analysis. Block merge and require security review on failure. Security vulnerabilities create critical business and legal risks. Prevents 95+ percent of common security vulnerabilities.
-
-Trackable Pillar: Write clear and structured commit messages. Match Git commit message regex patterns. Suggest proper commit message format on failure. Clear history enables debugging, auditing, and collaboration. Reduces issue investigation time by 50 percent.
-
-Integration Points: Pre-commit hooks for automated validation, CI/CD pipelines for quality gate enforcement, Agent workflows for core-quality validation, Documentation for quality metrics.
-
-Detailed Reference: modules/trust-5-framework.md
+- 품질 기준을 적용한 새 에이전트 생성
+- 구조적 가이드라인을 따른 새 스킬 개발
+- 복잡한 워크플로우 오케스트레이션
+- 토큰 예산 계획 및 최적화
+- 문서 아키텍처 설계
+- 품질 게이트 구성
 
 ---
 
-### 2. SPEC-First DDD - Development Workflow
+## 구현 가이드
 
-Purpose: Specification-driven development ensuring clear requirements before implementation.
+### 1. TRUST 5 프레임워크 - 품질 보증 시스템
 
-Three-Phase Workflow:
+목적: 코드 품질, 보안, 유지 보수성을 보장하는 자동화된 품질 게이트.
 
-Phase 1 SPEC (/do:1-plan): workflow-spec generates EARS format. Output is .do/specs/SPEC-XXX/spec.md. Execute /clear to save 45-50K tokens.
+다섯 가지 기둥:
 
-Phase 2 DDD (/do:2-run): ANALYZE for requirements, PRESERVE for existing behavior, IMPROVE for enhancement. Validate with at least 85% coverage.
+Tested(테스트됨) 기둥: 행동 보존을 보장하는 특성화 테스트를 포함한 포괄적인 테스트 커버리지 유지. 커버리지 보고와 함께 pytest 실행. 실패 시 머지를 차단하고 누락된 테스트를 생성. 특성화 테스트는 레거시 코드의 현재 동작을 캡처하고, 명세 테스트는 새 코드의 도메인 요구사항을 검증합니다. 높은 커버리지는 코드 안정성을 보장하고 프로덕션 결함을 줄입니다. 리팩토링 중 동작을 보존하고 디버깅 시간을 60~70% 줄입니다.
 
-Phase 3 Docs (/do:3-sync): API documentation, architecture diagrams, project reports.
+Readable(읽기 쉬운) 기둥: 명확하고 설명적인 네이밍 규칙 사용. ruff 린터 검사 실행. 실패 시 경고를 내고 리팩토링 개선 사항을 제안. 명확한 네이밍은 코드 이해도와 팀 협업을 향상시킵니다. 온보딩 시간을 40% 줄이고 유지 보수 속도를 높입니다.
 
-EARS Format: Ubiquitous for system-wide always active requirements. Event-driven for trigger-based when X do Y requirements. State-driven for conditional while X do Y requirements. Unwanted for prohibited shall not do X requirements. Optional for nice-to-have where possible do X requirements.
+Unified(통일된) 기둥: 일관된 포맷 및 임포트 패턴 적용. black 포매터와 isort 검사 실행. 실패 시 코드를 자동으로 포맷하거나 경고 발생. 일관성은 스타일 논쟁과 머지 충돌을 제거합니다. 코드 리뷰 시간을 30% 줄이고 가독성을 향상시킵니다.
 
-Token Budget: SPEC takes 30K, DDD takes 180K, Docs takes 40K, Total is 250K.
+Secured(보안) 기둥: OWASP 보안 표준 준수. security-expert 에이전트 분석 실행. 실패 시 머지를 차단하고 보안 검토를 요구. 보안 취약점은 심각한 비즈니스 및 법적 위험을 야기합니다. 일반적인 보안 취약점의 95% 이상을 방지합니다.
 
-Key Practice: Execute /clear after Phase 1 to initialize context.
+Trackable(추적 가능한) 기둥: 명확하고 구조화된 커밋 메시지 작성. Git 커밋 메시지 정규식 패턴 매칭. 실패 시 올바른 커밋 메시지 형식 제안. 명확한 히스토리는 디버깅, 감사, 협업을 가능하게 합니다. 이슈 조사 시간을 50% 줄입니다.
 
-Detailed Reference: modules/spec-first-ddd.md
+통합 포인트: 자동 검증을 위한 pre-commit 훅, 품질 게이트 적용을 위한 CI/CD 파이프라인, core-quality 검증을 위한 에이전트 워크플로우, 품질 지표 문서화.
 
----
-
-### 3. Delegation Patterns - Agent Orchestration
-
-Purpose: Task delegation to specialized agents, avoiding direct execution.
-
-Core Principle: Do must delegate all work through Task() to specialized agents. Direct execution bypasses specialization, quality gates, and token optimization. Proper delegation improves task success rate by 40 percent and enables parallel execution.
-
-Delegation Syntax: Call Task with subagent_type parameter for specialized agent, prompt parameter for clear specific task, and context parameter with relevant data dictionary.
-
-Three Patterns:
-
-Sequential for dependencies: Call Task to api-designer for design, then Task to backend-expert for implementation with design context.
-
-Parallel for independent work: Call Promise.all with Task to backend-expert and Task to frontend-expert simultaneously.
-
-Conditional for analysis-based: Call Task to debug-helper for analysis, then based on analysis.type, call Task to security-expert or other appropriate agent.
-
-Agent Selection: Simple tasks with 1 file use 1-2 agents sequential. Medium tasks with 3-5 files use 2-3 agents sequential. Complex tasks with 10+ files use 5+ agents mixed.
-
-Detailed Reference: modules/delegation-patterns.md
+상세 참조: modules/trust-5-framework.md
 
 ---
 
-### 4. Token Optimization - Budget Management
+### 2. SPEC-First DDD - 개발 워크플로우
 
-Purpose: Efficient 200K token budget through strategic context management.
+목적: 구현 전 명확한 요구사항을 보장하는 명세 주도 개발.
 
-Budget Allocation:
+3단계 워크플로우:
 
-SPEC Phase takes 30K tokens. Strategy is to load requirements only and execute /clear after completion. Specification phase requires minimal context for requirement analysis. Saves 45-50K tokens for implementation phase.
+1단계 SPEC (/do:1-plan): workflow-spec이 EARS 형식 생성. 출력물은 .do/specs/SPEC-XXX/spec.md. /clear 실행으로 45~50K 토큰 절약.
 
-DDD Phase takes 180K tokens. Strategy is selective file loading, load only implementation-relevant files. Implementation requires deep context but not full codebase. Enables 70 percent larger implementations within budget.
+2단계 DDD (/do:2-run): ANALYZE로 요구사항 파악, PRESERVE로 기존 동작 유지, IMPROVE로 개선. 최소 85% 커버리지로 검증.
 
-Docs Phase takes 40K tokens. Strategy is result caching and template reuse. Documentation builds on completed work artifacts. Reduces redundant file reads by 60 percent.
+3단계 Docs (/do:3-sync): API 문서화, 아키텍처 다이어그램, 프로젝트 보고서.
 
-Total Budget is 250K tokens across all phases. Phase separation with context reset between phases provides clean context boundaries and prevents token bloat. Enables 2-3x larger projects within same budget.
+EARS 형식: 시스템 전체에 항상 활성화된 요구사항은 Ubiquitous. 트리거 기반 "X 발생 시 Y 수행" 요구사항은 Event-driven. 조건부 "X 상태에서 Y 수행" 요구사항은 State-driven. 금지 "X 수행 금지" 요구사항은 Unwanted. "가능하면 X 수행" 같은 선택적 요구사항은 Optional.
 
-Token Saving Strategies:
+토큰 예산: SPEC은 30K, DDD는 180K, Docs는 40K, 총 250K.
 
-Phase Separation: Execute /clear between phases, after /do:1-plan to save 45-50K, when context exceeds 150K, after 50+ messages.
+핵심 실천: 1단계 완료 후 /clear를 실행하여 컨텍스트를 초기화합니다.
 
-Selective Loading: Load only necessary files.
-
-Context Optimization: Target 20-30K tokens.
-
-Model Selection: Sonnet for quality, Haiku for speed and cost with 70% cheaper rates for 60-70% total savings.
-
-Detailed Reference: modules/token-optimization.md
+상세 참조: modules/spec-first-ddd.md
 
 ---
 
-### 5. Progressive Disclosure - Content Architecture
+### 3. 위임 패턴 - 에이전트 오케스트레이션
 
-Purpose: Three-tier knowledge delivery balancing value with depth.
+목적: 직접 실행을 피하고 전문 에이전트에게 작업을 위임.
 
-Three Levels:
+핵심 원칙: Do는 모든 작업을 Task()를 통해 전문 에이전트에게 위임해야 합니다. 직접 실행은 전문화, 품질 게이트, 토큰 최적화를 우회합니다. 올바른 위임은 작업 성공률을 40% 향상시키고 병렬 실행을 가능하게 합니다.
 
-Quick Reference Level: 30 seconds time investment, core principles and essential concepts, approximately 1,000 tokens. Rapid value delivery for time-constrained users. Users gain 80 percent understanding in 5 percent of time.
+위임 구문: 전문 에이전트를 위한 subagent_type 매개변수, 명확하고 구체적인 작업을 위한 prompt 매개변수, 관련 데이터 딕셔너리를 위한 context 매개변수로 Task를 호출합니다.
 
-Implementation Level: 5 minutes time investment, workflows, practical examples, integration patterns, approximately 3,000 tokens. Bridges concept to execution with actionable guidance. Enables immediate productive work without deep expertise.
+세 가지 패턴:
 
-Advanced Level: 10+ minutes time investment, deep technical dives, edge cases, optimization techniques, approximately 5,000 tokens. Provides mastery-level knowledge for complex scenarios. Reduces escalations by 70 percent through comprehensive coverage.
+의존성이 있는 순차 실행: 설계를 위해 api-designer에 Task를 호출하고, 그 다음 설계 컨텍스트를 포함한 구현을 위해 backend-expert에 Task를 호출합니다.
 
-SKILL.md Structure (maximum 500 lines): Quick Reference section, Implementation Guide section, Advanced Patterns section, Works Well With section.
+독립적 작업의 병렬 실행: backend-expert와 frontend-expert에 동시에 Promise.all로 Task를 호출합니다.
 
-Module Architecture: SKILL.md as entry point with cross-references, modules directory for deep dives with unlimited size, examples.md for working samples, reference.md for external links.
+분석 기반 조건부 실행: 분석을 위해 debug-helper에 Task를 호출하고, 분석 결과 유형에 따라 security-expert 또는 다른 적절한 에이전트에 Task를 호출합니다.
 
-File Splitting when exceeding 500 lines: SKILL.md contains Quick at 80-120 lines, Implementation at 180-250 lines, Advanced at 80-140 lines, References at 10-20 lines. Overflow content goes to modules/topic.md.
+에이전트 선택: 1개 파일의 간단한 작업은 1~2개 에이전트 순차 실행. 3~5개 파일의 중간 작업은 2~3개 에이전트 순차 실행. 10개 이상 파일의 복잡한 작업은 5개 이상 에이전트 혼합 실행.
 
-Detailed Reference: modules/progressive-disclosure.md
-
----
-
-### 6. Modular System - File Organization
-
-Purpose: Scalable file structure enabling unlimited content.
-
-Standard Structure: Create .claude/skills/skill-name/ directory containing SKILL.md as core file under 500 lines, modules directory for extended content with unlimited size including patterns.md, examples.md for working samples, reference.md for external links, scripts directory for utilities (optional), templates directory (optional).
-
-File Principles: SKILL.md stays under 500 lines with progressive disclosure and cross-references. modules directory is topic-focused with no limits and self-contained content. examples.md is copy-paste ready with comments. reference.md contains API docs and resources.
-
-Cross-Reference Syntax: Reference modules as Details in modules/patterns.md, reference examples as Examples in examples.md#auth, reference external docs as External in reference.md#api.
-
-Discovery Flow: SKILL.md to Topic to modules/topic.md to Deep dive.
-
-Detailed Reference: modules/modular-system.md
+상세 참조: modules/delegation-patterns.md
 
 ---
 
-## Advanced Implementation
+### 4. 토큰 최적화 - 예산 관리
 
-Advanced patterns including cross-module integration, quality validation, and error handling are available in the detailed module references.
+목적: 전략적 컨텍스트 관리를 통한 효율적인 200K 토큰 예산 운영.
 
-Key Advanced Topics:
+예산 배분:
 
-- Cross-Module Integration: Combining TRUST 5 + SPEC-First DDD
-- Token-Optimized Delegation: Parallel execution with context reset
-- Progressive Agent Workflows: Escalation patterns
-- Quality Validation: Pre/Post execution validation
-- Error Handling: Delegation failure recovery
+SPEC 단계는 30K 토큰. 전략은 요구사항만 로드하고 완료 후 /clear 실행. 명세 단계는 요구사항 분석을 위한 최소 컨텍스트만 필요. 구현 단계를 위해 45~50K 토큰을 절약합니다.
 
-Detailed Reference: examples.md for working code samples
+DDD 단계는 180K 토큰. 전략은 선택적 파일 로드, 구현과 관련된 파일만 로드. 구현은 심층 컨텍스트가 필요하지만 전체 코드베이스는 불필요. 예산 내에서 70% 더 큰 구현을 가능하게 합니다.
 
----
+Docs 단계는 40K 토큰. 전략은 결과 캐싱 및 템플릿 재사용. 문서화는 완성된 작업 아티팩트를 기반으로 합니다. 중복 파일 읽기를 60% 줄입니다.
 
-## Works Well With
+총 예산은 모든 단계에 걸쳐 250K 토큰. 단계 간 컨텍스트 초기화를 통한 단계 분리는 깨끗한 컨텍스트 경계를 제공하고 토큰 팽창을 방지합니다. 동일한 예산 내에서 2~3배 더 큰 프로젝트를 가능하게 합니다.
 
-Agents: agent-factory for creating agents with foundation principles, skill-factory for generating skills with modular architecture, core-quality for automated TRUST 5 validation, workflow-spec for EARS format specification, workflow-ddd for ANALYZE-PRESERVE-IMPROVE execution, workflow-docs for documentation with progressive disclosure.
+토큰 절약 전략:
 
-Skills: do-cc-claude-md for CLAUDE.md with foundation patterns, do-cc-configuration for config with TRUST 5, do-cc-memory for token optimization, do-context7-integration for MCP integration.
+단계 분리: 단계 사이에 /clear 실행, /do:1-plan 이후 45~50K 절약, 컨텍스트가 150K 초과 시, 50개 이상 메시지 후.
 
-Tools: AskUserQuestion for direct user interaction and clarification needs.
+선택적 로드: 필요한 파일만 로드.
 
-Commands: /do:1-plan for SPEC-First Phase 1, /do:2-run for DDD Phase 2, /do:3-sync for Documentation Phase 3, /do:9-feedback for continuous improvement, /clear for token management.
+컨텍스트 최적화: 목표 20~30K 토큰.
 
-Foundation Modules (Extended Documentation): modules/agents-reference.md for 26-agent catalog with 7-tier hierarchy, modules/commands-reference.md for 6 core commands workflow, modules/execution-rules.md for security, Git strategy, and compliance.
+모델 선택: 품질을 위해 Sonnet, 속도와 비용을 위해 Haiku(70% 저렴, 총 60~70% 절감).
+
+상세 참조: modules/token-optimization.md
 
 ---
 
-## Quick Decision Guide
+### 5. 점진적 공개 - 콘텐츠 아키텍처
 
-New Agent: Primary principle is TRUST 5 and Delegation. Supporting principles are Token Optimization and Modular.
+목적: 가치와 깊이의 균형을 맞추는 3단계 지식 전달.
 
-New Skill: Primary principle is Progressive and Modular. Supporting principles are TRUST 5 and Token Optimization.
+세 가지 레벨:
 
-Workflow: Primary principle is Delegation Patterns. Supporting principles are SPEC-First and Token Optimization.
+빠른 참조 레벨: 30초 투자, 핵심 원칙 및 필수 개념, 약 1,000 토큰. 시간이 부족한 사용자에게 빠른 가치 전달. 사용자는 전체 시간의 5%만으로 80%의 이해를 얻습니다.
 
-Quality: Primary principle is TRUST 5 Framework. Supporting principle is SPEC-First DDD.
+구현 레벨: 5분 투자, 워크플로우, 실용적 예제, 통합 패턴, 약 3,000 토큰. 개념에서 실행으로의 다리 역할, 실용적 지침 제공. 깊은 전문 지식 없이도 즉시 생산적인 작업이 가능합니다.
 
-Budget: Primary principle is Token Optimization. Supporting principles are Progressive and Modular.
+고급 레벨: 10분 이상 투자, 깊은 기술적 심화, 엣지 케이스, 최적화 기법, 약 5,000 토큰. 복잡한 시나리오를 위한 숙련도 수준의 지식 제공. 포괄적인 커버리지를 통해 에스컬레이션을 70% 줄입니다.
 
-Docs: Primary principle is Progressive and Modular. Supporting principle is Token Optimization.
+SKILL.md 구조 (최대 500줄): 빠른 참조 섹션, 구현 가이드 섹션, 고급 패턴 섹션, 함께 사용하면 좋은 것들 섹션.
 
-Module Deep Dives: modules/trust-5-framework.md, modules/spec-first-ddd.md, modules/delegation-patterns.md, modules/token-optimization.md, modules/progressive-disclosure.md, modules/modular-system.md, modules/agents-reference.md, modules/commands-reference.md, modules/execution-rules.md.
+모듈 아키텍처: 교차 참조가 있는 진입점으로서의 SKILL.md, 무제한 크기의 심층 탐구를 위한 modules 디렉토리, 작동 예제를 위한 examples.md, 외부 링크를 위한 reference.md.
 
-Full Examples: examples.md
-External Resources: reference.md
+500줄 초과 시 파일 분할: SKILL.md는 빠른 참조 80~120줄, 구현 180~250줄, 고급 80~140줄, 참조 10~20줄. 초과 콘텐츠는 modules/topic.md로 이동.
+
+상세 참조: modules/progressive-disclosure.md
+
+---
+
+### 6. 모듈 시스템 - 파일 구성
+
+목적: 무제한 콘텐츠를 가능하게 하는 확장 가능한 파일 구조.
+
+표준 구조: .claude/skills/skill-name/ 디렉토리 생성. 500줄 미만의 핵심 파일인 SKILL.md, 무제한 크기의 확장 콘텐츠를 위한 modules 디렉토리(patterns.md 포함), 작동 예제를 위한 examples.md, 외부 링크를 위한 reference.md, 유틸리티를 위한 scripts 디렉토리(선택적), templates 디렉토리(선택적) 포함.
+
+파일 원칙: SKILL.md는 점진적 공개와 교차 참조로 500줄 미만 유지. modules 디렉토리는 주제 집중, 제한 없음, 자체 완결적 콘텐츠. examples.md는 주석이 있는 복사-붙여넣기 가능 형식. reference.md는 API 문서 및 리소스 포함.
+
+교차 참조 구문: modules/patterns.md의 세부 내용 참조, examples.md#auth의 예제 참조, reference.md#api의 외부 문서 참조.
+
+발견 흐름: SKILL.md → 주제 → modules/topic.md → 심층 탐구.
+
+상세 참조: modules/modular-system.md
+
+---
+
+## 고급 구현
+
+모듈 간 통합, 품질 검증, 오류 처리를 포함한 고급 패턴은 상세 모듈 참조에서 확인할 수 있습니다.
+
+주요 고급 주제:
+
+- 모듈 간 통합: TRUST 5 + SPEC-First DDD 결합
+- 토큰 최적화 위임: 컨텍스트 초기화를 통한 병렬 실행
+- 점진적 에이전트 워크플로우: 에스컬레이션 패턴
+- 품질 검증: 실행 전/후 검증
+- 오류 처리: 위임 실패 복구
+
+상세 참조: examples.md(작동 코드 샘플)
+
+---
+
+## 함께 사용하면 좋은 것들
+
+에이전트: 핵심 원칙으로 에이전트를 생성하는 agent-factory, 모듈 아키텍처로 스킬을 생성하는 skill-factory, 자동화된 TRUST 5 검증을 위한 core-quality, EARS 형식 명세를 위한 workflow-spec, ANALYZE-PRESERVE-IMPROVE 실행을 위한 workflow-ddd, 점진적 공개로 문서화하는 workflow-docs.
+
+스킬: 핵심 패턴이 포함된 CLAUDE.md를 위한 do-cc-claude-md, TRUST 5가 포함된 설정을 위한 do-cc-configuration, 토큰 최적화를 위한 do-cc-memory, MCP 통합을 위한 do-context7-integration.
+
+도구: 직접 사용자 상호작용 및 명확화를 위한 AskUserQuestion.
+
+커맨드: SPEC-First 1단계를 위한 /do:1-plan, DDD 2단계를 위한 /do:2-run, 문서화 3단계를 위한 /do:3-sync, 지속적 개선을 위한 /do:9-feedback, 토큰 관리를 위한 /clear.
+
+Foundation 모듈 (확장 문서): 7계층 계층의 26개 에이전트 카탈로그를 위한 modules/agents-reference.md, 6개 핵심 커맨드 워크플로우를 위한 modules/commands-reference.md, 보안, Git 전략, 규정 준수를 위한 modules/execution-rules.md.
+
+---
+
+## 빠른 결정 가이드
+
+새 에이전트: 주요 원칙은 TRUST 5와 위임. 보조 원칙은 토큰 최적화와 모듈.
+
+새 스킬: 주요 원칙은 점진적 공개와 모듈. 보조 원칙은 TRUST 5와 토큰 최적화.
+
+워크플로우: 주요 원칙은 위임 패턴. 보조 원칙은 SPEC-First와 토큰 최적화.
+
+품질: 주요 원칙은 TRUST 5 프레임워크. 보조 원칙은 SPEC-First DDD.
+
+예산: 주요 원칙은 토큰 최적화. 보조 원칙은 점진적 공개와 모듈.
+
+문서: 주요 원칙은 점진적 공개와 모듈. 보조 원칙은 토큰 최적화.
+
+모듈 심층 탐구: modules/trust-5-framework.md, modules/spec-first-ddd.md, modules/delegation-patterns.md, modules/token-optimization.md, modules/progressive-disclosure.md, modules/modular-system.md, modules/agents-reference.md, modules/commands-reference.md, modules/execution-rules.md.
+
+전체 예제: examples.md
+외부 리소스: reference.md

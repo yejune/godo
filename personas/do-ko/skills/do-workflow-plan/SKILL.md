@@ -1,13 +1,13 @@
 ---
 name: do-workflow-plan
 description: >
-  Plan workflow orchestration with EARS+MoSCoW requirements, complexity assessment,
-  Analysis-Architecture-Plan pipeline, and checklist generation for Do's
-  checklist-driven development methodology.
-  Use when creating plans, writing requirements, defining acceptance criteria,
-  assessing complexity, or orchestrating the plan phase.
-  Do NOT use for implementation (use do-workflow-ddd or do-workflow-tdd instead)
-  or documentation generation (use do-workflow-project instead).
+  EARS+MoSCoW 요구사항, 복잡도 평가, 분석-아키텍처-계획 파이프라인,
+  Do의 체크리스트 기반 개발 방법론을 위한 체크리스트 생성을 포함하는
+  계획 워크플로우 오케스트레이터입니다.
+  계획 작성, 요구사항 정의, 인수 기준 설정, 복잡도 평가,
+  또는 계획 단계 오케스트레이션 시 사용하세요.
+  구현(do-workflow-ddd 또는 do-workflow-tdd 사용)이나
+  문서 생성(do-workflow-project 사용)에는 사용하지 마세요.
 license: Apache-2.0
 compatibility: Designed for Claude Code
 allowed-tools: Read Write Edit Bash Grep Glob mcp__context7__resolve-library-id mcp__context7__get-library-docs
@@ -44,137 +44,137 @@ triggers:
   agents: ["manager-plan", "manager-strategy", "expert-analyst", "expert-architect"]
 ---
 
-# Do Plan Workflow
+# Do 계획 워크플로우
 
-## Quick Reference
+## 빠른 참조
 
-Plan Workflow Orchestration -- comprehensive planning through complexity assessment, optional analysis/architecture phases, EARS+MoSCoW requirements, and checklist generation.
+계획 워크플로우 오케스트레이션 -- 복잡도 평가, 선택적 분석/아키텍처 단계, EARS+MoSCoW 요구사항, 체크리스트 생성을 통한 포괄적인 계획 수립.
 
-Core Capabilities:
+핵심 기능:
 
-- Complexity Assessment: Determines simple vs complex workflow path
-- Analysis Phase: Current system analysis, requirements gathering, tech comparison (complex only)
-- Architecture Phase: Solution design, interface specs, implementation order (complex only)
-- EARS + MoSCoW: Structured requirements with prioritization
-- Plan Document: Implementation roadmap with phases
-- Checklist Generation: Agent-specific sub-checklists with 3-phase template
+- 복잡도 평가: 단순 vs 복잡 워크플로우 경로 결정
+- 분석 단계: 현재 시스템 분석, 요구사항 수집, 기술 비교 (복잡한 작업만)
+- 아키텍처 단계: 솔루션 설계, 인터페이스 명세, 구현 순서 (복잡한 작업만)
+- EARS + MoSCoW: 우선순위가 있는 구조화된 요구사항
+- 계획 문서: 단계별 구현 로드맵
+- 체크리스트 생성: 3단계 템플릿이 있는 에이전트별 서브 체크리스트
 
-Output Location: `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/`
+산출물 위치: `.do/jobs/{YY}/{MM}/{DD}/{title-kebab-case}/`
 
 ---
 
-## Implementation Guide
+## 구현 가이드
 
-### Complexity Assessment [HARD]
+### 복잡도 평가 [HARD]
 
-Every task starts with complexity assessment to determine workflow path.
+모든 작업은 워크플로우 경로를 결정하기 위한 복잡도 평가로 시작합니다.
 
-Simple Task (ALL must apply):
-- 4 or fewer file changes
-- Within existing patterns (no new modules)
-- Single domain work
-- No architecture changes
-- Workflow: Plan -> Checklist -> Develop -> Test -> Report
+단순한 작업 (모두 해당되어야 함):
+- 4개 이하 파일 변경
+- 기존 패턴 내에서의 작업 (새 모듈 없음)
+- 단일 도메인 작업
+- 아키텍처 변경 없음
+- 워크플로우: Plan -> Checklist -> Develop -> Test -> Report
 
-Complex Task (ANY triggers full pipeline):
-- 5+ file changes expected
-- New library/package/module creation
-- System migration/transition
-- 3+ domain integration (backend + frontend + DB)
-- Abstraction layer design needed
-- Existing system architecture change
-- Workflow: Analysis -> Architecture -> Plan -> Checklist -> Develop -> Test -> Report
+복잡한 작업 (하나라도 해당되면 전체 파이프라인):
+- 5개 이상 파일 변경 예상
+- 새 라이브러리/패키지/모듈 생성
+- 시스템 마이그레이션/전환
+- 3개 이상 도메인 통합 (backend + frontend + DB)
+- 추상화 계층 설계 필요
+- 기존 시스템 아키텍처 변경
+- 워크플로우: Analysis -> Architecture -> Plan -> Checklist -> Develop -> Test -> Report
 
-When uncertain: Ask user via AskUserQuestion: "Analysis/Architecture needed?"
+불확실한 경우: AskUserQuestion으로 사용자에게 질문: "Analysis/Architecture가 필요한가요?"
 
-### Simple Workflow: Plan -> Checklist
+### 단순 워크플로우: Plan -> Checklist
 
-Step 1 - Requirements Gathering:
-- Parse user request for scope and constraints
-- Ask clarifying questions if requirements are ambiguous [HARD]
-- Determine TDD preference via AskUserQuestion: "TDD?" [HARD]
+1단계 - 요구사항 수집:
+- 범위와 제약 조건을 위해 사용자 요청 파싱
+- 요구사항이 모호하면 명확한 질문 [HARD]
+- AskUserQuestion으로 TDD 여부 확인: "TDD로 할까요?" [HARD]
 
-Step 2 - Plan Document:
-- Create `.do/jobs/{YY}/{MM}/{DD}/{title}/plan.md`
-- Include: objectives, scope, approach, phases, risks
-- EARS format for requirements when appropriate
-- MoSCoW prioritization for multi-item plans
+2단계 - 계획 문서:
+- `.do/jobs/{YY}/{MM}/{DD}/{title}/plan.md` 생성
+- 포함 내용: 목표, 범위, 접근 방식, 단계, 위험
+- 적절한 경우 요구사항에 EARS 형식 사용
+- 다항목 계획에 MoSCoW 우선순위 적용
 
-Step 3 - Checklist Generation:
-- Generate `checklist.md` with numbered items
-- Each item: 1-3 file changes + verification method [HARD]
-- Items over 3 files: MUST split [HARD]
-- Generate sub-checklists: `checklists/{order}_{agent-topic}.md`
-- Sub-checklists follow 3-phase template (pre/execute/post)
+3단계 - 체크리스트 생성:
+- 번호가 매겨진 항목으로 `checklist.md` 생성
+- 각 항목: 1~3개 파일 변경 + 검증 방법 [HARD]
+- 3개 파일 초과 항목: 반드시 분할 [HARD]
+- 서브 체크리스트 생성: `checklists/{order}_{agent-topic}.md`
+- 서브 체크리스트는 3단계 템플릿(사전/실행/사후) 따름
 
-### Complex Workflow: Analysis -> Architecture -> Plan
+### 복잡 워크플로우: Analysis -> Architecture -> Plan
 
-Step 1 - Analysis Phase:
-- Delegate to expert-analyst agent
-- Output: `.do/jobs/{YY}/{MM}/{DD}/{title}/analysis.md`
-- Contents: current system analysis, requirements (MoSCoW), tech comparison, change scope, risks
-- [HARD] Analysis must complete before Architecture begins
+1단계 - 분석 단계:
+- expert-analyst 에이전트에 위임
+- 산출물: `.do/jobs/{YY}/{MM}/{DD}/{title}/analysis.md`
+- 내용: 현재 시스템 분석, 요구사항(MoSCoW), 기술 비교, 변경 범위, 위험
+- [HARD] Architecture 시작 전 Analysis 완료 필수
 
-Step 2 - Architecture Phase:
-- Delegate to expert-architect agent (receives analysis.md as input)
-- Output: `.do/jobs/{YY}/{MM}/{DD}/{title}/architecture.md`
-- Contents: system structure (ASCII diagram), directory layout, core interfaces (code-level), error handling, component implementations, approach comparison (min 2), testing strategy, implementation order, risk mitigation
-- [HARD] Architecture must complete before Plan begins
+2단계 - 아키텍처 단계:
+- expert-architect 에이전트에 위임 (analysis.md를 입력으로 받음)
+- 산출물: `.do/jobs/{YY}/{MM}/{DD}/{title}/architecture.md`
+- 내용: 시스템 구조 (ASCII 다이어그램), 디렉토리 레이아웃, 핵심 인터페이스 (코드 수준), 오류 처리, 컴포넌트 구현, 접근 방식 비교 (최소 2개), 테스트 전략, 구현 순서, 위험 완화
+- [HARD] Plan 시작 전 Architecture 완료 필수
 
-Step 3 - Plan Phase:
-- Create plan.md based on analysis + architecture outputs
-- All MUST requirements from analysis reflected in plan
-- Implementation order from architecture drives checklist sequence
+3단계 - 계획 단계:
+- analysis + architecture 출력을 기반으로 plan.md 생성
+- analysis의 모든 MUST 요구사항이 계획에 반영됨
+- architecture의 구현 순서가 체크리스트 순서를 결정함
 
-Step 4 - Checklist Generation:
-- Same as simple workflow but informed by architecture
-- Dependencies between items use `depends on:` notation
-- File ownership boundaries align with architecture component split
+4단계 - 체크리스트 생성:
+- 단순 워크플로우와 동일하지만 아키텍처를 반영
+- 항목 간 의존성에 `depends on:` 표기 사용
+- 파일 소유권 경계가 아키텍처 컴포넌트 분할과 일치
 
-### EARS + MoSCoW Integration
+### EARS + MoSCoW 통합
 
-EARS format for writing requirements:
+요구사항 작성을 위한 EARS 형식:
 
-| Type | Pattern | Example |
+| 유형 | 패턴 | 예시 |
 |------|---------|---------|
-| Ubiquitous | System always does X | System logs all API requests |
-| Event-driven | WHEN event THEN action | WHEN login fails THEN wait 3s before retry |
-| State-driven | IF condition THEN action | IF offline THEN use local cache |
-| Unwanted | System shall NOT X | System shall NOT store plaintext passwords |
-| Optional | Where possible, X | Where possible, send email notifications |
+| Ubiquitous | 시스템은 항상 X를 한다 | 시스템은 모든 API 요청을 로그에 기록한다 |
+| Event-driven | X 이벤트 발생 시 Y 수행 | 로그인 실패 시 재시도 전 3초 대기 |
+| State-driven | X 조건이면 Y 수행 | 오프라인이면 로컬 캐시 사용 |
+| Unwanted | 시스템은 X를 하지 않는다 | 시스템은 평문 비밀번호를 저장하지 않는다 |
+| Optional | 가능하면 X를 한다 | 가능하면 이메일 알림을 전송한다 |
 
-MoSCoW for prioritization:
+우선순위를 위한 MoSCoW:
 
-- MUST: Checklist items first, blocking
-- SHOULD: Important, second priority
-- COULD: Nice-to-have if time permits
-- WON'T: Explicitly excluded, documented as out-of-scope
+- MUST: 체크리스트 항목 우선, 차단적
+- SHOULD: 중요, 두 번째 우선순위
+- COULD: 시간이 허락하면 좋은 것
+- WON'T: 명시적으로 제외, 범위 외로 문서화
 
-Conversion flow: EARS requirements -> MoSCoW priority -> implementation decomposition -> Test Strategy -> checklist items -> sub-checklists
+변환 흐름: EARS 요구사항 -> MoSCoW 우선순위 -> 구현 분해 -> 테스트 전략 -> 체크리스트 항목 -> 서브 체크리스트
 
-### Test Strategy Pre-Declaration [HARD]
+### 테스트 전략 사전 선언 [HARD]
 
-During plan phase, each checklist item MUST declare its test strategy:
+계획 단계에서 각 체크리스트 항목은 테스트 전략을 반드시 선언해야 합니다:
 
-| Code Type | Test Strategy | Example |
+| 코드 유형 | 테스트 전략 | 예시 |
 |-----------|--------------|---------|
-| Business logic, API, data layer | Test type + target file | `unit: handler_test.go` |
-| Complex features | Multiple types | `unit: validator_test.go + E2E: flow_test.go` |
-| CSS, config, docs, hooks | `pass` + alternative | `pass (build check: go build ./...)` |
+| 비즈니스 로직, API, 데이터 계층 | 테스트 유형 + 대상 파일 | `unit: handler_test.go` |
+| 복잡한 기능 | 여러 유형 | `unit: validator_test.go + E2E: flow_test.go` |
+| CSS, 설정, 문서, 훅 | `pass` + 대안 | `pass (빌드 확인: go build ./...)` |
 
-"pass" is a judgment, not a skip. It records WHY testing is unnecessary.
+"pass"는 판단이지 건너뛰기가 아닙니다. 테스트가 불필요한 이유를 기록합니다.
 
 ---
 
-## Works Well With
+## 함께 사용하면 좋은 것들
 
-- do-foundation-core: Core principles and checklist system
-- do-workflow-ddd: DDD implementation after plan
-- do-workflow-tdd: TDD implementation after plan
-- do-workflow-team: Team mode plan with parallel research
-- expert-analyst: Analysis phase execution
-- expert-architect: Architecture phase execution
-- manager-plan: Plan creation and checklist decomposition
+- do-foundation-core: 핵심 원칙 및 체크리스트 시스템
+- do-workflow-ddd: 계획 이후 DDD 구현
+- do-workflow-tdd: 계획 이후 TDD 구현
+- do-workflow-team: 병렬 조사를 통한 팀 모드 계획
+- expert-analyst: 분석 단계 실행
+- expert-architect: 아키텍처 단계 실행
+- manager-plan: 계획 생성 및 체크리스트 분해
 
 ---
 

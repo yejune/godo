@@ -1,12 +1,12 @@
 ---
 name: do-workflow-ddd
 description: >
-  Domain-Driven Development workflow specialist using ANALYZE-PRESERVE-IMPROVE
-  cycle for behavior-preserving code transformation.
-  Use when refactoring legacy code, improving code structure without functional changes,
-  reducing technical debt, or performing API migration with behavior preservation.
-  Do NOT use for writing new tests (use do-workflow-testing instead)
-  or creating new features from scratch (use expert-backend or expert-frontend instead).
+  동작 보존 코드 변환을 위한 ANALYZE-PRESERVE-IMPROVE 사이클을 사용하는
+  도메인 주도 개발(DDD) 워크플로우 전문가입니다.
+  레거시 코드 리팩토링, 기능 변경 없이 코드 구조 개선,
+  기술 부채 감소, 또는 동작 보존이 필요한 API 마이그레이션 시 사용하세요.
+  새 테스트 작성(do-workflow-testing 사용)이나
+  처음부터 새 기능 생성(expert-backend 또는 expert-frontend 사용)에는 사용하지 마세요.
 license: Apache-2.0
 compatibility: Designed for Claude Code
 allowed-tools: Read Write Edit Bash(git:*) Bash(pytest:*) Bash(ruff:*) Bash(npm:*) Bash(npx:*) Bash(node:*) Bash(uv:*) Bash(make:*) Bash(cargo:*) Bash(go:*) Bash(mix:*) Bash(bundle:*) Grep Glob mcp__context7__resolve-library-id mcp__context7__get-library-docs
@@ -24,375 +24,375 @@ metadata:
   related-skills: "do-tool-ast-grep, do-workflow-testing, do-foundation-quality"
 ---
 
-# Domain-Driven Development (DDD) Workflow
+# 도메인 주도 개발(DDD) 워크플로우
 
-## Development Mode Configuration (CRITICAL)
+## 개발 모드 구성 (중요)
 
-[NOTE] This workflow is selected based on `.do/config/sections/quality.yaml`:
+[NOTE] 이 워크플로우는 `.do/config/sections/quality.yaml` 설정에 따라 선택됩니다:
 
 ```yaml
 constitution:
-  development_mode: hybrid    # or ddd, tdd
+  development_mode: hybrid    # 또는 ddd, tdd
   hybrid_settings:
-    new_features: tdd        # New code → use TDD
-    legacy_refactoring: ddd  # Existing code → use DDD (this workflow)
+    new_features: tdd        # 새 코드 → TDD 사용
+    legacy_refactoring: ddd  # 기존 코드 → DDD 사용 (이 워크플로우)
 ```
 
-**When to use this workflow**:
-- `development_mode: ddd` → Always use DDD
-- `development_mode: hybrid` + refactoring existing code → Use DDD
-- `development_mode: hybrid` + new package/module → Use TDD instead (do-workflow-tdd)
+**이 워크플로우를 사용하는 경우**:
+- `development_mode: ddd` → 항상 DDD 사용
+- `development_mode: hybrid` + 기존 코드 리팩토링 → DDD 사용
+- `development_mode: hybrid` + 새 패키지/모듈 → TDD 사용 (do-workflow-tdd)
 
-**Key distinction**:
-- **New file/package** (doesn't exist yet) → TDD (RED-GREEN-REFACTOR)
-- **Existing code** (file already exists) → DDD (ANALYZE-PRESERVE-IMPROVE)
+**핵심 구분**:
+- **새 파일/패키지** (아직 존재하지 않음) → TDD (RED-GREEN-REFACTOR)
+- **기존 코드** (파일이 이미 존재함) → DDD (ANALYZE-PRESERVE-IMPROVE)
 
-## Quick Reference
+## 빠른 참조
 
-Domain-Driven Development provides a systematic approach for refactoring existing codebases where behavior preservation is paramount. Unlike TDD which creates new functionality, DDD improves structure without changing behavior.
+도메인 주도 개발은 동작 보존이 최우선인 기존 코드베이스를 리팩토링하기 위한 체계적인 접근 방식을 제공합니다. 새 기능을 만드는 TDD와 달리, DDD는 동작을 변경하지 않고 구조를 개선합니다.
 
-Core Cycle - ANALYZE-PRESERVE-IMPROVE:
+핵심 사이클 - ANALYZE-PRESERVE-IMPROVE:
 
-- ANALYZE: Domain boundary identification, coupling metrics, AST structural analysis
-- PRESERVE: Characterization tests, behavior snapshots, test safety net verification
-- IMPROVE: Incremental structural changes with continuous behavior validation
+- ANALYZE: 도메인 경계 식별, 결합도 지표, AST 구조 분석
+- PRESERVE: 특성화 테스트, 동작 스냅샷, 테스트 안전망 검증
+- IMPROVE: 지속적인 동작 검증을 통한 점진적 구조 변경
 
-When to Use DDD:
+DDD 사용 시기:
 
-- Refactoring legacy code with existing tests
-- Improving code structure without functional changes
-- Technical debt reduction in production systems
-- API migration and deprecation handling
-- Code modernization projects
-- When DDD is not applicable because code already exists
-- Greenfield projects (with adapted cycle - see below)
+- 기존 테스트가 있는 레거시 코드 리팩토링
+- 기능 변경 없이 코드 구조 개선
+- 프로덕션 시스템의 기술 부채 감소
+- API 마이그레이션 및 폐기 처리
+- 코드 현대화 프로젝트
+- 코드가 이미 존재하는 경우 DDD가 적용되지 않을 때
+- 그린필드 프로젝트 (아래 적응된 사이클 참조)
 
-When NOT to Use DDD:
+DDD를 사용하지 않는 경우:
 
-- When behavior changes are required (modify SPEC first)
+- 동작 변경이 필요한 경우 (먼저 SPEC을 수정하세요)
 
-Greenfield Project Adaptation:
+그린필드 프로젝트 적응:
 
-For new projects without existing code, DDD adapts its cycle:
+기존 코드가 없는 새 프로젝트의 경우, DDD는 사이클을 다음과 같이 적응합니다:
 
-- ANALYZE: Requirements analysis instead of code analysis
-- PRESERVE: Define intended behavior through specification tests (test-first)
-- IMPROVE: Implement code to satisfy the defined tests
+- ANALYZE: 코드 분석 대신 요구사항 분석
+- PRESERVE: 명세 테스트를 통해 의도된 동작 정의 (테스트 우선)
+- IMPROVE: 정의된 테스트를 충족하는 코드 구현
 
-This makes DDD a superset of TDD - it includes TDD's test-first approach while also supporting refactoring scenarios.
-
----
-
-## Core Philosophy
-
-### DDD vs TDD Comparison
-
-TDD Approach (for new features):
-
-- Cycle: RED-GREEN-REFACTOR
-- Goal: Create new functionality through tests
-- Starting Point: No code exists
-- Test Type: Specification tests that define expected behavior
-- Outcome: New working code with test coverage
-
-DDD Approach (for refactoring):
-
-- Cycle: ANALYZE-PRESERVE-IMPROVE
-- Goal: Improve structure without behavior change
-- Starting Point: Existing code with defined behavior
-- Test Type: Characterization tests that capture current behavior
-- Outcome: Better structured code with identical behavior
-
-### Behavior Preservation Principle
-
-The golden rule of DDD is that observable behavior must remain identical before and after refactoring. This means:
-
-- All existing tests must pass unchanged
-- API contracts remain identical
-- Side effects remain identical
-- Performance characteristics remain within acceptable bounds
+이를 통해 DDD는 TDD의 상위 집합이 됩니다 - TDD의 테스트 우선 접근 방식을 포함하면서 리팩토링 시나리오도 지원합니다.
 
 ---
 
-## Implementation Guide
+## 핵심 철학
 
-### Phase 1: ANALYZE
+### DDD vs TDD 비교
 
-The analyze phase focuses on understanding the current codebase structure and identifying refactoring opportunities.
+TDD 접근 방식 (새 기능용):
 
-#### Domain Boundary Identification
+- 사이클: RED-GREEN-REFACTOR
+- 목표: 테스트를 통한 새 기능 생성
+- 시작점: 코드가 없는 상태
+- 테스트 유형: 예상 동작을 정의하는 명세 테스트
+- 결과: 테스트 커버리지를 갖춘 새로운 동작하는 코드
 
-Identify logical boundaries in the codebase by examining:
+DDD 접근 방식 (리팩토링용):
 
-- Module dependencies and import patterns
-- Data flow between components
-- Shared state and coupling points
-- Public API surfaces
+- 사이클: ANALYZE-PRESERVE-IMPROVE
+- 목표: 동작 변경 없이 구조 개선
+- 시작점: 정의된 동작이 있는 기존 코드
+- 테스트 유형: 현재 동작을 캡처하는 특성화 테스트
+- 결과: 동일한 동작을 가진 더 잘 구조화된 코드
 
-Use AST-grep to analyze structural patterns. For Python, search for import patterns to understand module dependencies. For class hierarchies, analyze inheritance relationships and method distributions.
+### 동작 보존 원칙
 
-#### Coupling and Cohesion Metrics
+DDD의 황금률은 리팩토링 전후에 관찰 가능한 동작이 동일하게 유지되어야 한다는 것입니다. 이는 다음을 의미합니다:
 
-Evaluate code quality metrics:
-
-- Afferent Coupling (Ca): Number of classes depending on this module
-- Efferent Coupling (Ce): Number of classes this module depends on
-- Instability (I): Ce / (Ca + Ce) - higher means less stable
-- Abstractness (A): Abstract classes / Total classes
-- Distance from Main Sequence: |A + I - 1|
-
-Low cohesion and high coupling indicate refactoring candidates.
-
-#### Structural Analysis Patterns
-
-Use AST-grep to identify problematic patterns:
-
-- God classes with too many methods or responsibilities
-- Feature envy where methods use other class data excessively
-- Long parameter lists indicating missing abstractions
-- Duplicate code patterns across modules
-
-Create analysis reports documenting:
-
-- Current architecture overview
-- Identified problem areas with severity ratings
-- Proposed refactoring targets with risk assessment
-- Dependency graphs showing coupling relationships
-
-### Phase 2: PRESERVE
-
-The preserve phase establishes safety nets before making any changes.
-
-#### Characterization Tests
-
-Characterization tests capture existing behavior without assumptions about correctness. The goal is to document what the code actually does, not what it should do.
-
-Steps for creating characterization tests:
-
-- Step 1: Identify critical code paths through execution
-- Step 2: Create tests that exercise these paths
-- Step 3: Let tests fail initially to discover actual output
-- Step 4: Update tests to expect actual output
-- Step 5: Document any surprising behavior discovered
-
-Characterization test naming convention: test*characterize*[component]\_[scenario]
-
-#### Behavior Snapshots
-
-For complex outputs, use snapshot testing to capture current behavior:
-
-- API response snapshots
-- Serialization output snapshots
-- State transformation snapshots
-- Error message snapshots
-
-Snapshot files serve as behavior contracts during refactoring.
-
-#### Test Safety Net Verification
-
-Before proceeding to improvement phase, verify:
-
-- All existing tests pass (100% green)
-- New characterization tests cover refactoring targets
-- Code coverage meets threshold for affected areas
-- No flaky tests exist in the safety net
-
-Run mutation testing if available to verify test effectiveness.
-
-### Phase 3: IMPROVE
-
-The improve phase makes structural changes while continuously validating behavior preservation.
-
-#### Incremental Transformation Strategy
-
-Never make large changes at once. Follow this pattern:
-
-- Make smallest possible structural change
-- Run full test suite
-- If tests fail, revert immediately
-- If tests pass, commit the change
-- Repeat until refactoring goal achieved
-
-#### Safe Refactoring Patterns
-
-Extract Method: When a code block can be named and isolated. Use AST-grep to identify candidates by searching for repeated code blocks or long methods.
-
-Extract Class: When a class has multiple responsibilities. Move related methods and fields to a new class while maintaining the original API through delegation.
-
-Move Method: When a method uses data from another class more than its own. Relocate while preserving all call sites.
-
-Inline Refactoring: When indirection adds complexity without benefit. Replace delegation with direct implementation.
-
-Rename Refactoring: When names do not reflect current understanding. Update all references atomically using AST-grep rewrite.
-
-#### AST-Grep Assisted Transformations
-
-Use AST-grep for safe, semantic-aware transformations:
-
-For method extraction, create a rule that identifies the code pattern and rewrites to the extracted form.
-
-For API migration, create a rule that matches old API calls and rewrites to new API format.
-
-For deprecation handling, create rules that identify deprecated patterns and suggest modern alternatives.
-
-#### Continuous Validation Loop
-
-After each transformation:
-
-- Run unit tests (fast feedback)
-- Run integration tests (behavior validation)
-- Run characterization tests (snapshot comparison)
-- Verify no new warnings or errors introduced
-- Check performance benchmarks if applicable
+- 모든 기존 테스트가 변경 없이 통과해야 함
+- API 계약이 동일하게 유지됨
+- 부작용이 동일하게 유지됨
+- 성능 특성이 허용 범위 내에 있음
 
 ---
 
-## DDD Workflow Execution
+## 구현 가이드
 
-### Standard DDD Session
+### 1단계: ANALYZE
 
-When executing DDD through do:2-run in DDD mode:
+분석 단계는 현재 코드베이스 구조를 이해하고 리팩토링 기회를 식별하는 데 초점을 맞춥니다.
 
-Step 1 - Initial Assessment:
+#### 도메인 경계 식별
 
-- Read SPEC document for refactoring scope
-- Identify affected files and components
-- Assess current test coverage
+다음을 검토하여 코드베이스의 논리적 경계를 식별합니다:
 
-Step 2 - Analyze Phase Execution:
+- 모듈 의존성 및 임포트 패턴
+- 컴포넌트 간 데이터 흐름
+- 공유 상태 및 결합 지점
+- 공개 API 표면
 
-- Run AST-grep analysis on target code
-- Generate coupling and cohesion metrics
-- Create domain boundary map
-- Document refactoring opportunities
+AST-grep을 사용하여 구조적 패턴을 분석합니다. Python의 경우, 임포트 패턴을 검색하여 모듈 의존성을 파악합니다. 클래스 계층의 경우, 상속 관계와 메서드 분포를 분석합니다.
 
-Step 3 - Preserve Phase Execution:
+#### 결합도 및 응집도 지표
 
-- Verify all existing tests pass
-- Create characterization tests for uncovered paths
-- Generate behavior snapshots
-- Confirm safety net adequacy
+코드 품질 지표를 평가합니다:
 
-Step 4 - Improve Phase Execution:
+- 입심 결합도(Ca): 이 모듈에 의존하는 클래스 수
+- 출심 결합도(Ce): 이 모듈이 의존하는 클래스 수
+- 불안정성(I): Ce / (Ca + Ce) - 높을수록 불안정
+- 추상화도(A): 추상 클래스 / 전체 클래스
+- 주 시퀀스로부터의 거리: |A + I - 1|
 
-- Execute transformations incrementally
-- Run tests after each change
-- Commit successful changes immediately
-- Document any discovered issues
+낮은 응집도와 높은 결합도는 리팩토링 후보를 나타냅니다.
 
-Step 5 - Validation and Completion:
+#### 구조적 분석 패턴
 
-- Run full test suite
-- Compare before/after metrics
-- Verify all behavior snapshots match
-- Generate refactoring report
+AST-grep을 사용하여 문제적 패턴을 식별합니다:
 
-### DDD Loop Pattern
+- 너무 많은 메서드 또는 책임을 가진 God 클래스
+- 다른 클래스의 데이터를 과도하게 사용하는 Feature Envy
+- 누락된 추상화를 나타내는 긴 매개변수 목록
+- 모듈 전반에 걸친 중복 코드 패턴
 
-For complex refactoring requiring multiple iterations:
+다음을 문서화하는 분석 보고서를 생성합니다:
 
-- Set maximum loop iterations based on scope
-- Each loop focuses on one refactoring target
-- Exit conditions: all targets adddessed or iteration limit reached
-- Progress tracking through TODO list updates
+- 현재 아키텍처 개요
+- 심각도 등급이 있는 식별된 문제 영역
+- 위험 평가가 포함된 리팩토링 대상 제안
+- 결합 관계를 보여주는 의존성 그래프
+
+### 2단계: PRESERVE
+
+보존 단계는 변경을 하기 전 안전망을 구축합니다.
+
+#### 특성화 테스트
+
+특성화 테스트는 정확성에 대한 가정 없이 기존 동작을 캡처합니다. 목표는 코드가 해야 하는 것이 아닌 실제로 하는 것을 문서화하는 것입니다.
+
+특성화 테스트 생성 단계:
+
+- 1단계: 실행을 통해 중요한 코드 경로 식별
+- 2단계: 이러한 경로를 실행하는 테스트 생성
+- 3단계: 실제 출력을 발견하기 위해 초기에 테스트를 실패하게 둠
+- 4단계: 실제 출력을 예상하도록 테스트 업데이트
+- 5단계: 발견된 놀라운 동작 문서화
+
+특성화 테스트 네이밍 규칙: test_characterize_[컴포넌트]_[시나리오]
+
+#### 동작 스냅샷
+
+복잡한 출력의 경우, 스냅샷 테스트를 사용하여 현재 동작을 캡처합니다:
+
+- API 응답 스냅샷
+- 직렬화 출력 스냅샷
+- 상태 변환 스냅샷
+- 오류 메시지 스냅샷
+
+스냅샷 파일은 리팩토링 중 동작 계약 역할을 합니다.
+
+#### 테스트 안전망 검증
+
+개선 단계로 진행하기 전에 다음을 확인합니다:
+
+- 모든 기존 테스트 통과 (100% 녹색)
+- 새 특성화 테스트가 리팩토링 대상을 커버
+- 영향받는 영역의 코드 커버리지가 임계값 충족
+- 안전망에 불안정한 테스트 없음
+
+가능하면 뮤테이션 테스트를 실행하여 테스트 효과성을 검증합니다.
+
+### 3단계: IMPROVE
+
+개선 단계는 동작 보존을 지속적으로 검증하면서 구조적 변경을 수행합니다.
+
+#### 점진적 변환 전략
+
+한 번에 큰 변경을 하지 마세요. 다음 패턴을 따릅니다:
+
+- 가능한 가장 작은 구조적 변경 수행
+- 전체 테스트 스위트 실행
+- 테스트 실패 시 즉시 롤백
+- 테스트 통과 시 변경 사항 커밋
+- 리팩토링 목표 달성까지 반복
+
+#### 안전한 리팩토링 패턴
+
+메서드 추출: 코드 블록에 이름을 붙이고 분리할 수 있을 때. AST-grep을 사용하여 반복된 코드 블록이나 긴 메서드를 검색하여 후보를 식별합니다.
+
+클래스 추출: 클래스가 여러 책임을 가질 때. 위임을 통해 원래 API를 유지하면서 관련 메서드와 필드를 새 클래스로 이동합니다.
+
+메서드 이동: 메서드가 자신의 데이터보다 다른 클래스의 데이터를 더 많이 사용할 때. 모든 호출 지점을 보존하면서 재배치합니다.
+
+인라인 리팩토링: 간접 참조가 이점 없이 복잡성을 추가할 때. 위임을 직접 구현으로 대체합니다.
+
+이름 변경 리팩토링: 이름이 현재 이해를 반영하지 않을 때. AST-grep 재작성을 사용하여 모든 참조를 원자적으로 업데이트합니다.
+
+#### AST-Grep 보조 변환
+
+의미론적으로 인식하는 안전한 변환을 위해 AST-grep을 사용합니다:
+
+메서드 추출의 경우, 코드 패턴을 식별하고 추출된 형태로 재작성하는 규칙을 만듭니다.
+
+API 마이그레이션의 경우, 이전 API 호출을 매칭하고 새 API 형식으로 재작성하는 규칙을 만듭니다.
+
+폐기 처리의 경우, 폐기된 패턴을 식별하고 현대적인 대안을 제안하는 규칙을 만듭니다.
+
+#### 지속적 검증 루프
+
+각 변환 후:
+
+- 단위 테스트 실행 (빠른 피드백)
+- 통합 테스트 실행 (동작 검증)
+- 특성화 테스트 실행 (스냅샷 비교)
+- 새로운 경고나 오류가 없는지 확인
+- 해당되는 경우 성능 벤치마크 확인
 
 ---
 
-## Quality Metrics
+## DDD 워크플로우 실행
 
-### DDD Success Criteria
+### 표준 DDD 세션
 
-Behavior Preservation (Required):
+do:2-run을 통해 DDD 모드로 실행할 때:
 
-- All pre-existing tests pass
-- All characterization tests pass
-- No API contract changes
-- Performance within bounds
+1단계 - 초기 평가:
 
-Structure Improvement (Goals):
+- 리팩토링 범위에 대한 SPEC 문서 읽기
+- 영향받는 파일 및 컴포넌트 식별
+- 현재 테스트 커버리지 평가
 
-- Reduced coupling metrics
-- Improved cohesion scores
-- Reduced code complexity
-- Better separation of concerns
+2단계 - 분석 단계 실행:
 
-### DDD-Specific TRUST Validation
+- 대상 코드에 AST-grep 분석 실행
+- 결합도 및 응집도 지표 생성
+- 도메인 경계 맵 생성
+- 리팩토링 기회 문서화
 
-Apply TRUST 5 framework with DDD focus:
+3단계 - 보존 단계 실행:
 
-- Testability: Characterization test coverage adequate
-- Readability: Naming and structure improvements verified
-- Understandability: Domain boundaries clearer
-- Security: No new vulnerabilities introduced
-- Transparency: All changes documented and traceable
+- 모든 기존 테스트 통과 확인
+- 커버되지 않은 경로에 대한 특성화 테스트 생성
+- 동작 스냅샷 생성
+- 안전망 충분성 확인
 
----
+4단계 - 개선 단계 실행:
 
-## Integration Points
+- 점진적으로 변환 실행
+- 각 변경 후 테스트 실행
+- 성공한 변경 사항 즉시 커밋
+- 발견된 이슈 문서화
 
-### With AST-Grep Skill
+5단계 - 검증 및 완료:
 
-DDD relies heavily on AST-grep for:
+- 전체 테스트 스위트 실행
+- 변경 전/후 지표 비교
+- 모든 동작 스냅샷 일치 확인
+- 리팩토링 보고서 생성
 
-- Structural code analysis
-- Pattern identification
-- Safe code transformations
-- Multi-file refactoring
+### DDD 루프 패턴
 
-Load do-tool-ast-grep for detailed pattern syntax and rule creation.
+여러 반복이 필요한 복잡한 리팩토링의 경우:
 
-### With Testing Workflow
-
-DDD complements testing workflow:
-
-- Uses characterization tests from testing patterns
-- Integrates with mutation testing for safety net validation
-- Leverages snapshot testing infrastructure
-
-### With Quality Framework
-
-DDD outputs feed into quality assessment:
-
-- Before/after metrics comparison
-- TRUST 5 validation for changes
-- Technical debt tracking
+- 범위에 따라 최대 루프 반복 횟수 설정
+- 각 루프는 하나의 리팩토링 대상에 집중
+- 종료 조건: 모든 대상 처리 완료 또는 반복 한계 도달
+- TODO 목록 업데이트를 통한 진행 상황 추적
 
 ---
 
-## Troubleshooting
+## 품질 지표
 
-### Common Issues
+### DDD 성공 기준
 
-Tests Fail After Transformation:
+동작 보존 (필수):
 
-- Revert immediately to last known good state
-- Analyze which tests failed and why
-- Check if transformation changed behavior unintentionally
-- Consider smaller transformation steps
+- 모든 기존 테스트 통과
+- 모든 특성화 테스트 통과
+- API 계약 변경 없음
+- 성능이 범위 내에 있음
 
-Characterization Tests Are Flaky:
+구조 개선 (목표):
 
-- Identify sources of non-determinism
-- Mock external dependencies
-- Fix time-dependent or order-dependent behavior
-- Consider snapshot tolerance settings
+- 결합도 지표 감소
+- 응집도 점수 향상
+- 코드 복잡도 감소
+- 관심사 분리 향상
 
-Performance Degradation:
+### DDD 전용 TRUST 검증
 
-- Profile before and after
-- Identify hot paths affected by changes
-- Consider caching or optimization
-- Document acceptable trade-offs
+DDD 포커스로 TRUST 5 프레임워크 적용:
 
-### Recovery Procedures
+- Testability: 특성화 테스트 커버리지 충분
+- Readability: 네이밍 및 구조 개선 검증
+- Understandability: 도메인 경계가 더 명확해짐
+- Security: 새로운 취약점 없음
+- Transparency: 모든 변경 사항이 문서화되고 추적 가능
 
-When DDD session encounters issues:
+---
 
-- Save current state with git stash
-- Reset to last successful commit
-- Review transformation that caused failure
-- Plan alternative approach
-- Resume from preserved state
+## 통합 포인트
+
+### AST-Grep 스킬과의 통합
+
+DDD는 다음을 위해 AST-grep에 크게 의존합니다:
+
+- 구조적 코드 분석
+- 패턴 식별
+- 안전한 코드 변환
+- 다중 파일 리팩토링
+
+상세한 패턴 구문 및 규칙 생성을 위해 do-tool-ast-grep을 로드하세요.
+
+### 테스트 워크플로우와의 통합
+
+DDD는 테스트 워크플로우를 보완합니다:
+
+- 테스트 패턴에서 특성화 테스트 사용
+- 안전망 검증을 위한 뮤테이션 테스트와 통합
+- 스냅샷 테스트 인프라 활용
+
+### 품질 프레임워크와의 통합
+
+DDD 출력은 품질 평가에 기여합니다:
+
+- 변경 전/후 지표 비교
+- 변경 사항에 대한 TRUST 5 검증
+- 기술 부채 추적
+
+---
+
+## 문제 해결
+
+### 일반적인 이슈
+
+변환 후 테스트 실패:
+
+- 마지막으로 알려진 정상 상태로 즉시 롤백
+- 어떤 테스트가 왜 실패했는지 분석
+- 변환이 의도치 않게 동작을 변경했는지 확인
+- 더 작은 변환 단계 고려
+
+특성화 테스트가 불안정함:
+
+- 비결정성의 원인 식별
+- 외부 의존성 목업
+- 시간 의존적이거나 순서 의존적인 동작 수정
+- 스냅샷 허용 오차 설정 고려
+
+성능 저하:
+
+- 변경 전/후 프로파일링
+- 변경에 영향받는 핫 경로 식별
+- 캐싱 또는 최적화 고려
+- 허용 가능한 트레이드오프 문서화
+
+### 복구 절차
+
+DDD 세션에서 이슈가 발생할 때:
+
+- git stash로 현재 상태 저장
+- 마지막 성공한 커밋으로 리셋
+- 실패를 유발한 변환 검토
+- 대안적 접근 방식 계획
+- 보존된 상태에서 재개
 
 ---
 
