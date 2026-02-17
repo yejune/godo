@@ -3,8 +3,8 @@ package extractor
 import (
 	"path/filepath"
 
-	"github.com/do-focus/convert/internal/detector"
-	"github.com/do-focus/convert/internal/model"
+	"github.com/yejune/godo/internal/detector"
+	"github.com/yejune/godo/internal/model"
 )
 
 // RuleExtractor classifies and extracts persona-specific content from rule

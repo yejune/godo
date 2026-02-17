@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/do-focus/convert/internal/persona"
+	"github.com/yejune/godo/internal/persona"
 	"github.com/spf13/cobra"
 )
 

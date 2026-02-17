@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/do-focus/convert/internal/model"
-	"github.com/do-focus/convert/internal/template"
+	"github.com/yejune/godo/internal/model"
+	"github.com/yejune/godo/internal/template"
 )
 
 // newTestRegistry creates a Registry with the given slot entries.

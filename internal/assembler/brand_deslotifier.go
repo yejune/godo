@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/do-focus/convert/internal/model"
+	"github.com/yejune/godo/internal/model"
 )
 
 // BrandDeslotifier reverses the slotification performed by extractor.BrandSlotifier.

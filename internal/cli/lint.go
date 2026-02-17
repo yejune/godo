@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/do-focus/convert/internal/lint"
+	"github.com/yejune/godo/internal/lint"
 	"github.com/spf13/cobra"
 )
 

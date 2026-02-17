@@ -6,7 +6,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/do-focus/convert/internal/detector"
+	"github.com/yejune/godo/internal/detector"
 )
 
 // setupTestDir creates a temporary directory structure simulating a .claude/ dir.

@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/do-focus/convert/internal/hook"
+	"github.com/yejune/godo/internal/hook"
 	"github.com/spf13/cobra"
 )
 

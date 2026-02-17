@@ -12,6 +12,11 @@ core and persona layers, reassembles them into deployable output, and provides
 runtime utilities for hooks, mode switching, linting, scaffolding, and more.`,
 }
 
+// SetVersion sets the version string for the root command.
+func SetVersion(v string) {
+	rootCmd.Version = v
+}
+
 // Execute runs the root command.
 func Execute() error {
 	return rootCmd.Execute()

@@ -1,9 +1,9 @@
 package cli
 
 import (
-	"github.com/do-focus/convert/internal/mode"
-	"github.com/do-focus/convert/internal/profile"
-	"github.com/do-focus/convert/internal/statusline"
+	"github.com/yejune/godo/internal/mode"
+	"github.com/yejune/godo/internal/profile"
+	"github.com/yejune/godo/internal/statusline"
 	"github.com/spf13/cobra"
 )
 

@@ -3,7 +3,7 @@ package cli
 import (
 	"fmt"
 
-	"github.com/do-focus/convert/internal/profile"
+	"github.com/yejune/godo/internal/profile"
 	"github.com/spf13/cobra"
 )
 

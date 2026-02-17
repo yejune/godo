@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/do-focus/convert/internal/detector"
-	"github.com/do-focus/convert/internal/model"
+	"github.com/yejune/godo/internal/detector"
+	"github.com/yejune/godo/internal/model"
 )
 
 // SkillExtractor classifies and extracts persona-specific content from skill

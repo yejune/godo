@@ -1,9 +1,9 @@
 package extractor
 
 import (
-	"github.com/do-focus/convert/internal/detector"
-	"github.com/do-focus/convert/internal/model"
-	"github.com/do-focus/convert/internal/template"
+	"github.com/yejune/godo/internal/detector"
+	"github.com/yejune/godo/internal/model"
+	"github.com/yejune/godo/internal/template"
 )
 
 // AgentExtractor classifies and extracts persona-specific content from agent

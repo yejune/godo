@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/do-focus/convert/internal/model"
+	"github.com/yejune/godo/internal/model"
 )
 
 func TestSplitFrontmatter_WithValidFrontmatter(t *testing.T) {

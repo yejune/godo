@@ -1,4 +1,4 @@
-module github.com/do-focus/convert
+module github.com/yejune/godo
 
 go 1.25.0
 

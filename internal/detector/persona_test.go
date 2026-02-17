@@ -3,7 +3,7 @@ package detector
 import (
 	"testing"
 
-	"github.com/do-focus/convert/internal/model"
+	"github.com/yejune/godo/internal/model"
 )
 
 func TestNewPersonaDetector_Success(t *testing.T) {

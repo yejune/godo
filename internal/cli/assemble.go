@@ -5,9 +5,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/do-focus/convert/internal/assembler"
-	"github.com/do-focus/convert/internal/model"
-	"github.com/do-focus/convert/internal/template"
+	"github.com/yejune/godo/internal/assembler"
+	"github.com/yejune/godo/internal/model"
+	"github.com/yejune/godo/internal/template"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )

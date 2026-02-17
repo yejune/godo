@@ -3,8 +3,8 @@ package extractor
 import (
 	"testing"
 
-	"github.com/do-focus/convert/internal/detector"
-	"github.com/do-focus/convert/internal/model"
+	"github.com/yejune/godo/internal/detector"
+	"github.com/yejune/godo/internal/model"
 )
 
 // newTestDetector creates a PersonaDetector with the default registry for tests.

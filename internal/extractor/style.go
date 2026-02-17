@@ -1,7 +1,7 @@
 package extractor
 
 import (
-	"github.com/do-focus/convert/internal/model"
+	"github.com/yejune/godo/internal/model"
 )
 
 // StyleExtractor handles style definition files (.claude/output-styles/*.md or .claude/styles/*.md).

@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/do-focus/convert/internal/model"
+	"github.com/yejune/godo/internal/model"
 )
 
 // compiledHeaderPattern pairs a HeaderPattern with its pre-compiled regexp.

@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/do-focus/convert/internal/rank"
+	"github.com/yejune/godo/internal/rank"
 	"github.com/spf13/cobra"
 )
 

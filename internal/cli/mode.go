@@ -3,7 +3,7 @@ package cli
 import (
 	"fmt"
 
-	"github.com/do-focus/convert/internal/mode"
+	"github.com/yejune/godo/internal/mode"
 	"github.com/spf13/cobra"
 )
 

@@ -3,8 +3,8 @@ package extractor
 import (
 	"testing"
 
-	"github.com/do-focus/convert/internal/detector"
-	"github.com/do-focus/convert/internal/parser"
+	"github.com/yejune/godo/internal/detector"
+	"github.com/yejune/godo/internal/parser"
 )
 
 // TestE2E_ExtractFullDirectory runs the full extraction pipeline against a

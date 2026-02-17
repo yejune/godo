@@ -1,7 +1,7 @@
 package extractor
 
 import (
-	"github.com/do-focus/convert/internal/model"
+	"github.com/yejune/godo/internal/model"
 )
 
 // ClaudeMDExtractor handles the top-level CLAUDE.md file.

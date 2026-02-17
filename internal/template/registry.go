@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/do-focus/convert/internal/model"
+	"github.com/yejune/godo/internal/model"
 	"gopkg.in/yaml.v3"
 )
 

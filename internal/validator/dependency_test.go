@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/do-focus/convert/internal/model"
+	"github.com/yejune/godo/internal/model"
 )
 
 // --- ValidatePhase ---

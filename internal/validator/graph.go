@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/do-focus/convert/internal/model"
+	"github.com/yejune/godo/internal/model"
 )
 
 // DependencyGraph represents a directed acyclic graph of agent dependencies.

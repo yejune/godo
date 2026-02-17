@@ -1,7 +1,7 @@
 package extractor
 
 import (
-	"github.com/do-focus/convert/internal/model"
+	"github.com/yejune/godo/internal/model"
 )
 
 // CharacterExtractor handles character definition files (characters/*.md).

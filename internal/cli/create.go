@@ -3,7 +3,7 @@ package cli
 import (
 	"fmt"
 
-	"github.com/do-focus/convert/internal/scaffold"
+	"github.com/yejune/godo/internal/scaffold"
 	"github.com/spf13/cobra"
 )
 

@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/do-focus/convert/internal/model"
+	"github.com/yejune/godo/internal/model"
 )
 
 var headerRegex = regexp.MustCompile(`^(#{1,6})\s+(.+)$`)

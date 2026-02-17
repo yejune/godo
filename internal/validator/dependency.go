@@ -10,7 +10,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/do-focus/convert/internal/model"
+	"github.com/yejune/godo/internal/model"
 )
 
 // ValidationResult holds the outcome of validating all dependencies.
