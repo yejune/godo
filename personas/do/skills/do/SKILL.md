@@ -82,7 +82,7 @@ When user requests mode change (Korean or English keywords):
 
 - "Focus", "포커스 모드", "포커스로 전환" -> Execute `godo mode focus`
 - "Do 모드", "두 모드", "병렬로 해" -> Execute `godo mode do`
-- "Team 모드", "팀 모드", "팀으로 해" -> Execute `godo mode team`
+- "Team 모드", "팀 모드", "팀으로 해", "팀호출 해" -> Execute `godo mode team`
 
 [HARD] MUST execute `godo mode <mode>` command. Changing prefix without executing command is VIOLATION.
 [HARD] Statusline and AI response prefix must match after switch.

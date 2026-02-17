@@ -1,5 +1,5 @@
 ---
-description: "GitHub Workflow - Manage issues and review PRs with Agent Teams"
+description: "GitHub 워크플로우 - Agent Teams로 이슈 관리 및 PR 검토"
 argument-hint: "issues [--all | --label LABEL | NUMBER] | pr [--all | NUMBER]"
 type: local
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, AskUserQuestion, Task, TeamCreate, SendMessage, TaskCreate, TaskUpdate, TaskList, TaskGet, TeamDelete
@@ -7,38 +7,38 @@ model: sonnet
 version: 1.0.0
 ---
 
-## GitHub Workflow Configuration
+## GitHub 워크플로우 구성
 
-- **Repository**: Auto-detected from `gh repo view --json nameWithOwner`
-- **Default mode**: Agent Teams (falls back to sub-agent if AGENT_TEAMS unavailable)
-- **Branch prefix**: `fix/issue-{number}` for bugs, `feat/issue-{number}` for features
-- **Git strategy**: Reads `github.git_workflow` from `.moai/config/sections/system.yaml`
-
----
-
-## EXECUTION DIRECTIVE - START IMMEDIATELY
-
-This is the GitHub workflow command. Parse $ARGUMENTS and execute immediately.
-
-### Argument Parsing
-
-First word determines sub-command:
-
-- **issues** (aliases: issue, fix-issues): Issue fixing workflow
-- **pr** (aliases: review, pull-request): PR code review workflow
-- No sub-command: Use AskUserQuestion to let user choose
-
-Remaining arguments become sub-command arguments:
-
-- `--all`: Process all open items
-- `--label LABEL`: Filter by label
-- `--solo`: Force sub-agent mode (skip Agent Teams)
-- `--merge`: Auto-merge PRs after CI passes (issues only)
-- `NUMBER`: Target specific issue or PR number
+- **저장소**: `gh repo view --json nameWithOwner`에서 자동 감지
+- **기본 모드**: Agent Teams (AGENT_TEAMS 사용 불가 시 서브에이전트로 대체)
+- **브랜치 접두사**: 버그는 `fix/issue-{number}`, 기능은 `feat/issue-{number}`
+- **Git 전략**: `.moai/config/sections/system.yaml`의 `github.git_workflow` 읽기
 
 ---
 
-## Pre-execution Context
+## 실행 지침 - 즉시 시작
+
+이것은 GitHub 워크플로우 명령입니다. $ARGUMENTS를 파싱하고 즉시 실행하세요.
+
+### 인자 파싱
+
+첫 번째 단어가 하위 명령을 결정:
+
+- **issues** (별칭: issue, fix-issues): 이슈 수정 워크플로우
+- **pr** (별칭: review, pull-request): PR 코드 검토 워크플로우
+- 하위 명령 없음: AskUserQuestion을 사용하여 사용자가 선택
+
+나머지 인자는 하위 명령 인자가 됨:
+
+- `--all`: 모든 열린 항목 처리
+- `--label LABEL`: 라벨로 필터링
+- `--solo`: 서브에이전트 모드 강제 (Agent Teams 건너뛰기)
+- `--merge`: CI 통과 후 PR 자동 병합 (issues만)
+- `NUMBER`: 특정 이슈 또는 PR 번호
+
+---
+
+## 실행 전 컨텍스트
 
 !gh repo view --json nameWithOwner --jq '.nameWithOwner'
 !git branch --show-current
@@ -49,73 +49,73 @@ Remaining arguments become sub-command arguments:
 
 ---
 
-## Team Mode (Default)
+## 팀 모드 (기본값)
 
-Agent Teams mode is the DEFAULT for this workflow. No `--team` flag required.
+Agent Teams 모드는 이 워크플로우의 기본값입니다. `--team` 플래그가 필요 없습니다.
 
-Prerequisites check (run at startup):
-1. Check if `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` is set
-2. Check if `workflow.team.enabled: true` in `.moai/config/sections/workflow.yaml`
+전제 조건 확인 (시작 시 실행):
+1. `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` 설정 확인
+2. `.moai/config/sections/workflow.yaml`의 `workflow.team.enabled: true` 확인
 
-If both prerequisites met: Use Agent Teams mode
-If either prerequisite missing OR `--solo` flag: Fall back to sub-agent mode
+두 전제 조건이 모두 충족: Agent Teams 모드 사용
+전제 조건 중 하나 누락 또는 `--solo` 플래그: 서브에이전트 모드로 대체
 
 ---
 
-# SUB-COMMAND: issues
+# 하위 명령: issues
 
-Purpose: Fetch GitHub issues, analyze root cause, implement fixes, and create PRs.
+목적: GitHub 이슈를 가져오고, 근본 원인을 분석하며, 수정을 구현하고 PR을 생성합니다.
 
-## Issues Phase 1: Issue Discovery
+## Issues 1단계: 이슈 발견
 
-### Step 1.1: Fetch Open Issues
+### 1.1단계: 열린 이슈 가져오기
 
-Fetch all open issues from GitHub:
+GitHub에서 모든 열린 이슈 가져오기:
 `gh issue list --state open --limit 50 --json number,title,labels,assignees,body,createdAt`
 
-### Step 1.2: Issue Selection
+### 1.2단계: 이슈 선택
 
-If NUMBER argument provided:
-- Fetch specific issue: `gh issue view {number} --json number,title,labels,body,comments`
-- Proceed directly to Phase 2
+NUMBER 인자 제공 시:
+- 특정 이슈 가져오기: `gh issue view {number} --json number,title,labels,body,comments`
+- 2단계로 바로 진행
 
-If --all or no argument:
-- Display issue list as formatted table
-- Use AskUserQuestion to let user select which issue(s) to fix
-- Options: Individual issue numbers, or "All" for batch mode
+--all 또는 인자 없음:
+- 형식화된 테이블로 이슈 목록 표시
+- AskUserQuestion을 사용하여 수정할 이슈를 사용자가 선택
+- 옵션: 개별 이슈 번호 또는 일괄 모드용 "All"
 
-If --label LABEL:
-- Filter: `gh issue list --state open --label "{LABEL}" --json number,title,labels,body`
-- Display filtered list and let user select
+--label LABEL인 경우:
+- 필터링: `gh issue list --state open --label "{LABEL}" --json number,title,labels,body`
+- 필터링된 목록 표시 및 사용자가 선택
 
-### Step 1.3: Issue Classification
+### 1.3단계: 이슈 분류
 
-For each selected issue, classify by type:
-- **bug**: Fix existing behavior (branch prefix: `fix/issue-{number}`)
-- **feature**: New functionality (branch prefix: `feat/issue-{number}`)
-- **enhancement**: Improve existing feature (branch prefix: `improve/issue-{number}`)
-- **docs**: Documentation only (branch prefix: `docs/issue-{number}`)
+선택된 각 이슈를 유형별로 분류:
+- **bug**: 기존 동작 수정 (브랜치 접두사: `fix/issue-{number}`)
+- **feature**: 새로운 기능 (브랜치 접두사: `feat/issue-{number}`)
+- **enhancement**: 기존 기능 개선 (브랜치 접두사: `improve/issue-{number}`)
+- **docs**: 문서만 (브랜치 접두사: `docs/issue-{number}`
 
-Classification based on: labels, title keywords, body content analysis.
+분류 기준: 라벨, 제목 키워드, 본문 내용 분석
 
-## Issues Phase 2: Analysis
+## Issues 2단계: 분석
 
-### Team Mode (Default)
+### 팀 모드 (기본값)
 
-Create a team for parallel issue analysis:
+병렬 이슈 분석을 위한 팀 생성:
 
 ```
 TeamCreate(team_name: "github-issues-{repo-slug}")
 ```
 
-For each selected issue, create tasks:
+선택된 각 이슈에 대해 작업 생성:
 ```
-TaskCreate: "Analyze issue #{number}: {title}"
-TaskCreate: "Implement fix for issue #{number}" (blocked by analysis task)
-TaskCreate: "Verify fix for issue #{number}" (blocked by implementation task)
+TaskCreate: "이슈 #{number} 분석: {title}"
+TaskCreate: "이슈 #{number} 수정 구현" (분석 작업에 의해 차단됨)
+TaskCreate: "이슈 #{number} 수정 검증" (구현 작업에 의해 차단됨)
 ```
 
-Spawn analysis teammates in parallel (one per issue, max 3 concurrent):
+병렬 분석 팀원 생성 (이슈당 하나, 최대 3개 동시):
 
 ```
 Task(
@@ -123,66 +123,66 @@ Task(
   team_name: "github-issues-{repo-slug}",
   name: "analyst-{number}",
   mode: "plan",
-  prompt: "Analyze GitHub issue #{number}.
+  prompt: "GitHub 이슈 #{number} 분석.
     Title: {title}
     Body: {body}
     Comments: {comments}
-    Explore the codebase to identify root cause, affected files, and fix approach.
-    Mark your task completed via TaskUpdate and send findings via SendMessage."
+    코드베이스를 탐색하여 근본 원인, 영향받는 파일, 수정 접근 방식 식별.
+    TaskUpdate를 통해 작업 완료로 표시하고 SendMessage로 결과 전송."
 )
 ```
 
-After analysis completes, spawn implementation teammates:
+분석 완료 후 구현 팀원 생성:
 
 ```
 Task(
-  subagent_type: "team-backend-dev",  // or team-frontend-dev based on affected files
+  subagent_type: "team-backend-dev",  // 또는 영향받는 파일에 따라 team-frontend-dev
   team_name: "github-issues-{repo-slug}",
   name: "fixer-{number}",
   mode: "acceptEdits",
-  prompt: "Fix GitHub issue #{number} based on analysis findings.
+  prompt: "분석 결과를 바탕으로 GitHub 이슈 #{number} 수정.
     Analysis: {analyst_findings}
     Affected files: {file_list}
-    Create feature branch: {prefix}/issue-{number}
-    Write tests, implement fix, verify tests pass.
-    Mark your task completed via TaskUpdate and send results via SendMessage."
+    기능 브랜치 생성: {prefix}/issue-{number}
+    테스트 작성, 수정 구현, 테스트 통과 확인.
+    TaskUpdate를 통해 작업 완료 표시 및 SendMessage로 결과 전송."
 )
 ```
 
-### Sub-agent Mode (--solo or fallback)
+### 서브에이전트 모드 (--solo 또는 대체)
 
-Delegate to appropriate expert agent based on classification:
-- Bug fix: expert-debug subagent
-- Feature: expert-backend or expert-frontend subagent
-- Enhancement: expert-refactoring subagent
-- Docs: manager-docs subagent
+분류에 따라 적절한 전문가 에이전트에 위임:
+- 버그 수정: expert-debug 서브에이전트
+- 기능: expert-backend 또는 expert-frontend 서브에이전트
+- 개선: expert-refactoring 서브에이전트
+- 문서: manager-docs 서브에이전트
 
-## Issues Phase 3: Branch and Fix
+## Issues 3단계: 브랜치 및 수정
 
-### Step 3.1: Create Feature Branch
+### 3.1단계: 기능 브랜치 생성
 
-Read `github.git_workflow` from system.yaml:
+system.yaml에서 `github.git_workflow` 읽기:
 
-**github_flow or gitflow**:
-1. Ensure on main (or develop for gitflow): `git checkout main && git pull origin main`
-2. Create branch: `git checkout -b {prefix}/issue-{number}`
+**github_flow 또는 gitflow**:
+1. main에 있는지 확인 (gitflow의 경우 develop): `git checkout main && git pull origin main`
+2. 브랜치 생성: `git checkout -b {prefix}/issue-{number}`
 
 **main_direct**:
-- Stay on main, no branch creation
+- main에 유지, 브랜치 생성 없음
 
-### Step 3.2: Verify Fix
+### 3.2단계: 수정 검증
 
-After implementation:
-1. Run tests: Language-specific test command
-2. Run linter: Language-specific lint command
-3. If tests fail: Retry with error context (max 3 attempts)
-4. If still failing: AskUserQuestion (retry, skip, abort)
+구현 후:
+1. 테스트 실행: 언어별 테스트 명령
+2. 린터 실행: 언어별 린트 명령
+3. 테스트 실패 시: 에러 컨텍스트와 함께 재시도 (최대 3회)
+4. 여전히 실패 시: AskUserQuestion (재시도, 건너뛰기, 중단)
 
-### Step 3.3: Commit Changes
+### 3.3단계: 변경 커밋
 
-Delegate to manager-git subagent.
+manager-git 서브에이전트에 위임.
 
-Commit message format:
+커밋 메시지 형식:
 ```
 fix(scope): description
 
@@ -191,232 +191,10 @@ Fixes #{issue_number}
 Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 ```
 
-## Issues Phase 4: Create PR
+## Issues 4단계: PR 생성
 
-Read `github.git_workflow` from system.yaml:
+system.yaml에서 `github.git_workflow` 읽기:
 
 **github_flow**:
-1. Push: `git push -u origin {prefix}/issue-{number}`
-2. Create PR: `gh pr create --title "fix: {issue title}" --body "$(body)"`
-   - Body includes: Fix summary, test plan, `Fixes #{number}` reference
-
-**gitflow**:
-1. Push and create PR targeting develop
-
-**main_direct**:
-1. Push to main directly
-
-Link issue to PR:
-- `gh issue comment {number} --body "Fix submitted in PR #{pr_number}"`
-
-After PR: `git checkout main` to prepare for next issue.
-
-## Issues Phase 5: Cleanup and Report
-
-If team mode was used:
-1. Shutdown all teammates via SendMessage(type: "shutdown_request")
-2. TeamDelete to clean up resources
-
-Display batch summary:
-```markdown
-## GitHub Issues: Complete
-
-| Issue | Title | Status | PR |
-|-------|-------|--------|-----|
-| #123 | Fix login bug | PR Created | #456 |
-| #124 | Add dark mode | Skipped | - |
-```
-
-AskUserQuestion for next steps:
-- Review PRs on GitHub
-- Merge All PRs (if --merge flag)
-- Process More Issues
-- Done
-
----
-
-# SUB-COMMAND: pr
-
-Purpose: Fetch PRs, perform multi-perspective code review, and submit review comments.
-
-## PR Phase 1: PR Discovery
-
-### Step 1.1: Fetch Open PRs
-
-`gh pr list --state open --limit 30 --json number,title,author,labels,additions,deletions,changedFiles,headRefName`
-
-### Step 1.2: PR Selection
-
-If NUMBER argument provided:
-- Fetch specific PR: `gh pr view {number} --json number,title,body,files,commits,reviews`
-- Proceed to Phase 2
-
-If --all or no argument:
-- Display PR list as formatted table (number, title, author, +/- lines, files changed)
-- Use AskUserQuestion to let user select PR(s) to review
-
-### Step 1.3: Fetch PR Details
-
-For each selected PR:
-- Get full diff: `gh pr diff {number}`
-- Get changed files: `gh pr view {number} --json files --jq '.files[].path'`
-- Get existing reviews: `gh pr view {number} --json reviews`
-
-## PR Phase 2: Code Review
-
-### Team Mode (Default)
-
-Create a review team for parallel multi-perspective analysis:
-
-```
-TeamCreate(team_name: "github-pr-review-{number}")
-```
-
-Create review tasks:
-```
-TaskCreate: "Security review of PR #{number}"
-TaskCreate: "Performance review of PR #{number}"
-TaskCreate: "Quality and correctness review of PR #{number}"
-```
-
-Spawn 3 reviewers in parallel:
-
-```
-Task(
-  subagent_type: "team-researcher",
-  team_name: "github-pr-review-{number}",
-  name: "security-reviewer",
-  mode: "plan",
-  prompt: "You are a security reviewer for PR #{number} in {repo}.
-    Review the following diff for security vulnerabilities:
-    - Injection risks (SQL, XSS, command injection)
-    - Authentication/authorization issues
-    - Sensitive data exposure
-    - OWASP Top 10 compliance
-    Changed files: {file_list}
-    Diff: {diff_content}
-    Mark task completed and send findings via SendMessage."
-)
-
-Task(
-  subagent_type: "team-researcher",
-  team_name: "github-pr-review-{number}",
-  name: "perf-reviewer",
-  mode: "plan",
-  prompt: "You are a performance reviewer for PR #{number} in {repo}.
-    Review the following diff for performance issues:
-    - Algorithm complexity (O(n^2) loops, unnecessary allocations)
-    - Database query patterns (N+1, missing indexes)
-    - Memory leaks and resource management
-    - Concurrency issues (race conditions, deadlocks)
-    Changed files: {file_list}
-    Diff: {diff_content}
-    Mark task completed and send findings via SendMessage."
-)
-
-Task(
-  subagent_type: "team-researcher",
-  team_name: "github-pr-review-{number}",
-  name: "quality-reviewer",
-  mode: "plan",
-  prompt: "You are a code quality reviewer for PR #{number} in {repo}.
-    Review the following diff for quality issues:
-    - Code correctness and edge cases
-    - Test coverage for changes
-    - Naming conventions and readability
-    - Error handling completeness
-    - API contract consistency
-    Changed files: {file_list}
-    Diff: {diff_content}
-    Mark task completed and send findings via SendMessage."
-)
-```
-
-### Sub-agent Mode (--solo or fallback)
-
-Delegate sequentially:
-1. expert-security subagent: Security analysis of PR diff
-2. expert-performance subagent: Performance analysis
-3. manager-quality subagent: Code quality review
-
-## PR Phase 3: Synthesize and Submit Review
-
-After all reviewers complete:
-
-1. Collect findings from all perspectives
-2. Classify issues by severity:
-   - **Critical**: Must fix before merge (security vulnerabilities, data loss risks)
-   - **Important**: Should fix (performance issues, missing error handling)
-   - **Suggestion**: Nice to have (naming, style, minor improvements)
-3. Format as GitHub review
-
-### Submit Review
-
-Use AskUserQuestion to confirm review action:
-- Approve: Submit approval with summary
-- Request Changes: Submit with required changes
-- Comment Only: Submit as comment without approval decision
-- Skip: Do not submit review
-
-If approved, submit via:
-```bash
-gh pr review {number} --approve --body "$(review_body)"
-# OR
-gh pr review {number} --request-changes --body "$(review_body)"
-# OR
-gh pr review {number} --comment --body "$(review_body)"
-```
-
-For inline comments on specific lines:
-```bash
-gh api repos/{owner}/{repo}/pulls/{number}/reviews \
-  --method POST \
-  --field body="Review summary" \
-  --field event="COMMENT" \
-  --field comments="[{\"path\":\"file.go\",\"line\":42,\"body\":\"Issue description\"}]"
-```
-
-## PR Phase 4: Cleanup and Report
-
-If team mode was used:
-1. Shutdown all reviewers via SendMessage(type: "shutdown_request")
-2. TeamDelete to clean up resources
-
-Display review summary:
-```markdown
-## PR Review: Complete
-
-| PR | Title | Decision | Issues Found |
-|----|-------|----------|-------------|
-| #456 | Add auth middleware | Request Changes | 2 Critical, 3 Important |
-
-### Critical Issues
-- [file.go:42] SQL injection risk in query builder
-- [auth.go:15] Missing token expiration check
-
-### Important Issues
-- [handler.go:88] O(n^2) loop in user lookup
-```
-
-AskUserQuestion for next steps:
-- Review Next PR
-- Done
-
----
-
-## Common Rules
-
-- **[HARD] Agent delegation**: All analysis and fixes MUST be delegated to agents
-- **[HARD] User approval**: Issue fixes and review submissions require user confirmation
-- **Team mode default**: Agent Teams used by default, `--solo` to override
-- **Git strategy aware**: Reads `github.git_workflow` from system.yaml
-- **Issue linking**: Always include `Fixes #{number}` in commits/PRs
-- **Branch per issue**: Each issue gets its own branch (except main_direct)
-- **Test verification**: All fixes must pass tests before PR creation
-- **Batch safe**: Process multiple items sequentially to avoid branch conflicts
-
----
-
-## BEGIN EXECUTION
-
-Parse $ARGUMENTS to determine sub-command (issues or pr), then execute the corresponding workflow phases immediately.
+1. 푸시: `git push -u origin {prefix}/issue-{number}`
+2. PR 생성: `gh pr create --title "fix: {issue title}" --body "$(body)"`
