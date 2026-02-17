@@ -182,6 +182,7 @@ func runExtract(cmd *cobra.Command, args []string) error {
 		dstRelPath := relPath
 		if slotifier != nil {
 			dstRelPath = slotifier.RemapCorePath(relPath)
+			dstRelPath = slotifier.StripBrandSubdir(dstRelPath)
 		}
 		dst := filepath.Join(coreDir, dstRelPath)
 
@@ -261,8 +262,10 @@ func runExtract(cmd *cobra.Command, args []string) error {
 // to use stripped skill names (e.g., "skills/lang-python/" instead of "skills/moai-lang-python/").
 func remapRegistryPaths(reg *template.Registry, slotifier *extractor.BrandSlotifier) {
 	for _, entry := range reg.Slots {
+		entry.Description = slotifier.SlotifyContent(entry.Description)
 		for i := range entry.FoundIn {
 			entry.FoundIn[i].Path = slotifier.RemapCorePath(entry.FoundIn[i].Path)
+			entry.FoundIn[i].Path = slotifier.StripBrandSubdir(entry.FoundIn[i].Path)
 		}
 	}
 }

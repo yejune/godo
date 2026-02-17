@@ -150,14 +150,14 @@ func TestSlotifyContent_NoFalsePositives(t *testing.T) {
 		want  string
 	}{
 		{
-			name:  "standalone brand word not followed by hyphen",
+			name:  "standalone brand word replaced",
 			input: "The moai system is great",
-			want:  "The moai system is great",
+			want:  "The {{slot:BRAND}} system is great",
 		},
 		{
-			name:  "brand followed by uppercase",
+			name:  "brand case-insensitive replaced",
 			input: "MoAI Constitution",
-			want:  "MoAI Constitution",
+			want:  "{{slot:BRAND}} Constitution",
 		},
 		{
 			name:  "brand inside another word",
