@@ -12,11 +12,18 @@ import (
 // HandleStop handles the Stop hook event.
 // Match original behavior:
 // 1) If stop_hook_active is true, allow stop to prevent loops.
-// 2) Block only when the most recent active checklist is in-progress/blocked.
+// 2) Block if there are uncommitted changes.
+// 3) Block when the most recent active checklist is in-progress/blocked.
 func HandleStop(input *Input) *Output {
 	if input != nil && input.StopHookActive {
 		return &Output{}
 	}
+
+	// Check for uncommitted changes
+	if hasChanges, summary := GitStatus(); hasChanges {
+		return NewStopBlockOutput(fmt.Sprintf("커밋되지 않은 변경사항이 있습니다:\n%s\n변경사항을 커밋한 후 종료하세요.", summary))
+	}
+
 	if reason := checkActiveChecklist(); reason != "" {
 		return NewStopBlockOutput(reason)
 	}

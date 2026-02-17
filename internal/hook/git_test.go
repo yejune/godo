@@ -40,8 +40,9 @@ func Test_GitStatus_with_uncommitted_changes(t *testing.T) {
 	tmpDir, cleanup := setupGitRepo(t)
 	defer cleanup()
 
-	// Create an uncommitted file
-	os.WriteFile(filepath.Join(tmpDir, "new.go"), []byte("package main"), 0644)
+	// Modify a tracked file (not just create untracked)
+	readme := filepath.Join(tmpDir, "README.md")
+	os.WriteFile(readme, []byte("modified"), 0644)
 
 	hasChanges, summary := GitStatus()
 	if !hasChanges {
