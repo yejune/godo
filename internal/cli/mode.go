@@ -2,17 +2,21 @@ package cli
 
 import (
 	"fmt"
+	"strings"
 
-	"github.com/yejune/godo/internal/mode"
 	"github.com/spf13/cobra"
+	"github.com/yejune/godo/internal/mode"
 )
 
 var modeCmd = &cobra.Command{
-	Use:   "mode [do|focus|team]",
-	Short: "Get or set the current execution mode",
-	Long: `Mode manages the Do framework execution mode (do, focus, or team).
-Without arguments, prints the current mode. With an argument, switches to the specified mode.`,
-	Args: cobra.MaximumNArgs(1),
+	Use:   "mode [get|set <mode>|<mode>]",
+	Short: "Get or set the current execution/permission mode",
+	Long: `Compatible forms:
+  godo mode
+  godo mode get
+  godo mode set <do|focus|team|bypass|accept|default|plan>
+  godo mode <do|focus|team|bypass|accept|default|plan>`,
+	Args: cobra.MaximumNArgs(2),
 	RunE: runMode,
 }
 
@@ -34,19 +38,39 @@ func runMode(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	newMode := args[0]
-	switch newMode {
-	case "do", "focus", "team":
-		mode.WriteState(newMode)
-		if err := mode.SetDefaultMode(newMode); err != nil {
-			return fmt.Errorf("set default mode: %w", err)
-		}
-		fmt.Fprintf(cmd.OutOrStdout(), "mode switched to %s\n", newMode)
-	default:
-		return fmt.Errorf("invalid mode %q (valid: do, focus, team)", newMode)
+	arg0 := strings.ToLower(args[0])
+
+	if arg0 == "get" {
+		fmt.Fprintln(cmd.OutOrStdout(), mode.ReadState())
+		return nil
 	}
 
-	return nil
+	if arg0 == "set" {
+		if len(args) < 2 {
+			return fmt.Errorf("usage: godo mode set <do|focus|team|bypass|accept|default|plan>")
+		}
+		return applyMode(cmd, strings.ToLower(args[1]))
+	}
+
+	return applyMode(cmd, arg0)
+}
+
+func applyMode(cmd *cobra.Command, value string) error {
+	if ccMode, ok := mode.PermissionModes[value]; ok {
+		if err := mode.SetDefaultMode(ccMode); err != nil {
+			return fmt.Errorf("set permission mode: %w", err)
+		}
+		fmt.Fprintf(cmd.OutOrStdout(), "Permission mode set: %s (%s)\n", value, ccMode)
+		return nil
+	}
+
+	if mode.ExecutionModes[value] {
+		mode.WriteState(value)
+		fmt.Fprintf(cmd.OutOrStdout(), "Mode set: %s\n", value)
+		return nil
+	}
+
+	return fmt.Errorf("invalid mode %q (valid execution: do/focus/team, permission: bypass/accept/default/plan)", value)
 }
 
 func runModePermission(cmd *cobra.Command, args []string) error {

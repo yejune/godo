@@ -8,9 +8,10 @@ import (
 )
 
 var selfupdateCmd = &cobra.Command{
-	Use:   "selfupdate",
-	Short: "Update godo to the latest version via Homebrew",
-	RunE:  runSelfupdate,
+	Use:     "selfupdate",
+	Aliases: []string{"self-update"},
+	Short:   "Update godo to the latest version via Homebrew",
+	RunE:    runSelfupdate,
 }
 
 func init() {
@@ -18,7 +19,6 @@ func init() {
 }
 
 func runSelfupdate(cmd *cobra.Command, args []string) error {
-	// Check if brew is available
 	if _, err := exec.LookPath("brew"); err != nil {
 		return fmt.Errorf("Homebrew not found. Install godo manually or install Homebrew first")
 	}
