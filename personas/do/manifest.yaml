@@ -38,6 +38,15 @@ skills:
     - skills/do/workflows/report.md
     - skills/do/workflows/do.md
     - skills/do/workflows/team-do.md
+    - skills/do/workflows/feedback.md
+    - skills/do/workflows/fix.md
+    - skills/do/workflows/loop.md
+    - skills/do/workflows/project.md
+    - skills/do/workflows/team-debug.md
+    - skills/do/workflows/team-plan.md
+    - skills/do/workflows/team-review.md
+    - skills/do/workflows/team-run.md
+    - skills/do/workflows/team-sync.md
     - skills/do/references/reference.md
     # Do-specific modules merged into core skills
     - skills/foundation-core/modules/agent-delegation.md
@@ -66,6 +75,7 @@ skills:
 rules:
     - rules/workflow/spec-workflow.md
     - rules/workflow/workflow-modes.md
+    - rules/bootapp.md
 
 # Output styles (3 styles)
 styles:

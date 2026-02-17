@@ -782,19 +782,21 @@ dev-*.md 내용을 토픽별 분해하여 기존 코어 스킬의 modules/ 또�
 1-21. workflow-tdd/modules/tdd-cycle.md 생성
 ```
 
-### Phase 2: 페르소나 워크플로우 생성 + 오버라이드 스킬 제거
+### Phase 2: 페르소나 구조 정리 + 양방향 동기화 (REVISED)
+
+Original plan had 10 items (2-1 to 2-10). After research, revised to 6 work items:
 
 ```
-2-1.  personas/do/workflows/ 디렉토리 생성
-2-2.  personas/do/workflows/plan.md 생성
-2-3.  personas/do/workflows/run.md 생성
-2-4.  personas/do/workflows/report.md 생성
-2-5.  personas/do/workflows/team-plan.md 생성
-2-6.  personas/do/workflows/team-run.md 생성
-2-7.  personas/do/rules/bootapp.md 갱신 (dev-environment.md bootapp 섹션)
-2-8.  personas/do/skills/ 오버라이드 스킬 삭제 (do-foundation-*, do-workflow-*)
-2-9.  personas/do/manifest.yaml 갱신 (workflows 추가, 오버라이드 스킬 제거)
-2-10. personas/do/rules/workflow/ 삭제 (dev-*.md 원본 — 코어로 이동 완료)
+2-1.  [CANCELLED] personas/do/workflows/ 디렉토리 생성 — 15파일이 skills/do/workflows/에 이미 존재, 이동 불필요
+2-2.  [CANCELLED] thin workflow 파일 생성 — SKILL.md 오케스트레이터가 라우팅 처리
+2-3.  [DONE] manifest.yaml 갱신 — 9개 누락 워크플로우 파일을 skills: 섹션에 추가
+2-4.  [DONE] rules/bootapp.md 생성 — 네트워크 8규칙 + 빌드/재시작 7규칙
+2-5.  [DONE] docker-rules.md 갱신 — Network 섹션 + Build & Restart 확장 + AI Anti-Patterns 12규칙 추가
+2-6.  [DONE] output-styles/ 삭제 — styles/가 정본 (manifest 참조), output-styles/는 레거시 중복
+2-7.  [ALREADY DONE] 오버라이드 스킬 삭제 — Phase 1에서 이미 완료 (injection modules만 잔존, 의도된 설계)
+2-8.  [NOT APPLICABLE] rules/workflow/ 삭제 — spec-workflow.md/workflow-modes.md는 원본 dev-*.md가 아닌 페르소나 규칙
+2-9.  [DONE] do-focus checklist.md 백포팅 — convert에서 추가된 8개 신규 규칙 + 3개 템플릿 개선
+2-10. [DONE] architecture.md Phase 2 섹션 갱신 — 실제 결정 반영
 ```
 
 ### Phase 3: godo Go 코드 패키지 분리

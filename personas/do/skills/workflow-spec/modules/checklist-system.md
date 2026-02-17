@@ -195,3 +195,16 @@ Destructive git commands that overwrite/delete files are forbidden project-wide.
 - [HARD] Never instruct agent to read entire large files (500+ lines)
 - [HARD] Extract only relevant sections and inject directly into prompt
 - [HARD] For large artifacts (architecture.md, analysis.md), provide only the relevant Phase excerpt
+
+## Jobs Continuation Strategy [HARD]
+- [HARD] Job folders are immutable records -- once created, content must not be modified
+- [HARD] Only allowed modification to existing job: adding "Continued in: {path}" reference
+- [HARD] When execution continues or modifies a previous job's work, create a NEW job folder with current date
+- [HARD] New job format: `.do/jobs/{YY}/{MM}/{DD}/{title}/`
+- [HARD] New job's plan.md must start with: `Continues from: {path to previous job}`
+- [HARD] New job's checklist.md must specify which previous sub-checklists are being continued
+- [HARD] Bidirectional linking required:
+  - Previous job checklist: add `Continued in: {new job path}` at bottom
+  - New job checklist: add `Continues from: {previous job path}` at top
+- [HARD] Sub-checklists also linked: new sub-checklist header references the previous one it continues
+- [HARD] Research/analysis artifacts stay in original job -- only execution moves to new job

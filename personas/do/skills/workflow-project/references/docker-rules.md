@@ -16,10 +16,23 @@
 - [HARD] Check container status with `docker compose ps` before running commands — if stopped, `docker compose up -d` first
 - [HARD] For services with healthcheck defined, wait for healthy status before running tests/migrations
 
+### Network -- bootapp Domain-Based
+- [HARD] No external port exposure needed -- bootapp provides domain-based routing
+- [HARD] `ports:` section in docker-compose.yml can be omitted -- access via domain
+- [HARD] Service access via DOMAIN environment variable (e.g., `DOMAIN: app.test`, `DOMAIN: db.test`)
+- [HARD] SSL_DOMAINS environment variable required -- HTTPS domain communication without ports, auto certificate generation/trust
+- [HARD] Host access: `https://app.test` (NOT `localhost:8080`)
+- [HARD] Inter-container communication: use Docker service name or DOMAIN value (e.g., `db.test`, `redis.test`)
+- [HARD] Never access other services via `localhost` from inside container code
+- [HARD] TLD should be `.test` (RFC 2606 reserved) -- `.local` forbidden (macOS mDNS conflict)
+
 ### Build & Restart
-- [HARD] On Dockerfile change: `docker compose build` then request user to run startup command
-- [HARD] On docker-compose.yml change: request user to run startup command (auto-reflects)
-- [HARD] After startup, verify service status: `docker compose ps` for container running + healthcheck passing
+- [HARD] `docker bootapp up/down` modifies `/etc/hosts`, so agents must NEVER run it directly -- inform the user of the command to run and request execution (AskUserQuestion)
+- [HARD] Project start: request user to run `docker bootapp up` -- subnet allocation, domain registration, SSL auto-handling
+- [HARD] Project end: request user to run `docker bootapp down` -- domain/hosts cleanup
+- [HARD] On Dockerfile change: `docker compose build` then request user to run `docker bootapp up`
+- [HARD] On docker-compose.yml change: request user to run `docker bootapp up` (auto-reflects)
+- [HARD] After bootapp up, verify service status: `docker compose ps` for container running + healthcheck passing
 - [HARD] On dependency addition (package.json, go.mod, etc.): install inside container or rebuild image
 
 ## Environment Variable Management
@@ -62,3 +75,18 @@
 ### Dependency Management
 - [HARD] Before adding new dependency, check if existing dependencies can solve it
 - [HARD] Leverage existing knowledge and experience first — search and reference, document new discoveries
+
+## AI Agent Anti-Patterns
+
+- [HARD] Dependency installation runs on host -- auto-reflected in container via volume mount (`npm install`, `pip install`, `go mod download`, etc.)
+- [HARD] Syntax check/dev tools also allowed on host platform-specifically (lint, formatter, type checker, etc.)
+- [HARD] Never use `localhost` for inter-container communication -- use Docker service name or domain
+- [HARD] No port exposure via `ports:` mapping -- use bootapp domains
+- [HARD] Never ignore Docker Compose healthcheck status -- wait for healthy before subsequent work
+- [HARD] Never create `.env` family files -- forbidden for any reason
+- [HARD] Never run tests outside containers -- use `docker compose exec`
+- [HARD] Never enter container shell (`docker exec -it ... bash/sh`) -- always use `docker compose exec <service> <command>` single commands
+- [HARD] `docker cp` forbidden -- never copy files to container, share via volume mount
+- [HARD] Never create temp files/scripts inside container -- all changes on host source, reflected via volume
+- [HARD] Idempotency required -- same command multiple times yields same result, never depend on temporary state
+- [HARD] Never `COPY` source code in Dockerfile -- both source and dependencies shared via volume mount
