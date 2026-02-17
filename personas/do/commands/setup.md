@@ -59,7 +59,7 @@ AskUserQuestion으로 4개 질문:
 
 4. **Jobs 폴더 언어** (DO_JOBS_LANGUAGE)
    - en (기본값): 폴더명을 영어로 작성 (예: login-api-security)
-   - auto: 대화 언어(DO_LANGUAGE)와 동일하게 작성
+   - ko: 폴더명을 한국어로 작성 (예: 로그인-api-보안)
 
 ## Step 3: 설정 저장
 

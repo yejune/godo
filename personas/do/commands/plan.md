@@ -22,7 +22,7 @@ argument-hint: [플랜 제목 또는 빈칸]
 
 제목 언어 (DO_JOBS_LANGUAGE):
 - "en" (기본값): 제목을 영어 kebab-case로 작성 (예: login-api-security)
-- "auto": DO_LANGUAGE와 동일한 언어로 작성 (예: ko → 로그인-api-보안)
+- 그 외: 해당 언어로 작성 (예: "ko" → 로그인-api-보안)
 
 ### Step 2: 복잡도 판단
 
