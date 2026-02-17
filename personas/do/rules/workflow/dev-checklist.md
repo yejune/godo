@@ -299,9 +299,13 @@
 - [HARD] 잘못된 내용은 보완하여 `git add` → `git commit`으로 수정 — 히스토리 보존
 - [HARD] 사용자가 모든 위험을 감수하고 명시적으로 지시한 경우에만 예외 (동의 필수)
 
-## 커밋 메시지 체크리스트 경로 [HARD]
+## 체크리스트 경로 추적 [HARD]
 - [HARD] 코드 수정 커밋 시 관련 서브 체크리스트 경로를 커밋 메시지에 포함
-- [HARD] 형식: `ref: .do/jobs/{path}/checklists/{NN}_{agent}.md`
+- [HARD] 커밋 메시지 형식: `ref: .do/jobs/{path}/checklists/{NN}_{agent}.md`
+- [HARD] 수정한 소스 코드에도 가능한 경우 체크리스트 경로를 주석으로 포함
+  - 예: `// ref: .do/jobs/26/02/17/login-api/checklists/01_expert-backend.md`
+  - 언어별 주석 형식 사용 (Go: `//`, Python: `#`, JS/TS: `//`)
+  - 파일 상단 또는 변경 함수 근처에 배치
 - [HARD] 추가 수정 시에도 동일한 형식으로 add/commit — 역추적 용이하도록
 
 ## 에이전트 토큰 소진 대응 [HARD]
