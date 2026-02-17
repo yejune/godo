@@ -26,6 +26,7 @@ type TranscriptUsage struct {
 	TurnCount           int    `json:"turn_count,omitempty"`
 }
 
+// transcriptMessage represents a single line in the JSONL transcript file.
 type transcriptMessage struct {
 	Timestamp string        `json:"timestamp"`
 	Type      string        `json:"type"`
@@ -33,11 +34,13 @@ type transcriptMessage struct {
 	Model     string        `json:"model"`
 }
 
+// transcriptMsg represents the message content with usage data.
 type transcriptMsg struct {
 	Usage *transcriptUsage `json:"usage"`
 	Model string           `json:"model"`
 }
 
+// transcriptUsage represents token usage information from a transcript line.
 type transcriptUsage struct {
 	InputTokens              int64 `json:"input_tokens"`
 	OutputTokens             int64 `json:"output_tokens"`
@@ -124,7 +127,7 @@ func ClaudeCodeDir() string {
 	return filepath.Join(homeDir, ".claude")
 }
 
-// ClaudeDesktopConfigDir returns the Claude Desktop configuration directory.
+// ClaudeDesktopConfigDir returns the Claude Desktop (Electron app) configuration directory.
 func ClaudeDesktopConfigDir() string {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
@@ -147,7 +150,7 @@ func ClaudeDesktopConfigDir() string {
 	}
 }
 
-// GlobJSONL collects .jsonl files matching the given pattern.
+// GlobJSONL collects .jsonl files matching the given pattern, ignoring glob errors.
 func GlobJSONL(pattern string) []string {
 	matches, err := filepath.Glob(pattern)
 	if err != nil {
@@ -234,36 +237,7 @@ func AnonymizeProjectPath(path string) string {
 	if err != nil {
 		absPath = path
 	}
+
 	hash := sha256.Sum256([]byte(absPath))
 	return hex.EncodeToString(hash[:])
-}
-
-// ExtractProjectDir extracts the project directory name from a transcript path.
-func ExtractProjectDir(transcriptPath string) string {
-	dir := filepath.Dir(transcriptPath)
-	projectDir := filepath.Dir(dir)
-	return filepath.Base(projectDir)
-}
-
-// FormatNumber formats an int64 with comma separators.
-func FormatNumber(n int64) string {
-	s := fmt.Sprintf("%d", n)
-	if len(s) <= 3 {
-		return s
-	}
-
-	var result strings.Builder
-	remainder := len(s) % 3
-	if remainder > 0 {
-		result.WriteString(s[:remainder])
-	}
-
-	for i := remainder; i < len(s); i += 3 {
-		if result.Len() > 0 {
-			result.WriteByte(',')
-		}
-		result.WriteString(s[i : i+3])
-	}
-
-	return result.String()
 }

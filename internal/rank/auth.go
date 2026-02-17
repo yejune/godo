@@ -14,7 +14,7 @@ import (
 
 // OAuth authentication constants.
 const (
-	OAuthTimeout = 300 * time.Second
+	OAuthTimeout = 300 * time.Second // 5 minutes
 	PortMin      = 8080
 	PortMax      = 8180
 	StateBytes   = 32

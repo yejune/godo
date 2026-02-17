@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 const (
-	Subdir       = "glm"
-	CredFilename = "credentials.json"
-	CredDirPerm  = 0700
-	CredFilePerm = 0600
+	subdir       = "glm"
+	credFilename = "credentials.json"
+	credDirPerm  = 0700
+	credFilePerm = 0600
 )
 
 // Credentials holds the user's GLM API key.
@@ -20,24 +21,24 @@ type Credentials struct {
 	CreatedAt string `json:"created_at"`
 }
 
-// CredentialsDir returns the directory path for GLM credentials (~/.do/glm/).
-func CredentialsDir() string {
+// GetCredentialsDir returns the directory path for GLM credentials (~/.do/glm/).
+func GetCredentialsDir() string {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		home = "."
 	}
-	return filepath.Join(home, ".do", Subdir)
+	return filepath.Join(home, ".do", subdir)
 }
 
-// CredentialsPath returns the full path to the credentials file (~/.do/glm/credentials.json).
-func CredentialsPath() string {
-	return filepath.Join(CredentialsDir(), CredFilename)
+// GetCredentialsPath returns the full path to the credentials file (~/.do/glm/credentials.json).
+func GetCredentialsPath() string {
+	return filepath.Join(GetCredentialsDir(), credFilename)
 }
 
 // SaveCredentials persists credentials to disk atomically with secure file permissions.
 func SaveCredentials(creds *Credentials) error {
-	dir := CredentialsDir()
-	if err := os.MkdirAll(dir, CredDirPerm); err != nil {
+	dir := GetCredentialsDir()
+	if err := os.MkdirAll(dir, credDirPerm); err != nil {
 		return fmt.Errorf("create GLM credentials directory: %w", err)
 	}
 
@@ -46,10 +47,10 @@ func SaveCredentials(creds *Credentials) error {
 		return fmt.Errorf("marshal GLM credentials: %w", err)
 	}
 
-	credPath := CredentialsPath()
+	credPath := GetCredentialsPath()
 	tmpFile := credPath + ".tmp"
 
-	if err := os.WriteFile(tmpFile, data, CredFilePerm); err != nil {
+	if err := os.WriteFile(tmpFile, data, credFilePerm); err != nil {
 		return fmt.Errorf("write temp credential file: %w", err)
 	}
 
@@ -64,7 +65,7 @@ func SaveCredentials(creds *Credentials) error {
 // LoadCredentials reads credentials from disk.
 // Returns (nil, nil) if the file does not exist or contains invalid JSON.
 func LoadCredentials() (*Credentials, error) {
-	data, err := os.ReadFile(CredentialsPath())
+	data, err := os.ReadFile(GetCredentialsPath())
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil
@@ -78,6 +79,24 @@ func LoadCredentials() (*Credentials, error) {
 	}
 
 	return &creds, nil
+}
+
+// SetupCredentials saves a new API key.
+func SetupCredentials(apiKey string) error {
+	creds := &Credentials{
+		APIKey:    apiKey,
+		CreatedAt: time.Now().Format(time.RFC3339),
+	}
+	return SaveCredentials(creds)
+}
+
+// SetGLMEnv sets the environment variables for GLM backend in the current process.
+func SetGLMEnv(apiKey string) {
+	os.Setenv("ANTHROPIC_AUTH_TOKEN", apiKey)
+	os.Setenv("ANTHROPIC_BASE_URL", "https://api.z.ai/api/anthropic")
+	os.Setenv("ANTHROPIC_DEFAULT_HAIKU_MODEL", "glm-4.7-flashx")
+	os.Setenv("ANTHROPIC_DEFAULT_SONNET_MODEL", "glm-4.7")
+	os.Setenv("ANTHROPIC_DEFAULT_OPUS_MODEL", "glm-5")
 }
 
 // MaskAPIKey masks an API key for display, showing only prefix and suffix.
