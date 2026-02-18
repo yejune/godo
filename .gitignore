@@ -4,9 +4,13 @@ CLAUDE.md
 dist/
 godo
 
+# macOS
+.DS_Store
+
 # Do runtime
 .do/.latest-version
 .do/memory/
 godo.rb
 .history/
 .do/jobs/
+**/.do/
