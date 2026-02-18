@@ -81,6 +81,14 @@ AskUserQuestion으로 4개 질문:
 
 기존 settings.local.json 내용 유지하면서 env 필드만 업데이트.
 
+## Step 3.5: 스피너 즉시 적용
+
+Bash로 스피너를 바로 적용합니다:
+
+```bash
+godo spinner apply
+```
+
 ## Step 4: 완료 메시지
 
 설정 완료!
@@ -93,3 +101,4 @@ AskUserQuestion으로 4개 질문:
 - AI 푸터: {예/아니오}
 - Jobs 폴더 언어: {jobs언어}
 - 에이전트 확인: {예/아니오}
+

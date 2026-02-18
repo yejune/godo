@@ -183,33 +183,25 @@ func runSetup(cmd *cobra.Command, args []string) error {
 	commitLangDefault := findDefault(commitLangOpts, cur("DO_COMMIT_LANGUAGE"), 0)
 	commitLang := promptChoice(reader, "Commit language", commitLangOpts, commitLangDefault)
 
-	// 4. Persona
-	personaOpts := []option{
-		{"young-f", "young-f"}, {"young-m", "young-m"},
-		{"senior-f", "senior-f"}, {"senior-m", "senior-m"},
-	}
-	personaDefault := findDefault(personaOpts, cur("DO_PERSONA"), 0)
-	persona := promptChoice(reader, "Persona", personaOpts, personaDefault)
-
-	// 5. Execution mode
+	// 4. Execution mode
 	modeOpts := []option{
 		{"do", "do"}, {"focus", "focus"}, {"team", "team"},
 	}
 	modeDefault := findDefault(modeOpts, cur("DO_MODE"), 0)
 	execMode := promptChoice(reader, "Mode", modeOpts, modeDefault)
 
-	// 6. Style
+	// 5. Style
 	styleOpts := []option{
 		{"sprint", "sprint"}, {"pair", "pair"}, {"direct", "direct"},
 	}
 	styleDefault := findDefault(styleOpts, cur("DO_STYLE"), 1)
 	style := promptChoice(reader, "Style", styleOpts, styleDefault)
 
-	// 7. AI footer
+	// 6. AI footer
 	aiFooterCur := cur("DO_AI_FOOTER") == "true"
 	aiFooter := promptYN(reader, "AI footer?", aiFooterCur, "true", "false")
 
-	// 8. Jobs language
+	// 7. Jobs language
 	jobsLangOpts := []option{
 		{"en", "en"}, {"ko", "ko"},
 	}
@@ -221,24 +213,24 @@ func runSetup(cmd *cobra.Command, args []string) error {
 	fmt.Fprintln(cmd.OutOrStdout(), "Claude Launch Flags")
 	fmt.Fprintln(cmd.OutOrStdout(), strings.Repeat("-", 40))
 
-	// 9. Bypass permissions
+	// 8. Bypass permissions
 	bypassCur := cur("DO_CLAUDE_BYPASS") == "true"
 	bypass := promptYN(reader, "Bypass permissions?", bypassCur, "true", "false")
 
-	// 10. Chrome MCP
+	// 9. Chrome MCP
 	chromeCur := cur("DO_CLAUDE_CHROME") == "true"
 	chrome := promptYN(reader, "Enable Chrome MCP?", chromeCur, "true", "false")
 
-	// 11. Continue session
+	// 10. Continue session
 	continueCur := cur("DO_CLAUDE_CONTINUE") == "true"
 	continueSession := promptYN(reader, "Continue previous session?", continueCur, "true", "false")
 
-	// 12. Auto sync
+	// 11. Auto sync
 	autoSyncCur := cur("DO_CLAUDE_AUTO_SYNC")
 	autoSyncDefault := autoSyncCur != "false" // default true
 	autoSync := promptYN(reader, "Auto sync before launch?", autoSyncDefault, "true", "false")
 
-	// 13. Model
+	// 12. Model
 	modelOpts := []option{
 		{"opus[1m]", "opus[1m]"},
 		{"opus", "opus"},
@@ -256,7 +248,6 @@ func runSetup(cmd *cobra.Command, args []string) error {
 	env["DO_USER_NAME"] = userName
 	env["DO_LANGUAGE"] = lang
 	env["DO_COMMIT_LANGUAGE"] = commitLang
-	env["DO_PERSONA"] = persona
 	env["DO_MODE"] = execMode
 	env["DO_STYLE"] = style
 	env["DO_AI_FOOTER"] = aiFooter
