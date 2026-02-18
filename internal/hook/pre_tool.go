@@ -12,10 +12,15 @@ func HandlePreTool(input *Input) *Output {
 	policy := DefaultSecurityPolicy()
 	toolName := input.ToolName
 
-	// [HARD] Task tool requires valid sub-checklist path in prompt
-	if toolName == "Task" {
-		if output := checkChecklistRequirement(input); output != nil {
-			return output
+	// [HARD] All code modification tools require valid checklist (only if .do/jobs exists)
+	jobsDir := ".do/jobs"
+	if _, err := os.Stat(jobsDir); err == nil {
+		// Project has Do framework - enforce checklist
+		switch toolName {
+		case "Task", "Write", "Edit":
+			if output := checkChecklistRequirement(input); output != nil {
+				return output
+			}
 		}
 	}
 
