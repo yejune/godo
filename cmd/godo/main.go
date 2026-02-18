@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/yejune/godo/internal/cli"
+	"github.com/yejune/godo/internal/hook"
 )
 
 var version string
@@ -28,6 +29,7 @@ func normalizeLegacyAliases() {
 func main() {
 	normalizeLegacyAliases()
 	cli.SetVersion(version)
+	hook.SetVersion(version)
 	if err := cli.Execute(); err != nil {
 		os.Exit(1)
 	}

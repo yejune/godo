@@ -59,13 +59,9 @@ func runClaude(cmd *cobra.Command, args []string) error {
 	autoSync := getString("DO_CLAUDE_AUTO_SYNC") == "true"
 	model := getString("DO_CLAUDE_MODEL")
 
-	// Default model to opus[1m] if not specified
-	if model == "" {
-		model = "opus[1m]"
-	}
-
 	var passThrough []string
-	for _, arg := range filteredArgs {
+	for i := 0; i < len(filteredArgs); i++ {
+		arg := filteredArgs[i]
 		switch arg {
 		case "--chrome":
 			chrome = true
@@ -75,6 +71,11 @@ func runClaude(cmd *cobra.Command, args []string) error {
 			bypass = true
 		case "-c", "--continue":
 			cont = true
+		case "--model", "-m":
+			if i+1 < len(filteredArgs) {
+				model = filteredArgs[i+1]
+				i++
+			}
 		default:
 			passThrough = append(passThrough, arg)
 		}

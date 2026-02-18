@@ -238,6 +238,20 @@ func runSetup(cmd *cobra.Command, args []string) error {
 	autoSyncDefault := autoSyncCur != "false" // default true
 	autoSync := promptYN(reader, "Auto sync before launch?", autoSyncDefault, "true", "false")
 
+	// 13. Model
+	modelOpts := []option{
+		{"opus[1m]", "opus[1m]"},
+		{"opus", "opus"},
+		{"sonnet[1m]", "sonnet[1m]"},
+		{"sonnet", "sonnet"},
+		{"haiku", "haiku"},
+		{"opusplan", "opusplan"},
+		{"claude default", ""},
+	}
+	curModel := cur("DO_CLAUDE_MODEL")
+	modelDefault := findDefault(modelOpts, curModel, 0) // default: opus[1m]
+	modelVal := promptChoice(reader, "Model", modelOpts, modelDefault)
+
 	// Merge into env (preserves existing keys not managed here)
 	env["DO_USER_NAME"] = userName
 	env["DO_LANGUAGE"] = lang
@@ -251,6 +265,7 @@ func runSetup(cmd *cobra.Command, args []string) error {
 	env["DO_CLAUDE_CHROME"] = chrome
 	env["DO_CLAUDE_CONTINUE"] = continueSession
 	env["DO_CLAUDE_AUTO_SYNC"] = autoSync
+	env["DO_CLAUDE_MODEL"] = modelVal
 	// CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS is auto-injected via EnsureSettingsLocal (sync time)
 
 	settings["env"] = env
@@ -286,6 +301,7 @@ func EnsureSettingsLocal() {
 			"DO_CLAUDE_CHROME":                     "false",
 			"DO_CLAUDE_CONTINUE":                   "false",
 			"DO_CLAUDE_AUTO_SYNC":                  "true",
+			"DO_CLAUDE_MODEL":                      "opus[1m]",
 			"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
 		}
 		settings["env"] = env

@@ -1,10 +1,8 @@
 package cli
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -59,7 +57,7 @@ func spinnerApply(cmd *cobra.Command) error {
 		return fmt.Errorf("no spinner verbs found for persona %q", personaType)
 	}
 
-	if err := applySpinnerToSettings(verbs); err != nil {
+	if err := persona.ApplySpinnerToSettings(verbs); err != nil {
 		return err
 	}
 
@@ -76,7 +74,7 @@ func spinnerRestore(cmd *cobra.Command) error {
 }
 
 func spinnerStatus(cmd *cobra.Command) error {
-	settings, err := readClaudeSettings(getClaudeSettingsPath())
+	settings, err := persona.ReadClaudeSettings(persona.GetClaudeSettingsPath())
 	if err != nil {
 		return err
 	}
@@ -105,72 +103,14 @@ func spinnerStatus(cmd *cobra.Command) error {
 	return nil
 }
 
-func getClaudeSettingsPath() string {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return filepath.Join(".", "settings.json")
-	}
-	return filepath.Join(homeDir, ".claude", "settings.json")
-}
-
-func readClaudeSettings(path string) (map[string]interface{}, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return make(map[string]interface{}), nil
-		}
-		return nil, err
-	}
-
-	var settings map[string]interface{}
-	if err := json.Unmarshal(data, &settings); err != nil {
-		return nil, fmt.Errorf("invalid JSON in %s: %w", path, err)
-	}
-	return settings, nil
-}
-
-func writeClaudeSettings(path string, settings map[string]interface{}) error {
-	data, err := json.MarshalIndent(settings, "", "  ")
-	if err != nil {
-		return err
-	}
-	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
-		return err
-	}
-	return os.WriteFile(path, append(data, '\n'), 0644)
-}
-
-func applySpinnerToSettings(verbs []string) error {
-	settingsPath := getClaudeSettingsPath()
-	settings, err := readClaudeSettings(settingsPath)
-	if err != nil {
-		return fmt.Errorf("reading settings: %w", err)
-	}
-
-	iverbs := make([]interface{}, len(verbs))
-	for i, v := range verbs {
-		iverbs[i] = v
-	}
-
-	settings["spinnerVerbs"] = map[string]interface{}{
-		"mode":  "replace",
-		"verbs": iverbs,
-	}
-
-	if err := writeClaudeSettings(settingsPath, settings); err != nil {
-		return fmt.Errorf("writing settings: %w", err)
-	}
-	return nil
-}
-
 func removeSpinnerFromSettings() error {
-	settingsPath := getClaudeSettingsPath()
-	settings, err := readClaudeSettings(settingsPath)
+	settingsPath := persona.GetClaudeSettingsPath()
+	settings, err := persona.ReadClaudeSettings(settingsPath)
 	if err != nil {
 		return fmt.Errorf("reading settings: %w", err)
 	}
 	delete(settings, "spinnerVerbs")
-	if err := writeClaudeSettings(settingsPath, settings); err != nil {
+	if err := persona.WriteClaudeSettings(settingsPath, settings); err != nil {
 		return fmt.Errorf("writing settings: %w", err)
 	}
 	return nil
