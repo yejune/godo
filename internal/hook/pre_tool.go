@@ -17,7 +17,7 @@ func HandlePreTool(input *Input) *Output {
 	if _, err := os.Stat(jobsDir); err == nil {
 		// Project has Do framework - enforce checklist
 		switch toolName {
-		case "Task", "Write", "Edit":
+		case "Task":
 			if output := checkChecklistRequirement(input); output != nil {
 				return output
 			}

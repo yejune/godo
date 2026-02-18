@@ -9,6 +9,9 @@ import (
 
 // GetClaudeSettingsPath returns the path to the Claude settings.json file.
 func GetClaudeSettingsPath() string {
+	if configDir := os.Getenv("CLAUDE_CONFIG_DIR"); configDir != "" {
+		return filepath.Join(configDir, "settings.json")
+	}
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return filepath.Join(".", "settings.json")
