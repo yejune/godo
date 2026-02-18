@@ -59,6 +59,11 @@ func runClaude(cmd *cobra.Command, args []string) error {
 	autoSync := getString("DO_CLAUDE_AUTO_SYNC") == "true"
 	model := getString("DO_CLAUDE_MODEL")
 
+	// Default model to opus[1m] if not specified
+	if model == "" {
+		model = "opus[1m]"
+	}
+
 	var passThrough []string
 	for _, arg := range filteredArgs {
 		switch arg {
