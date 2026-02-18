@@ -16,7 +16,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const releaseURL = "https://github.com/yejune/godo/releases/latest/download/do-release.tar.gz"
+const releaseURL = "https://github.com/yejune/godo/releases/latest/download/godo-release.tar.gz"
 
 var userSyncCmd = &cobra.Command{
 	Use:   "sync",
