@@ -53,9 +53,9 @@ AskUserQuestion으로 4개 질문:
    - 예 (true), 아니오 (false)
 
 3. **실행 모드** (DO_MODE)
-   - do: 모든 작업을 에이전트에게 위임 (대규모 작업)
+   - team (기본값): Agent Teams API로 병렬 팀 실행
+   - do: 모든 작업을 에이전트에게 위임
    - focus: 코드를 직접 작성 (소규모 작업)
-   - auto (기본값): 작업 규모에 따라 자동 선택
 
 4. **Jobs 폴더 언어** (DO_JOBS_LANGUAGE)
    - English (en) (기본값), 한국어 (ko), 日本語 (ja), 中文 (zh)

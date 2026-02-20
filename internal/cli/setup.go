@@ -226,7 +226,7 @@ func EnsureSettingsLocal() {
 			"DO_LANGUAGE":                          "ko",
 			"DO_COMMIT_LANGUAGE":                   "en",
 			"DO_PERSONA":                           "young-f",
-			"DO_MODE":                              "do",
+			"DO_MODE":                              "team",
 			"DO_STYLE":                             "pair",
 			"DO_AI_FOOTER":                         "false",
 			"DO_JOBS_LANGUAGE":                     "en",
