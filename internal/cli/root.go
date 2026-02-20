@@ -10,6 +10,7 @@ var rootCmd = &cobra.Command{
 	Long: `Godo is the Do framework CLI. It extracts moai-adk's .claude/ directory into
 core and persona layers, reassembles them into deployable output, and provides
 runtime utilities for hooks, mode switching, linting, scaffolding, and more.`,
+	SilenceUsage: true,
 }
 
 // SetVersion sets the version string for the root command.

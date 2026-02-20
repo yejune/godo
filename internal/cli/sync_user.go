@@ -63,6 +63,8 @@ const frameworkRuleGlob = ".claude/rules/dev-*.md"
 // frameworkFiles lists standalone framework files to backup/delete.
 var frameworkFiles = []string{
 	"CLAUDE.md",
+	filepath.Join(".claude", "settings.json"),
+	filepath.Join(".claude", "registry.yaml"),
 }
 
 func runUserSync(cmd *cobra.Command, args []string) error {
@@ -514,7 +516,11 @@ func downloadAndExtract(cmd *cobra.Command, url string) error {
 			continue
 		}
 
+		// CLAUDE.md stays at project root; everything else goes under .claude/
 		target := name
+		if name != "CLAUDE.md" {
+			target = filepath.Join(".claude", name)
+		}
 
 		switch header.Typeflag {
 		case tar.TypeDir:
@@ -550,7 +556,7 @@ func downloadAndExtract(cmd *cobra.Command, url string) error {
 	return nil
 }
 
-// verifyInstallation checks that critical files exist after download.
+// verifyInstallation checks that critical framework files exist after download.
 func verifyInstallation() error {
 	required := []string{
 		"CLAUDE.md",
