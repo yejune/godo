@@ -159,58 +159,7 @@ func runSetup(cmd *cobra.Command, args []string) error {
 		return ""
 	}
 
-	fmt.Fprintln(cmd.OutOrStdout(), "godo setup")
-	fmt.Fprintln(cmd.OutOrStdout(), strings.Repeat("-", 40))
-
-	// 1. User name
-	nameDefault := cur("DO_USER_NAME")
-	if nameDefault == "" {
-		nameDefault = currentUser()
-	}
-	userName := promptText(reader, "User name", nameDefault)
-
-	// 2. Language
-	langOpts := []option{
-		{"ko", "ko"}, {"en", "en"}, {"ja", "ja"}, {"zh", "zh"},
-	}
-	langDefault := findDefault(langOpts, cur("DO_LANGUAGE"), 0)
-	lang := promptChoice(reader, "Language", langOpts, langDefault)
-
-	// 3. Commit language
-	commitLangOpts := []option{
-		{"en", "en"}, {"ko", "ko"},
-	}
-	commitLangDefault := findDefault(commitLangOpts, cur("DO_COMMIT_LANGUAGE"), 0)
-	commitLang := promptChoice(reader, "Commit language", commitLangOpts, commitLangDefault)
-
-	// 4. Execution mode
-	modeOpts := []option{
-		{"do", "do"}, {"focus", "focus"}, {"team", "team"},
-	}
-	modeDefault := findDefault(modeOpts, cur("DO_MODE"), 0)
-	execMode := promptChoice(reader, "Mode", modeOpts, modeDefault)
-
-	// 5. Style
-	styleOpts := []option{
-		{"sprint", "sprint"}, {"pair", "pair"}, {"direct", "direct"},
-	}
-	styleDefault := findDefault(styleOpts, cur("DO_STYLE"), 1)
-	style := promptChoice(reader, "Style", styleOpts, styleDefault)
-
-	// 6. AI footer
-	aiFooterCur := cur("DO_AI_FOOTER") == "true"
-	aiFooter := promptYN(reader, "AI footer?", aiFooterCur, "true", "false")
-
-	// 7. Jobs language
-	jobsLangOpts := []option{
-		{"en", "en"}, {"ko", "ko"},
-	}
-	jobsLangDefault := findDefault(jobsLangOpts, cur("DO_JOBS_LANGUAGE"), 0)
-	jobsLang := promptChoice(reader, "Jobs language", jobsLangOpts, jobsLangDefault)
-
-	// --- Claude Launch Flags ---
-	fmt.Fprintln(cmd.OutOrStdout())
-	fmt.Fprintln(cmd.OutOrStdout(), "Claude Launch Flags")
+	fmt.Fprintln(cmd.OutOrStdout(), "godo setup — Claude Launch Flags")
 	fmt.Fprintln(cmd.OutOrStdout(), strings.Repeat("-", 40))
 
 	// 8. Bypass permissions
@@ -245,13 +194,6 @@ func runSetup(cmd *cobra.Command, args []string) error {
 	modelVal := promptChoice(reader, "Model", modelOpts, modelDefault)
 
 	// Merge into env (preserves existing keys not managed here)
-	env["DO_USER_NAME"] = userName
-	env["DO_LANGUAGE"] = lang
-	env["DO_COMMIT_LANGUAGE"] = commitLang
-	env["DO_MODE"] = execMode
-	env["DO_STYLE"] = style
-	env["DO_AI_FOOTER"] = aiFooter
-	env["DO_JOBS_LANGUAGE"] = jobsLang
 	env["DO_CLAUDE_BYPASS"] = bypass
 	env["DO_CLAUDE_CHROME"] = chrome
 	env["DO_CLAUDE_CONTINUE"] = continueSession
