@@ -92,22 +92,37 @@ func runClaude(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	claudeArgs := []string{"claude"}
-	if bypass {
-		claudeArgs = append(claudeArgs, "--dangerously-skip-permissions")
+	buildArgs := func(withContinue bool) []string {
+		a := []string{"claude"}
+		if bypass {
+			a = append(a, "--dangerously-skip-permissions")
+		}
+		if !chrome {
+			a = append(a, "--no-chrome")
+		}
+		if withContinue {
+			a = append(a, "--continue")
+		}
+		if model != "" {
+			a = append(a, "--model", model)
+		}
+		a = append(a, passThrough...)
+		return a
 	}
-	if !chrome {
-		claudeArgs = append(claudeArgs, "--no-chrome")
-	}
-	if cont {
-		claudeArgs = append(claudeArgs, "--continue")
-	}
-	if model != "" {
-		claudeArgs = append(claudeArgs, "--model", model)
-	}
-	claudeArgs = append(claudeArgs, passThrough...)
 
-	return syscall.Exec(claudeBin, claudeArgs, os.Environ())
+	if cont {
+		// Try --continue first; fall back to launch without it on failure.
+		tryCmd := exec.Command(claudeBin, buildArgs(true)[1:]...)
+		tryCmd.Stdin = os.Stdin
+		tryCmd.Stdout = os.Stdout
+		tryCmd.Stderr = os.Stderr
+		if err := tryCmd.Run(); err == nil {
+			return nil
+		}
+		fmt.Fprintln(cmd.ErrOrStderr(), "No previous session found, starting new session...")
+	}
+
+	return syscall.Exec(claudeBin, buildArgs(false), os.Environ())
 }
 
 func parseClaudeProfileFlag(args []string) (string, []string) {
