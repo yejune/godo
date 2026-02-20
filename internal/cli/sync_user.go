@@ -516,11 +516,7 @@ func downloadAndExtract(cmd *cobra.Command, url string) error {
 			continue
 		}
 
-		// CLAUDE.md stays at project root; everything else goes under .claude/
 		target := name
-		if name != "CLAUDE.md" {
-			target = filepath.Join(".claude", name)
-		}
 
 		switch header.Typeflag {
 		case tar.TypeDir:

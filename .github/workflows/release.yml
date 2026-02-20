@@ -65,13 +65,14 @@ jobs:
           # Build linux binary for assemble
           ./godo-linux-amd64 assemble --core ./core --persona ./personas/do/manifest.yaml --out ./dist
 
-          # Package assembled output as tarball
-          cd dist
-          tar -czvf ../godo-release.tar.gz .
-          cd ..
+          # Restructure for deployment: CLAUDE.md at root, everything else under .claude/
+          mkdir -p staging/.claude
+          mv dist/CLAUDE.md staging/
+          mv dist/* staging/.claude/
 
-          # Also create zip for Windows users
-          cd dist
+          # Package as tarball and zip
+          cd staging
+          tar -czvf ../godo-release.tar.gz .
           zip -r ../godo-release.zip .
           cd ..
 
